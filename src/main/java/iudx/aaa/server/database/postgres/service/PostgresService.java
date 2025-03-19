@@ -5,21 +5,24 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Tuple;
 import iudx.aaa.server.common.models.Query;
 
 @VertxGen
 @ProxyGen
 public interface PostgresService {
   Future<JsonObject> executeQuery(final String query);
+  Future<JsonObject> executeInsert(final String query, JsonArray params);
 
-  /**
-   * The executeCountQuery implements a count of records operation on the database.
-   *
-   * @param query which is a String
-   * @return PostgresService which is a service
-   */
-  Future<JsonObject> executeCountQuery(final String query);
+//  /**
+//   * The executeCountQuery implements a count of records operation on the database.
+//   *
+//   * @param query which is a String
+//   * @return PostgresService which is a service
+//   */
+//  Future<JsonObject> executeCountQuery(final String query);
 
   @GenIgnore
   static PostgresService createProxy(Vertx vertx, String address) {

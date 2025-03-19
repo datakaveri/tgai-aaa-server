@@ -32,6 +32,9 @@ public class FailureHandler implements Handler<RoutingContext> {
     HttpServerResponse response = context.response();
     response.putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON);
 
+    LOGGER.error("Failure handler invoked: " + context.failure().getMessage(), context.failure());
+
+
     /* If timeout handler is triggered */
     if (context.failure() == null && context.statusCode() == 503) {
       LOGGER.error("Fail: Handling unexpected error: Timeout for {}", context.normalizedPath());

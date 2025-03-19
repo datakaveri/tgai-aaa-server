@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 
 public class PostgresVerticle extends AbstractVerticle {
-  private static final Logger LOGGER = LogManager.getLogger(PostgresService.class);
+  private static final Logger LOGGER = LogManager.getLogger(PostgresVerticle.class);
   private MessageConsumer<JsonObject> consumer;
   private ServiceBinder binder;
 
@@ -42,6 +42,15 @@ public class PostgresVerticle extends AbstractVerticle {
     databaseUserName = config().getString("databaseUserName");
     databasePassword = config().getString("databasePassword");
     poolSize = config().getInteger("poolSize");
+
+    LOGGER.info("DATABASE IP "+databaseIp);
+    LOGGER.info("DATABASE PORT "+databasePort);
+    LOGGER.info("DATABASE NAME "+databaseName);
+    LOGGER.info("DATABASE USER NAME "+databaseUserName);
+    LOGGER.info("DATABASE USER PASSWORD "+databasePassword);
+    LOGGER.info("DATABASE Pool Size "+poolSize);
+
+
 
     PgConnectOptions connectOptions = new PgConnectOptions()
       .setPort(databasePort)
