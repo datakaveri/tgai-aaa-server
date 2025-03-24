@@ -14,7 +14,6 @@ import iudx.aaa.server.common.models.Query;
 @ProxyGen
 public interface PostgresService {
   Future<JsonObject> executeQuery(final String query);
-  Future<JsonObject> executeInsert(final String query, JsonArray params);
 
 //  /**
 //   * The executeCountQuery implements a count of records operation on the database.

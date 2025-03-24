@@ -14,10 +14,10 @@ import java.util.List;
 
 public interface OrganizationService {
 
-  Future<JsonObject> addOrganization(JsonObject request);
-
   Future<JsonObject> getOrganization(JsonObject request);
 
-  Future<JsonObject> registerOrganization(JsonObject request, String userId);
+  Future<JsonObject> getOrganizationRequest(JsonObject request);
+
+  Future<JsonObject> registerOrganization(JsonObject request);
 
 }
