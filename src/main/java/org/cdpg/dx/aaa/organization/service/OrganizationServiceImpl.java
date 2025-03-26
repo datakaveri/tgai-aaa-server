@@ -4,11 +4,19 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import iudx.aaa.server.database.postgres.service.PostgresService;
+import org.cdpg.dx.aaa.organization.models.Organization;
+import org.cdpg.dx.database.postgres.models.*;
+import org.cdpg.dx.database.postgres.service.*;
 
+import java.awt.image.ComponentColorModel;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import io.vertx.core.Future;
+
+import static org.cdpg.dx.database.postgres.models.ConditionGroup.LogicalOperator.AND;
+import static org.cdpg.dx.database.postgres.models.OrderBy.Direction.DESC;
 
 
 public class OrganizationServiceImpl implements OrganizationService {
@@ -23,101 +31,53 @@ public class OrganizationServiceImpl implements OrganizationService {
     this.postgresService = postgresService;
   }
 
+  private InsertQuery createInsertQuery(Organization organization)
+  {
+    String table = "organization";
+    List<String> columns = List.of("name");
+    List<Object> values = List.of(organization.name());
+
+    return new InsertQuery(table,columns,values);
+  }
+
+  private DeleteQuery createDeleteQuery(Organization organization)
+  {
+    String table =  "organization";
+
+    ConditionComponent condition1 = new SimpleCondition("id = ?", List.of(organization.id()));
+    ConditionComponent condition2 = new SimpleCondition("created_at < ?", List.of(organization.createdAt()));
+
+    ConditionComponent conditionComponent = new ConditionGroup(List.of(condition1,condition2), AND);
+    List<OrderBy> orderBy = List.of(new OrderBy("created_at", DESC));
+    Integer limit = 5;
+    DeleteQuery deleteQuery = new DeleteQuery(table,conditionComponent,orderBy,limit);
+
+    return deleteQuery;
+  }
+
+  private Organization convertQueryResultToOrganization(QueryResult queryResult)
+  {
+    //List<JsonObject> rows, int totalCount, boolean hasMore
+
+    return new Organization("id","name",LocalDateTime.now(), LocalDateTime.now());
+  }
 
 
   @Override
-  public Future<JsonObject> getOrganization(JsonObject request) {
-    LOGGER.info("Info: Get organization");
+  public Future<Organization> createOrganization(Organization organization)
+  {
 
-    Promise<JsonObject> promise = Promise.promise();
-    String id = request.getString("id");
+    InsertQuery query = createInsertQuery(organization);
+    return postgresService.insert(query).map(this::convertQueryResultToOrganization);
 
-    String query = "SELECT * FROM tgai.organization";
-    LOGGER.info("Query: {}", query);
-
-    postgresService.executeQuery(query).onComplete(pgHandler -> {
-      if (pgHandler.succeeded()) {
-        LOGGER.info("Connected to DB: {}", pgHandler.result().encodePrettily());
-      } else {
-        LOGGER.error("DB Connection Failed", pgHandler.cause());
-      }
-    });
-
-    postgresService.executeQuery(query).onComplete(
-      pgHandler -> {
-        if (pgHandler.succeeded()) {
-          LOGGER.info("Query Result: {}", pgHandler.result().encodePrettily());
-          promise.complete(pgHandler.result());
-        } else {
-          promise.fail(pgHandler.cause());
-        }
-      });
-    return promise.future();
   }
 
   @Override
-  public Future<JsonObject> registerOrganization(JsonObject request) {
-    LOGGER.info("Info: Register Organization Request");
+  public Future<Organization> deleteOrganization(Organization organization)
+  {
 
-    Promise<JsonObject> promise = Promise.promise();
-    String userId = request.getString("user_id");
-
-    UUID requestId = UUID.randomUUID(); // Generate unique request ID
-    String status = "PENDING";
-
-    // ✅ Manually construct the query string
-    String insertRequestQuery = String.format(
-      "INSERT INTO tgai.org_requests (id, user_id, status) VALUES ('%s', '%s', '%s')",
-      requestId, userId, status
-    );
-
-    postgresService.executeQuery(insertRequestQuery)
-      .onSuccess(pgHandler -> {
-        LOGGER.info("Organization registration request submitted successfully");
-
-        JsonObject response = new JsonObject()
-          .put("status", "success")
-          .put("message", "Organization registration request submitted")
-          .put("request_id", requestId.toString())
-          .put("status", status);
-
-        promise.complete(response);
-      })
-      .onFailure(err -> {
-        LOGGER.error("Failed to register organization request: {}", err.toString());
-        promise.fail(err);
-      });
-
-    return promise.future();
-  }
-
-  @Override
-  public Future<JsonObject> getOrganizationRequest(JsonObject request) {
-    LOGGER.info("Info: Get organization Requests");
-
-    Promise<JsonObject> promise = Promise.promise();
-
-    String query = "SELECT * FROM tgai.org_requests";
-    LOGGER.info("Query: {}", query);
-
-    postgresService.executeQuery(query).onComplete(pgHandler -> {
-      if (pgHandler.succeeded()) {
-        LOGGER.info("Connected to DB: {}", pgHandler.result().encodePrettily());
-      } else {
-        LOGGER.error("DB Connection Failed", pgHandler.cause());
-      }
-    });
-
-    postgresService.executeQuery(query).onComplete(
-      pgHandler -> {
-        if (pgHandler.succeeded()) {
-          LOGGER.info("Query Result: {}", pgHandler.result().encodePrettily());
-          promise.complete(pgHandler.result());
-        } else {
-          promise.fail(pgHandler.cause());
-        }
-      });
-    return promise.future();
+    DeleteQuery query = createDeleteQuery(organization);
+    return postgresService.delete(query).map(this::convertQueryResultToOrganization);
   }
 
 

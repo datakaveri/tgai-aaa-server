@@ -35,12 +35,6 @@ import iudx.aaa.server.apiserver.util.FailureHandler;
 import iudx.aaa.server.apiserver.util.FetchRoles;
 import iudx.aaa.server.apiserver.util.OIDCAuthentication;
 import iudx.aaa.server.auditing.AuditingService;
-import iudx.aaa.server.common.models.response.FailureResponseHandler;
-import iudx.aaa.server.common.models.response.ResponseType;
-import iudx.aaa.server.common.models.response.SuccessResponseHandler;
-import iudx.aaa.server.database.postgres.service.PostgresService;
-import iudx.aaa.server.organization.service.OrganizationService;
-import iudx.aaa.server.organization.service.OrganizationServiceImpl;
 import iudx.aaa.server.policy.PolicyService;
 import iudx.aaa.server.registration.RegistrationService;
 import iudx.aaa.server.token.TokenService;
@@ -107,8 +101,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   private AdminService adminService;
   private AuditingService auditingService;
   private ApdService apdService;
-//  private OrganizationController organizationController;
-  private PostgresService postgresService;
+
 
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster, reads the
@@ -393,19 +386,6 @@ public class ApiServerVerticle extends AbstractVerticle {
               HttpServerOptions serverOptions = new HttpServerOptions();
               LOGGER.debug("Info: Starting HTTP server");
 
-              //organization
-//              postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
-//              OrganizationService organizationService = new OrganizationServiceImpl(postgresService);
-//              organizationController = new OrganizationController(organizationService);
-//
-//              Router orgRouter = organizationController.getRouter();
-//
-//              router.mountSubRouter("/auth/v1/org",orgRouter);
-//
-//              orgRouter.getRoutes().forEach(route ->
-//                LOGGER.info("Org Controller Route: " + route.getPath())
-//              );
-
               router.getRoutes().forEach(route ->
                 LOGGER.info("Registered Route: " + route.getPath())
               );
@@ -441,7 +421,6 @@ public class ApiServerVerticle extends AbstractVerticle {
               adminService = AdminService.createProxy(vertx, ADMIN_SERVICE_ADDRESS);
               auditingService = AuditingService.createProxy(vertx, AUDITING_SERVICE_ADDRESS);
               apdService = ApdService.createProxy(vertx, APD_SERVICE_ADDRESS);
-              postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
             });
 
 
