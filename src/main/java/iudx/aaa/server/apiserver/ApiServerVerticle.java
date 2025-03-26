@@ -1,6 +1,8 @@
 package iudx.aaa.server.apiserver;
 
 import static iudx.aaa.server.apiserver.util.Constants.*;
+import static iudx.aaa.server.util.Constants.ORGANIZATION_SERVICE_ADDRESS;
+import static iudx.aaa.server.util.Constants.PG_SERVICE_ADDRESS;
 
 import com.nimbusds.jose.jwk.ECKey;
 import io.vertx.core.AbstractVerticle;
@@ -100,6 +102,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   private AuditingService auditingService;
   private ApdService apdService;
 
+
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster, reads the
    * configuration, obtains a proxy for the Event bus services exposed through service discovery,
@@ -175,6 +178,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     ClientAuthentication clientFlow = new ClientAuthentication(pgPool);
     DelegationIdAuthorization delegationAuth = new DelegationIdAuthorization(pgPool);
     FailureHandler failureHandler = new FailureHandler();
+
+
+
 
     RouterBuilder.create(vertx, "docs/openapi.yaml")
         .onFailure(Throwable::printStackTrace)
@@ -380,6 +386,10 @@ public class ApiServerVerticle extends AbstractVerticle {
               HttpServerOptions serverOptions = new HttpServerOptions();
               LOGGER.debug("Info: Starting HTTP server");
 
+              router.getRoutes().forEach(route ->
+                LOGGER.info("Registered Route: " + route.getPath())
+              );
+
               /*
                * Setup the HTTP server properties, APIs and port. Default port is 8080. If set through
                * config, then that value is taken
@@ -407,12 +417,17 @@ public class ApiServerVerticle extends AbstractVerticle {
               policyService = PolicyService.createProxy(vertx, POLICY_SERVICE_ADDRESS);
               registrationService =
                   RegistrationService.createProxy(vertx, REGISTRATION_SERVICE_ADDRESS);
-              tokenService = TokenService.createProxy(vertx, TOKEN_SERVICE_ADDRESS);
+             // tokenService = TokenService.createProxy(vertx, TOKEN_SERVICE_ADDRESS);
               adminService = AdminService.createProxy(vertx, ADMIN_SERVICE_ADDRESS);
               auditingService = AuditingService.createProxy(vertx, AUDITING_SERVICE_ADDRESS);
               apdService = ApdService.createProxy(vertx, APD_SERVICE_ADDRESS);
             });
+
+
+
   }
+
+
 
   /**
    * Handler to handle create token request.
@@ -437,6 +452,8 @@ public class ApiServerVerticle extends AbstractVerticle {
             })
         .onFailure(failure -> processResponse(context.response(), failure.getLocalizedMessage()));
   }
+
+
 
   /**
    * Handle the Token Introspection.
