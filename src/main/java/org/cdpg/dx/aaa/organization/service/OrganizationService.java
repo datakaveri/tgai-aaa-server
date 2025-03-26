@@ -1,13 +1,9 @@
-package iudx.aaa.server.organization.service;
+package org.cdpg.dx.aaa.organization.service;
 
-import io.vertx.codegen.annotations.GenIgnore;
-import io.vertx.codegen.annotations.ProxyGen;
-import io.vertx.codegen.annotations.VertxGen;
+
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
+
 
 
 import java.util.List;

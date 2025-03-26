@@ -1,21 +1,14 @@
-package iudx.aaa.server.organization.service;
+package org.cdpg.dx.aaa.organization.service;
 
 import io.vertx.core.Promise;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import iudx.aaa.server.database.postgres.service.PostgresService;
-import iudx.aaa.server.common.models.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import io.vertx.core.Future;
-import org.apache.maven.model.Organization;
 
 
 public class OrganizationServiceImpl implements OrganizationService {
