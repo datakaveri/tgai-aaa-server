@@ -9,11 +9,17 @@ import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.service.*;
 
 import java.awt.image.ComponentColorModel;
+import java.lang.reflect.RecordComponent;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Set;
 
 import io.vertx.core.Future;
+
+import javax.lang.model.element.Name;
 
 import static org.cdpg.dx.database.postgres.models.ConditionGroup.LogicalOperator.AND;
 import static org.cdpg.dx.database.postgres.models.OrderBy.Direction.DESC;
@@ -34,8 +40,27 @@ public class OrganizationServiceImpl implements OrganizationService {
   private InsertQuery createInsertQuery(Organization organization)
   {
     String table = "organization";
-    List<String> columns = List.of("name");
-    List<Object> values = List.of(organization.name());
+
+    Set<String> excludedColumns = Set.of("id", "created_at", "updated_at");
+
+    List<String> columns = Arrays.stream(Organization.class.getRecordComponents())
+      .map(RecordComponent::getName)
+      .filter(col -> !excludedColumns.contains(col))
+      .collect(Collectors.toList());
+
+
+    List<Object> values = Arrays.stream(Organization.class.getRecordComponents())
+      .filter(component->!excludedColumns.contains(component.getName()))
+      .map(component ->
+      {
+        try {
+          return component.getAccessor().invoke(organization);
+        } catch (Exception e) {
+          throw new RuntimeException("Error accessing record component", e);
+        }
+      })
+      .collect(Collectors.toList());
+
 
     return new InsertQuery(table,columns,values);
   }

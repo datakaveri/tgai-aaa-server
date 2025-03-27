@@ -1,6 +1,7 @@
 package org.cdpg.dx.database.postgres.service;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.RowSet;
@@ -44,10 +45,10 @@ public class PostgresServiceImpl implements PostgresService {
         return executeQuery(query.toSQL(), query.getQueryParams());
     }
 
-    @Override
-    public Future<QueryResult> search(SelectQuery query, int limit, int offset) {
-        return executeQuery(query.toSQL() + " LIMIT " + limit + " OFFSET " + offset, query.getQueryParams());
-    }
+//    @Override
+//    public Future<QueryResult> search(SelectQuery query, int limit, int offset) {
+//        return executeQuery(query.toSQL() + " LIMIT " + limit + " OFFSET " + offset, query.getQueryParams());
+//    }
 
     @Override
     public Future<QueryResult> delete(DeleteQuery query) {
