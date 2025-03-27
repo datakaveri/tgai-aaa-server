@@ -1,17 +1,14 @@
 package org.cdpg.dx.aaa.organization.service;
 
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.organization.models.Organization;
+import org.cdpg.dx.database.postgres.models.InsertQuery;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.service.*;
 
-import java.awt.image.ComponentColorModel;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import io.vertx.core.Future;
 
@@ -29,6 +26,31 @@ public class OrganizationServiceImpl implements OrganizationService {
   public OrganizationServiceImpl(PostgresService postgresService) {
     LOGGER.info("Info: org service impl constructor");
     this.postgresService = postgresService;
+  }
+
+  @Override
+  public Future<Organization> createOrganization(Organization organization)
+  {
+    InsertQuery query = createInsertQuery(organization);
+    return postgresService.insert(query).map(this::convertQueryResultToOrganization);
+  }
+
+  @Override
+  public Future<Organization> deleteOrganization(Organization organization)
+  {
+
+    DeleteQuery query = createDeleteQuery(organization);
+    return postgresService.delete(query).map(this::convertQueryResultToOrganization);
+  }
+
+  @Override
+  public Future<Organization> updateOrganization(Organization organization) {
+    return null;
+  }
+
+  @Override
+  public Future<Organization> getOrganization(Organization organization) {
+    return null;
   }
 
   private InsertQuery createInsertQuery(Organization organization)
@@ -61,24 +83,5 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     return new Organization("id","name",LocalDateTime.now(), LocalDateTime.now());
   }
-
-
-  @Override
-  public Future<Organization> createOrganization(Organization organization)
-  {
-
-    InsertQuery query = createInsertQuery(organization);
-    return postgresService.insert(query).map(this::convertQueryResultToOrganization);
-
-  }
-
-  @Override
-  public Future<Organization> deleteOrganization(Organization organization)
-  {
-
-    DeleteQuery query = createDeleteQuery(organization);
-    return postgresService.delete(query).map(this::convertQueryResultToOrganization);
-  }
-
 
 }
