@@ -3,21 +3,33 @@ package org.cdpg.dx.aaa.organization.service;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.aaa.organization.models.Organization;
+import org.cdpg.dx.aaa.organization.models.*;
 
 
 import java.util.List;
+import java.util.UUID;
 
 public interface OrganizationService {
 
+  Future<JsonObject> getOrganizationCreateRequests(UUID requestId);
 
-  Future<Organization> createOrganization(Organization organization);
+  Future<JsonObject> createOrganizationRequest(JsonObject request);
 
-  Future<Organization> deleteOrganization(Organization organization);
+  Future<JsonObject> approveOrganizationCreateRequest(UUID requestId, JsonObject request);
 
-//  Future<Organization> updateOrganization(Organization organization);
+  Future<JsonObject> rejectOrganizationCreateRequest(UUID requestId, JsonObject request);
+
+//  Future<OrganizationJoinRequest> joinOrganizationRequest(UUID organizationId, UUID userId);
 //
-//  Future<Organization> getOrganization(Organization organization);
-//  Future<JsonObject> registerOrganization(JsonObject request);
+//  Future<List<OrganizationJoinRequest>> getOrganizationJoinRequests();
+//
+//  Future<OrganizationJoinRequest> approveOrganizationJoinRequest(UUID requestId);
+//
+//  Future<Boolean> deleteOrganization(UUID id);
+//
+//  Future<List<Organization>> getOrganization();
+//
+//  Future<Organization> updateOrganization(UUID orgId,UpdateOrgDTO updateOrgDTO);
 
 }
+

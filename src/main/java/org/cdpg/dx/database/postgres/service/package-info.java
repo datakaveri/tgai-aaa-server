@@ -1,5 +1,5 @@
 @ModuleGen(
-    groupPackage = "dx.database.postgres.service",
+    groupPackage = "org.cdpg.dx.database.postgres.service",
     name = "org-cdpg-dx-database-postgres-service",
     useFutures = true)
 package org.cdpg.dx.database.postgres.service;

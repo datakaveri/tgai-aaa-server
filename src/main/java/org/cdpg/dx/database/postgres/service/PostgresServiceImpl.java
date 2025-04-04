@@ -1,39 +1,53 @@
 package org.cdpg.dx.database.postgres.service;
 
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Row;
 import org.cdpg.dx.database.postgres.models.*;
-import org.cdpg.dx.database.postgres.service.PostgresService;
+
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostgresServiceImpl implements PostgresService {
     private final PgPool client;
+    private static final Logger LOG = LoggerFactory.getLogger(PostgresServiceImpl.class);
 
     public PostgresServiceImpl(PgPool client) {
+        LOG.info("inside the constructor : hereee");
         this.client = client;
     }
 
     private QueryResult convertToQueryResult(RowSet<Row> rowSet) {
-        List<JsonObject> rows = rowSet.stream().map(row -> {
+        JsonArray jsonArray = new JsonArray();
+
+        for (Row row : rowSet) {
             JsonObject json = new JsonObject();
             for (int i = 0; i < row.size(); i++) {
                 json.put(row.getColumnName(i), row.getValue(i));
             }
-            return json;
-        }).collect(Collectors.toList());
-        return new QueryResult(rows, rows.size(), false);
+            jsonArray.add(json);
+        }
+
+        boolean rowsAffected = rowSet.rowCount() > 0; // Check if any rows were affected
+
+        return new QueryResult(jsonArray, jsonArray.size(), false, rowsAffected);
     }
 
     private Future<QueryResult> executeQuery(String sql, List<Object> params) {
         return client.preparedQuery(sql).execute(Tuple.from(params))
             .map(this::convertToQueryResult);
     }
+
+//    @Override
+//    public Future<QueryResult> execute(Query query) {
+//        return executeQuery(query.toSQL(), query.getQueryParams());
+//    }
 
     @Override
     public Future<QueryResult> insert(InsertQuery query) {
@@ -45,11 +59,6 @@ public class PostgresServiceImpl implements PostgresService {
         return executeQuery(query.toSQL(), query.getQueryParams());
     }
 
-//    @Override
-//    public Future<QueryResult> search(SelectQuery query, int limit, int offset) {
-//        return executeQuery(query.toSQL() + " LIMIT " + limit + " OFFSET " + offset, query.getQueryParams());
-//    }
-
     @Override
     public Future<QueryResult> delete(DeleteQuery query) {
         return executeQuery(query.toSQL(), query.getQueryParams());
@@ -57,6 +66,6 @@ public class PostgresServiceImpl implements PostgresService {
 
     @Override
     public Future<QueryResult> select(SelectQuery query) {
-        return null;
+        return executeQuery(query.toSQL(), query.getQueryParams());
     }
 }
