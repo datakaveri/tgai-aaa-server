@@ -2,7 +2,6 @@ package iudx.aaa.server.apiserver;
 
 import static iudx.aaa.server.apiserver.util.Constants.*;
 import static iudx.aaa.server.util.Constants.ORGANIZATION_SERVICE_ADDRESS;
-import static iudx.aaa.server.util.Constants.PG_SERVICE_ADDRESS;
 
 import com.nimbusds.jose.jwk.ECKey;
 import io.vertx.core.AbstractVerticle;
@@ -38,6 +37,7 @@ import iudx.aaa.server.auditing.AuditingService;
 import iudx.aaa.server.policy.PolicyService;
 import iudx.aaa.server.registration.RegistrationService;
 import iudx.aaa.server.token.TokenService;
+import static org.cdpg.dx.common.Constants.PG_SERVICE_ADDRESS;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.HashSet;
@@ -47,6 +47,10 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.organization.dao.OrganizationCreateRequestDAO;
+import org.cdpg.dx.aaa.organization.dao.impl.OrganizationCreateRequestDAOImpl;
+import org.cdpg.dx.common.Constants;
+import org.cdpg.dx.database.postgres.service.PostgresService;
 
 /**
  * The AAA Server API Verticle.
@@ -101,6 +105,8 @@ public class ApiServerVerticle extends AbstractVerticle {
   private AdminService adminService;
   private AuditingService auditingService;
   private ApdService apdService;
+  private PostgresService postgresService;
+  private OrganizationCreateRequestDAO organizationCreateRequestDAO;
 
 
   /**
@@ -383,8 +389,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                             .end(JSON_NOT_FOUND);
                       });
 
+
               HttpServerOptions serverOptions = new HttpServerOptions();
               LOGGER.debug("Info: Starting HTTP server");
+
+              //organization
+              postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
+              organizationCreateRequestDAO = new OrganizationCreateRequestDAOImpl(postgresService);
 
               router.getRoutes().forEach(route ->
                 LOGGER.info("Registered Route: " + route.getPath())
