@@ -49,6 +49,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.organization.dao.OrganizationCreateRequestDAO;
 import org.cdpg.dx.aaa.organization.dao.impl.OrganizationCreateRequestDAOImpl;
+import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.common.Constants;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
@@ -107,6 +109,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   private ApdService apdService;
   private PostgresService postgresService;
   private OrganizationCreateRequestDAO organizationCreateRequestDAO;
+  private OrganizationService organizationService;
 
 
   /**
@@ -396,6 +399,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               //organization
               postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
               organizationCreateRequestDAO = new OrganizationCreateRequestDAOImpl(postgresService);
+              organizationService = new OrganizationServiceImpl(organizationCreateRequestDAO);
 
               router.getRoutes().forEach(route ->
                 LOGGER.info("Registered Route: " + route.getPath())
