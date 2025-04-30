@@ -172,6 +172,8 @@ public class OrganizationHandler {
         OrgID = UUID.fromString(OrgRequestJson.getString("org_id"));
         UserID = UUID.fromString(user.getUserId());
 
+
+
         organizationService.joinOrganizationRequest(OrgID, UserID)
                 .onSuccess(createdRequest -> processSuccess(routingContext, createdRequest.toJson(), 201, "Created Join request"))
                 .onFailure(err -> processFailure(routingContext, 500, "Internal Server Error: Failed to create Join request"));

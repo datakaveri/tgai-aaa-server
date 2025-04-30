@@ -94,6 +94,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.organization.models.OrganizationUser;
+import org.cdpg.dx.aaa.organization.service.OrganizationService;
 
 /**
  * The Registration Service Implementation.
@@ -127,6 +129,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             .collect(Collectors.toList());
 
     randomSource = new SecureRandom();
+
   }
 
   @Override

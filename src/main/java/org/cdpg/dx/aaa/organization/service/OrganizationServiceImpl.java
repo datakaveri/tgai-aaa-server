@@ -165,4 +165,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Future<Boolean> deleteOrganizationUsers(UUID orgId, List<UUID> userIds) {
         return orgUserDAO.deleteUsersByOrgId(orgId, userIds);
     }
+
+    @Override
+    public Future<OrganizationUser> getOrganizationUserInfo(UUID userId) {
+        return orgUserDAO.getById(userId);
+    }
 }
