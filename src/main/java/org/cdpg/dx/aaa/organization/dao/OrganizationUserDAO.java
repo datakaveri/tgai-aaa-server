@@ -22,4 +22,6 @@ public interface OrganizationUserDAO {
     Future<List<OrganizationUser>> getAll(UUID orgId);
 
     Future<Boolean> isOrgAdmin(UUID orgid, UUID userid);
+
+    Future<OrganizationUser> getById(UUID userId);
 }

@@ -17,6 +17,7 @@ import static iudx.aaa.server.registration.Constants.KC_ADMIN_CLIENT_SEC;
 import static iudx.aaa.server.registration.Constants.KC_ADMIN_POOLSIZE;
 import static iudx.aaa.server.registration.Constants.KEYCLOAK_REALM;
 import static iudx.aaa.server.registration.Constants.KEYCLOAK_URL;
+import static org.cdpg.dx.common.util.ProxyAdressConstants.PG_SERVICE_ADDRESS;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -29,6 +30,10 @@ import iudx.aaa.server.token.TokenService;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.organization.dao.OrganizationDAOFactory;
+import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
+import org.cdpg.dx.database.postgres.service.PostgresService;
 
 /**
  * The Registration Verticle.
@@ -135,6 +140,8 @@ public class RegistrationVerticle extends AbstractVerticle {
             keycloakAdminPoolSize);
 
     tokenService = TokenService.createProxy(vertx, TOKEN_SERVICE_ADDRESS);
+
+
     registrationService = new RegistrationServiceImpl(pool, kcadmin, tokenService, options);
     binder = new ServiceBinder(vertx);
     consumer =

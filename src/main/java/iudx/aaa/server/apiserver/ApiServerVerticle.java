@@ -4,10 +4,7 @@ import static iudx.aaa.server.apiserver.util.Constants.*;
 import static org.cdpg.dx.common.util.ProxyAdressConstants.PG_SERVICE_ADDRESS;
 
 import com.nimbusds.jose.jwk.ECKey;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -41,10 +38,8 @@ import iudx.aaa.server.registration.RegistrationService;
 import iudx.aaa.server.token.TokenService;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,6 +49,7 @@ import org.cdpg.dx.aaa.credit.service.CreditServiceImpl;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.dao.impl.*;
 import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
+import org.cdpg.dx.aaa.organization.models.OrganizationUser;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.database.postgres.service.PostgresService;
@@ -674,6 +670,22 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     registrationService
         .listUser(user)
+            .compose(userDetails -> {
+                System.out.println("User Details: " + userDetails);
+                List<Future> futures = new ArrayList<>();
+
+                Future<OrganizationUser> orgUserFuture = organizationService
+                        .getOrganizationUserInfo(UUID.fromString(user.getUserId()))
+                .onSuccess(orgInfo -> {
+                    JsonObject orgInfoJson = orgInfo.toJson();
+                    userDetails.put("organizationInfo", orgInfoJson);
+                }).onFailure(err -> {
+                    LOGGER.error("Error fetching organization info for user {}: {}", user.getUserId(), err.getMessage());
+                });
+                futures.add(orgUserFuture.recover(err -> Future.succeededFuture()));
+
+                return CompositeFuture.all(futures).map(v -> userDetails);
+            })
         .onSuccess(result -> processResponse(context.response(), result))
         .onFailure(failure -> processResponse(context.response(), failure.getLocalizedMessage()));
   }
