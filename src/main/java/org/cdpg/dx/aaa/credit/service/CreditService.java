@@ -9,31 +9,24 @@ import java.util.UUID;
 public interface CreditService {
 
   // ************ CREDIT REQUEST *********
-  Future<CreditRequest> createCreditRequest(UUID userId, double amount);
+  Future<CreditRequest> createCreditRequest(CreditRequest creditRequest); // done -> creates a new entry in credit request table
 
-  Future<CreditRequest> getCreditRequestById(UUID id);
+  Future<List<CreditRequest>> getAllPendingRequests(); //pending
 
-  Future<List<CreditRequest>> getAllRequestsByStatus(Status status);
-
-  Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status);
-
-  // ************ CREDIT DEDUCTION *********
-
-  Future<Boolean> logCreditDeduction(CreditDeductionDTO creditDeductionDTO);
-
-  Future<List<CreditDeduction>> getDeductionsByUser(UUID userId);
-
-  Future<List<CreditDeduction>> getDeductionsByAdmin(UUID adminId);
+  Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy); //done -> on approval will create a new entry in userCredit table
 
   // ************ USER CREDIT *********
 
-  Future<UserCredit> getCreditByUserId(UUID userId);
+  Future<Boolean> deductCredits(CreditTransaction creditTransaction);
 
-  Future<Boolean> addCredits(UUID userId, double amount);
+  Future<Double> getBalance(UUID userId);
 
-  Future<Boolean> deductCredits(UUID userId, double amount);
+  // ************ COMPUTE ROLE **********
 
-  Future<Boolean> updateCreditBalance(UserCreditDTO userCreditDTO);
+  Future<ComputeRole> create(ComputeRole computeRole);
 
-  Future<UserCredit> getBalance(UUID userId);
+  Future<List<ComputeRole>> getAll();
+
+  Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy);
+
 }

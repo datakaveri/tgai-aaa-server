@@ -30,10 +30,16 @@ public class Constants {
   public static final String UPDATED_AT ="updated_at";
 
   // CREDIT DEDUCTION TABLE
-  public static final String CREDIT_DEDUCTION_TABLE="credit_deductions";
-  public static final String CREDIT_DEDUCTION_ID = "id";
-  public static final String DEDUCTED_BY = "deducted_by";
-  public static final String DEDUCTED_AT = "deducted_at";
+  public static final String CREDIT_TRANSACTION_TABLE="credit_transactions";
+  public static final String CREDIT_TRANSACTION_ID = "id";
+  public static final String TRANSACTED_BY = "transacted_by";
+  public static final String CREATED_AT = "created_at";
+  public static final String TRANSACTION_STATUS = "transaction_status";
+  public static final String TRANSACTION_TYPE = "transaction_type";
 
+
+  public static final String COMPUTE_ROLE_TABLE="compute_role";
+  public static final String COMPUTE_ROLE_ID="id";
+  public static final String APPROVED_BY="approved_by";
 
 }

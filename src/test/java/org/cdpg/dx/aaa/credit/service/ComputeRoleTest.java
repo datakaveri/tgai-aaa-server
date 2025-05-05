@@ -1,24 +1,26 @@
 package org.cdpg.dx.aaa.credit.service;
 
-
 import io.vertx.core.Vertx;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.cdpg.dx.aaa.credit.dao.CreditDAOFactory;
-import org.cdpg.dx.aaa.credit.dao.CreditTransactionDAO;
-import org.cdpg.dx.aaa.credit.dao.CreditRequestDAO;
-import org.cdpg.dx.aaa.credit.dao.UserCreditDAO;
+import org.cdpg.dx.aaa.credit.dao.*;
+import org.cdpg.dx.aaa.credit.dao.impl.ComputeRoleDAOImpl;
 import org.cdpg.dx.aaa.credit.dao.impl.CreditRequestDAOImpl;
-import org.cdpg.dx.aaa.credit.models.CreditRequest;
+import org.cdpg.dx.aaa.credit.models.ComputeRole;
 import org.cdpg.dx.database.postgres.PostgresVerticle;
 import org.cdpg.dx.database.postgres.service.PostgresService;
+import org.cdpg.dx.aaa.credit.models.Status;
+
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.cdpg.dx.common.util.ProxyAdressConstants.PG_SERVICE_ADDRESS;
@@ -26,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(VertxExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CreditServiceTest {
+public class ComputeRoleTest {
 
   private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15")
     .withDatabaseName("testdb")
@@ -46,15 +48,16 @@ public class CreditServiceTest {
   @BeforeEach
   void deployPostgresVerticle(Vertx vertx, VertxTestContext testContext) {
     String createTableSql = """
-                CREATE TABLE IF NOT EXISTS credit_requests (
-                  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                  user_id UUID NOT NULL,
-                  amount	DECIMAL,
-                  status VARCHAR NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
-                  requested_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                  processed_at TIMESTAMP WITHOUT TIME ZONE
-                );
-                """;
+      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+      CREATE TABLE IF NOT EXISTS compute_role (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id UUID NOT NULL,
+        status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'approved')),
+        approved_by UUID,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    """;
 
     try (var conn = POSTGRES.createConnection("")) {
       var stmt = conn.createStatement();
@@ -79,26 +82,46 @@ public class CreditServiceTest {
   }
 
   @Test
-  void test_create_credit_request(Vertx vertx, VertxTestContext testContext) {
+  void test_create_and_getAll_and_updateStatus(Vertx vertx, VertxTestContext testContext) {
     PostgresService postgresService = PostgresService.createProxy(vertx, PG_SERVICE_ADDRESS);
 
-    CreditRequestDAO creditRequestDAO = new CreditRequestDAOImpl(postgresService);
-
-    UserCreditDAO mockUserCreditDAO = Mockito.mock(UserCreditDAO.class);
-    CreditTransactionDAO mockCreditTransactionDAO = Mockito.mock(CreditTransactionDAO.class);
+    ComputeRoleDAO computeRoleDAO = new ComputeRoleDAOImpl(postgresService);
 
     CreditDAOFactory factory = new CreditDAOFactory(postgresService) {
-      @Override public CreditRequestDAO creditRequestDAO() { return creditRequestDAO; }
-      @Override public UserCreditDAO userCreditDAO() { return mockUserCreditDAO; }
-      @Override public CreditTransactionDAO creditTransactionDAO() { return mockCreditTransactionDAO; }
+      @Override public ComputeRoleDAO computeRoleDAO() { return computeRoleDAO; }
     };
 
-    CreditService creditService = new CreditServiceImpl(factory);
+
+    CreditService service = new CreditServiceImpl(factory);
 
     UUID userId = UUID.randomUUID();
-    double amount = 750.0;
 
+    ComputeRole request = new ComputeRole(
+      Optional.empty(),
+      userId,
+      Status.PENDING.getStatus(),
+      Optional.empty(),
+      Optional.empty(),
+      Optional.empty()
+    );
 
+    service.create(request).onComplete(testContext.succeeding(created -> {
+      assertNotNull(created.id());
+      assertEquals(userId, created.userId());
+      assertEquals(Status.PENDING.getStatus(), created.status());
 
+      service.getAll().onComplete(testContext.succeeding(all -> {
+        assertFalse(all.isEmpty());
+        assertTrue(all.stream().anyMatch(r -> r.userId().equals(userId)));
+
+        UUID approvedBy = UUID.randomUUID();
+        service.updateStatus(created.id().get(), Status.APPROVED, approvedBy)
+          .onComplete(testContext.succeeding(updated -> {
+            assertTrue(updated);
+            testContext.completeNow();
+          }));
+      }));
+    }));
   }
 }
+
