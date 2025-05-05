@@ -160,4 +160,21 @@ public class OrganizationUserDAOImpl implements OrganizationUserDAO {
         return Future.failedFuture(err);
       });
   }
+
+  public Future<OrganizationUser> getById(UUID userId){
+    SelectQuery query = new SelectQuery(Constants.ORG_USER_TABLE, List.of("*"), new Condition(Constants.USER_ID, Condition.Operator.EQUALS, List.of(userId.toString())), null, null, null, null);
+
+    return postgresService.select(query)
+            .compose(result -> {
+              if (result.getRows().isEmpty()) {
+                return Future.failedFuture("No user found with the given ID.");
+              }
+              return Future.succeededFuture(OrganizationUser.fromJson(result.getRows().getJsonObject(0)));
+            })
+            .recover(err -> {
+              LOGGER.error("Error fetching user by ID: {}", err.getMessage(), err);
+              return Future.failedFuture(err);
+            });
+  }
+
 }
