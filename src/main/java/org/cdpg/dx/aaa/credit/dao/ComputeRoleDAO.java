@@ -14,4 +14,6 @@ public interface ComputeRoleDAO {
   Future<List<ComputeRole>> getAll(Status status);
 
   Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy);
+
+    Future<Boolean> hasUserComputeAccess(UUID userId);
 }

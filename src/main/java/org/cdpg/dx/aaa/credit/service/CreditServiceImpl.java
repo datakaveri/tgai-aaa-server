@@ -39,7 +39,7 @@ public class CreditServiceImpl implements CreditService {
 
 
   @Override
-  public Future<List<CreditRequest>> getAllPendingRequests() {
+  public Future<List<CreditRequest>> getAllPendingCreditRequests() {
     return creditRequestDAO.getAll(Status.PENDING);
   }
 
@@ -124,13 +124,18 @@ public class CreditServiceImpl implements CreditService {
   }
 
   @Override
-  public Future<List<ComputeRole>> getAll() {
+  public Future<List<ComputeRole>> getAllPendingComputeRequests() {
     return computeRoleDAO.getAll(Status.PENDING);
   }
 
   @Override
   public Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy) {
     return computeRoleDAO.updateStatus(requestId,status,approvedBy);
+  }
+
+  @Override
+  public Future<Boolean> hasUserComputeAccess(UUID userId) {
+    return computeRoleDAO.hasUserComputeAccess(userId);
   }
 
 }

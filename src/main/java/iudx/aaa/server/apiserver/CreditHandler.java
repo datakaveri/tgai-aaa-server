@@ -11,9 +11,6 @@ import org.cdpg.dx.aaa.credit.models.CreditRequest;
 import org.cdpg.dx.aaa.credit.models.CreditTransaction;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
-import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
-import org.cdpg.dx.aaa.organization.models.OrganizationUser;
-import org.cdpg.dx.aaa.organization.service.OrganizationService;
 
 import java.util.UUID;
 
@@ -40,7 +37,7 @@ public class CreditHandler {
 //            return;
 //        }
 
-        creditService.getAllPendingRequests()
+        creditService.getAllPendingCreditRequests()
                 .onComplete(ar -> {
                     if (ar.succeeded()) {
                         JsonArray jsonArray = new JsonArray();

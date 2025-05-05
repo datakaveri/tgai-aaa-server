@@ -50,10 +50,16 @@ public class OrganizationHandler {
         UpdateOrgDTO updateOrgDTO;
 
         updateOrgDTO = new UpdateOrgDTO(
-                Optional.ofNullable(OrgRequestJson.getString("description")),
-                OrgRequestJson.getString("org_name"),
-                OrgRequestJson.getString("document_path"),
-                Optional.empty()
+          Optional.ofNullable(OrgRequestJson.getString("org_name")),
+          Optional.ofNullable(OrgRequestJson.getString("org_logo")),
+          Optional.ofNullable(OrgRequestJson.getString("entity_type")),
+          Optional.ofNullable(OrgRequestJson.getString("org_sector")),
+          Optional.ofNullable(OrgRequestJson.getString("website_link")),
+          Optional.ofNullable(OrgRequestJson.getString("address")),
+          Optional.ofNullable(OrgRequestJson.getString("certificate_path")),
+          Optional.ofNullable(OrgRequestJson.getString("pancard_path")),
+          Optional.ofNullable(OrgRequestJson.getString("relevantdoc_path")),
+          Optional.empty()
         );
 
         organizationService.updateOrganizationById(orgId, updateOrgDTO)

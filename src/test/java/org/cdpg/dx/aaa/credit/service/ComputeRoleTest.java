@@ -7,7 +7,6 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.cdpg.dx.aaa.credit.dao.*;
 import org.cdpg.dx.aaa.credit.dao.impl.ComputeRoleDAOImpl;
-import org.cdpg.dx.aaa.credit.dao.impl.CreditRequestDAOImpl;
 import org.cdpg.dx.aaa.credit.models.ComputeRole;
 import org.cdpg.dx.database.postgres.PostgresVerticle;
 import org.cdpg.dx.database.postgres.service.PostgresService;
@@ -16,10 +15,8 @@ import org.cdpg.dx.aaa.credit.models.Status;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -110,7 +107,7 @@ public class ComputeRoleTest {
       assertEquals(userId, created.userId());
       assertEquals(Status.PENDING.getStatus(), created.status());
 
-      service.getAll().onComplete(testContext.succeeding(all -> {
+      service.getAllPendingComputeRequests().onComplete(testContext.succeeding(all -> {
         assertFalse(all.isEmpty());
         assertTrue(all.stream().anyMatch(r -> r.userId().equals(userId)));
 

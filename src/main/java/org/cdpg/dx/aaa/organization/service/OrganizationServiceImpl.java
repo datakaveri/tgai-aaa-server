@@ -3,6 +3,7 @@ package org.cdpg.dx.aaa.organization.service;
 import io.vertx.core.Future;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
+import org.cdpg.dx.aaa.organization.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,14 +55,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                 });
     }
 
+
     private Future<Boolean> createOrganizationFromRequest(UUID requestId) {
       return createRequestDAO.getById(requestId)
         .compose(request -> {
           Organization org = new Organization(
             Optional.empty(),
-            Optional.ofNullable(request.description()),
-            request.name(),
-            request.documentPath(),
+              request.name(),
+              request.logoPath(),
+              request.entityType(),
+              request.orgSector(),
+              request.websiteLink(),
+              request.address(),
+              request.certificatePath(),
+              request.pancardPath(),
+              request.relevantDocPath(),
             Optional.empty(),
             Optional.empty()
           );
@@ -73,6 +81,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 createdOrg.id().get(),
                 request.requestedBy(),
                 Role.ADMIN,
+                request.jobTitle(),
+                request.empId(),
+                Optional.ofNullable(request.orgManagerphoneNo()),
                 Optional.empty(),
                 Optional.empty()
               );
@@ -125,12 +136,15 @@ public class OrganizationServiceImpl implements OrganizationService {
       return joinRequestDAO.getById(requestId)
                 .compose(request -> {
                     OrganizationUser orgUser = new OrganizationUser(
-                            Optional.empty(),
-                            request.organizationId(),
-                            request.userId(),
-                            Role.USER,
-                            Optional.empty(),
-                            Optional.empty()
+                      Optional.empty(),
+                      request.organizationId(),
+                      request.userId(),
+                      Role.USER,
+                      request.jobTitle(),
+                      request.empId(),
+                      Optional.empty(),
+                      Optional.empty(),
+                      Optional.empty()
                     );
                     return orgUserDAO.create(orgUser).map(created -> true);
                 });
