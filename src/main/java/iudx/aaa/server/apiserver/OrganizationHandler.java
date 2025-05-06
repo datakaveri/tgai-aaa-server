@@ -167,20 +167,21 @@ public class OrganizationHandler {
 
     public void joinOrganisationRequest(RoutingContext routingContext) {
 
-        JsonObject OrgRequestJson = routingContext.body().asJsonObject();
-        OrganizationJoinRequest organizationJoinRequest;
+      JsonObject OrgRequestJson = routingContext.body().asJsonObject();
+      OrganizationJoinRequest organizationJoinRequest;
+      User user = routingContext.get(USER);
+      OrgRequestJson.put("user_id", user.getUserId());
 
-        UUID OrgID;
-        UUID UserID;
+      try {
+        organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
 
-        User user = routingContext.get(USER);
+      } catch (Exception e) {
+        processFailure(routingContext, 400, "Invalid request payload: " + e.getMessage());
+        return;
+      }
 
-        OrgID = UUID.fromString(OrgRequestJson.getString("org_id"));
-        UserID = UUID.fromString(user.getUserId());
 
-
-
-        organizationService.joinOrganizationRequest(OrgID, UserID)
+        organizationService.joinOrganizationRequest(organizationJoinRequest)
                 .onSuccess(createdRequest -> processSuccess(routingContext, createdRequest.toJson(), 201, "Created Join request"))
                 .onFailure(err -> processFailure(routingContext, 500, "Internal Server Error: Failed to create Join request"));
     }
