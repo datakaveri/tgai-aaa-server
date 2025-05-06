@@ -39,7 +39,7 @@ public class CreditServiceImpl implements CreditService {
 
 
   @Override
-  public Future<List<CreditRequest>> getAllPendingRequests() {
+  public Future<List<CreditRequest>> getAllPendingCreditRequests() {
     return creditRequestDAO.getAll(Status.PENDING);
   }
 
@@ -51,7 +51,7 @@ public class CreditServiceImpl implements CreditService {
     return creditRequestDAO.updateStatus(requestId, status)
       .compose(approved -> {
         if (!approved) return Future.succeededFuture(false);
-        if (Status.APPROVED.getStatus().equals(status.getStatus())) {
+        if (status==Status.APPROVED) {
           return creditRequestDAO.getCreditRequestById(requestId)
             .compose(cr ->{
              UUID userId = cr.userId();
@@ -64,11 +64,12 @@ public class CreditServiceImpl implements CreditService {
                  CreditTransaction creditTransaction = new CreditTransaction(
                    Optional.empty(),
                    userId,
-                   amount,
-                   transactedBy,
+                   Optional.of(amount),
+                   Optional.of(transactedBy),
                    Optional.of(TransactionStatus.SUCCESS.getStatus()),
                    Optional.of(TransactionType.CREDIT.getType()),
-                   Optional.empty());
+                   Optional.of(Instant.now().toString())
+                 );
 
                   return creditTransactionDAO.logTransaction(creditTransaction);
                })
@@ -91,7 +92,10 @@ public class CreditServiceImpl implements CreditService {
   @Override
   public Future<Boolean> deductCredits(CreditTransaction creditTransaction) {
     UUID userId = creditTransaction.userId();
-    double amount = creditTransaction.amount();
+    if (creditTransaction.amount().isEmpty()) {
+      return Future.failedFuture("Amount is missing in CreditTransaction");
+    }
+    Double amount = creditTransaction.amount().get();
 
     return getBalance(userId)
       .compose(balance -> {
@@ -103,11 +107,11 @@ public class CreditServiceImpl implements CreditService {
               CreditTransaction completeTransaction = new CreditTransaction(
                 Optional.empty(),
                 userId,
-                amount,
+                Optional.of(amount),
                 creditTransaction.transactedBy(),
                 Optional.of(TransactionStatus.SUCCESS.getStatus()),
                 Optional.of(TransactionType.DEBIT.getType()),                                  // transactionType (or "CREDIT" if adding)
-                Optional.of(Instant.now().toString())     // createdAt - current time
+                Optional.of(Instant.now().toString())
               );
 
               return creditTransactionDAO.logTransaction(completeTransaction);
@@ -124,13 +128,18 @@ public class CreditServiceImpl implements CreditService {
   }
 
   @Override
-  public Future<List<ComputeRole>> getAll() {
+  public Future<List<ComputeRole>> getAllPendingComputeRequests() {
     return computeRoleDAO.getAll(Status.PENDING);
   }
 
   @Override
   public Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy) {
     return computeRoleDAO.updateStatus(requestId,status,approvedBy);
+  }
+
+  @Override
+  public Future<Boolean> hasUserComputeAccess(UUID userId) {
+    return computeRoleDAO.hasUserComputeAccess(userId);
   }
 
 }

@@ -11,7 +11,7 @@ public interface CreditService {
   // ************ CREDIT REQUEST *********
   Future<CreditRequest> createCreditRequest(CreditRequest creditRequest); // done -> creates a new entry in credit request table
 
-  Future<List<CreditRequest>> getAllPendingRequests(); //pending
+  Future<List<CreditRequest>> getAllPendingCreditRequests();
 
   Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy); //done -> on approval will create a new entry in userCredit table
 
@@ -25,8 +25,9 @@ public interface CreditService {
 
   Future<ComputeRole> create(ComputeRole computeRole);
 
-  Future<List<ComputeRole>> getAll();
+  Future<List<ComputeRole>> getAllPendingComputeRequests();
 
   Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy);
 
+  Future<Boolean> hasUserComputeAccess(UUID userId);
 }

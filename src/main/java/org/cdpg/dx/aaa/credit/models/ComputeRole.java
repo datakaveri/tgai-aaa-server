@@ -2,6 +2,7 @@ package org.cdpg.dx.aaa.credit.models;
 
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.util.Constants;
+import org.cdpg.dx.aaa.organization.models.Status;
 
 import java.util.*;
 
@@ -18,7 +19,7 @@ public record ComputeRole(
     return new ComputeRole(
       Optional.ofNullable(json.getString(Constants.COMPUTE_ROLE_ID)).map(UUID::fromString),
       UUID.fromString(json.getString(Constants.USER_ID)),
-      json.getString(Constants.STATUS),
+      Optional.ofNullable(json.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
       Optional.ofNullable(json.getString(Constants.APPROVED_BY)).map(UUID::fromString),
       Optional.ofNullable(json.getString(Constants.CREATED_AT)),
       Optional.ofNullable(json.getString(Constants.UPDATED_AT))

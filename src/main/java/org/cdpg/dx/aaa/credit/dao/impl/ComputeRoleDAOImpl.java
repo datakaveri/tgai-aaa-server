@@ -17,6 +17,7 @@ import org.cdpg.dx.database.postgres.service.PostgresService;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -99,6 +100,34 @@ public class ComputeRoleDAOImpl implements ComputeRoleDAO {
       })
       .recover(err -> {
         LOGGER.error("Error updating request status: {}", err.getMessage(), err);
+        return Future.failedFuture(err);
+      });
+  }
+
+  @Override
+  public Future<Boolean> hasUserComputeAccess(UUID userId) {
+
+    SelectQuery query = new SelectQuery(
+      Constants.COMPUTE_ROLE_TABLE,
+      List.of(Constants.STATUS),
+      new Condition(Constants.USER_ID, Condition.Operator.EQUALS, List.of(userId.toString())),
+      null, null, null, null
+    );
+
+    return postgresService.select(query)
+      .compose(result -> {
+      if(!result.getRows().isEmpty())
+      {
+        String status = result.getRows().getJsonObject(0).getString(Constants.STATUS);
+        if(status.equals(Status.APPROVED.getStatus()))
+        {
+          return Future.succeededFuture(true);
+        }
+      }
+      return Future.succeededFuture(false);
+      })
+      .recover(err -> {
+        LOGGER.error("Error fetching computerole access status for user {}: {}", userId, err.getMessage(), err);
         return Future.failedFuture(err);
       });
   }

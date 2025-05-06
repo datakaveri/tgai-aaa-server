@@ -5,29 +5,18 @@ import java.util.List;
 
 public final class Constants {
 
+
+
   private Constants()
   {
 
   }
+
   public static final String ORGANIZATION_TABLE="tgai.organizations";
   public static final String ORG_ID = "id";
   public static final String ORG_NAME = "name";
-  public static final String ORG_DESCRIPTION = "description";
-  public static final String DOCUMENTS_PATH = "document_path";
   public static final String CREATED_AT = "created_at";
   public static final String UPDATED_AT = "updated_at";
-
-
-
-  public static final List<String> ALL_ORG_FIELDS = List.of(
-    ORGANIZATION_TABLE,
-    ORG_ID,
-    ORG_NAME,
-    ORG_DESCRIPTION,
-    DOCUMENTS_PATH,
-    CREATED_AT,
-    UPDATED_AT
-  );
 
 
   public static List<String> getAllPolicyFields() {
@@ -43,28 +32,54 @@ public final class Constants {
   public static final String REQUESTED_AT = "requested_at";
   public static final String PROCESSED_AT = "processed_at";
 
-  // Enum values for status
-  public static final String STATUS_PENDING = "pending";
-  public static final String STATUS_APPROVED = "approved";
-  public static final String STATUS_REJECTED = "rejected";
-
   public static final String ORG_USER_ID="id";
   public static final String ROLE="role";
 
+  //CreateOrganizationRequest
   public static final String ORG_CREATE_ID="id";
   public static final String ORG_CREATE_REQUEST_TABLE = "tgai.organization_create_requests";
   public static final String REQUESTED_BY="requested_by";
+  public static final String ORG_LOGO="logo_path";
+  public static final String ENTITY_TYPE="entity_type";
+  public static final String ORG_SECTOR="org_sector";
+  public static final String ORG_WEBSITE="website_link";
+  public static final String ORG_ADDRESS="address";
+  public static final String CERTIFICATE="certificate_path";
+  public static final String PANCARD="pancard_path";
+  public static final String RELEVANT_DOC="relevant_doc_path";
+  public static final String EMP_ID="emp_id";
+  public static final String JOB_TITLE="job_title";
+  public static final String PHONE_NO="phone_no";
+
+
+
 
   public static final List<String> ALL_ORG_CREATE_REQUEST_FIELDS = List.of(
     ORG_CREATE_ID,
     REQUESTED_BY,
     ORG_NAME,
-    ORG_DESCRIPTION,
-    DOCUMENTS_PATH,
-    STATUS,
+    ENTITY_TYPE,
+    ORG_SECTOR,
+    ORG_WEBSITE,
+    ORG_ADDRESS,
+    EMP_ID,
+    JOB_TITLE,
     CREATED_AT,
     UPDATED_AT
   );
+
+  public static final List<String> ALL_ORG_FIELDS = List.of(
+    ORGANIZATION_TABLE,
+    ORG_ID,
+    ORG_NAME,
+    ENTITY_TYPE,
+    ORG_SECTOR,
+    ORG_WEBSITE,
+    ORG_ADDRESS,
+    CREATED_AT,
+    UPDATED_AT
+  );
+
 
   public static final String ORG_USER_TABLE = "tgai.organization_users";
 
