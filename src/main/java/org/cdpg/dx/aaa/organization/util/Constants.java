@@ -14,7 +14,7 @@ public final class Constants {
 
   public static final String ORGANIZATION_TABLE="tgai.organizations";
   public static final String ORG_ID = "id";
-  public static final String ORG_NAME = "org_name";
+  public static final String ORG_NAME = "name";
   public static final String CREATED_AT = "created_at";
   public static final String UPDATED_AT = "updated_at";
 
@@ -39,14 +39,14 @@ public final class Constants {
   public static final String ORG_CREATE_ID="id";
   public static final String ORG_CREATE_REQUEST_TABLE = "tgai.organization_create_requests";
   public static final String REQUESTED_BY="requested_by";
-  public static final String ORG_LOGO="logo";
+  public static final String ORG_LOGO="logo_path";
   public static final String ENTITY_TYPE="entity_type";
   public static final String ORG_SECTOR="org_sector";
-  public static final String ORG_WEBSITE="website";
+  public static final String ORG_WEBSITE="website_link";
   public static final String ORG_ADDRESS="address";
-  public static final String CERTIFICATE="certificate";
-  public static final String PANCARD="pancard";
-  public static final String RELEVANT_DOC="relevant_doc";
+  public static final String CERTIFICATE="certificate_path";
+  public static final String PANCARD="pancard_path";
+  public static final String RELEVANT_DOC="relevant_doc_path";
   public static final String EMP_ID="emp_id";
   public static final String JOB_TITLE="job_title";
   public static final String PHONE_NO="phone_no";

@@ -1,0 +1,37 @@
+ALTER TABLE organization_create_requests
+DROP COLUMN description,
+DROP COLUMN document_path,
+ADD COLUMN logo_path VARCHAR,
+ADD COLUMN entity_type VARCHAR NOT NULL,
+ADD COLUMN org_sector VARCHAR NOT NULL,
+ADD COLUMN website_link VARCHAR NOT NULL,
+ADD COLUMN address VARCHAR NOT NULL,
+ADD COLUMN certificate_path VARCHAR NOT NULL,
+ADD COLUMN pancard_path VARCHAR NOT NULL,
+ADD COLUMN relevant_doc_path VARCHAR,
+ADD COLUMN emp_id VARCHAR NOT NULL,
+ADD COLUMN job_title VARCHAR NOT NULL,
+ADD COLUMN phone_no VARCHAR NOT NULL;
+
+
+ALTER TABLE organization_join_requests
+ADD COLUMN job_title VARCHAR NOT NULL,
+ADD COLUMN emp_id VARCHAR NOT NULL;
+
+ALTER TABLE organization_users
+ADD COLUMN job_title VARCHAR NOT NULL,
+ADD COLUMN emp_id VARCHAR NOT NULL,
+ADD COLUMN phone_no VARCHAR;
+
+ALTER TABLE organizations
+DROP COLUMN description,
+DROP COLUMN document_path,
+ADD COLUMN logo_path VARCHAR,
+ADD COLUMN entity_type VARCHAR NOT NULL,
+ADD COLUMN org_sector VARCHAR NOT NULL,
+ADD COLUMN website_link VARCHAR NOT NULL,
+ADD COLUMN address VARCHAR NOT NULL,
+ADD COLUMN certificate_path VARCHAR NOT NULL,
+ADD COLUMN pancard_path VARCHAR NOT NULL,
+ADD COLUMN relevant_doc_path VARCHAR;
+
