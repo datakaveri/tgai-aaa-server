@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.organization.dao.OrganizationDAO;
 import org.cdpg.dx.aaa.organization.dao.OrganizationJoinRequestDAO;
 import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
 import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
@@ -84,22 +85,15 @@ public class OrganizationJoinRequestDAOImpl implements OrganizationJoinRequestDA
     }
 
     @Override
-    public Future<OrganizationJoinRequest> join(UUID organizationId, UUID userId) {
-        Map<String, Object> insertFields = Map.of(
-                Constants.ORGANIZATION_ID, organizationId.toString(),
-                Constants.USER_ID, userId.toString(),
-                Constants.REQUESTED_AT, Instant.now().toString(),
-                Constants.STATUS , Status.PENDING.getStatus()
-        );
+    public Future<OrganizationJoinRequest> join(OrganizationJoinRequest organizationJoinRequest) {
+      InsertQuery query = new InsertQuery();
+      query.setTable(Constants.ORG_JOIN_REQUEST_TABLE);
+      query.setColumns(List.copyOf(organizationJoinRequest.toNonEmptyFieldsMap().keySet()));
+      query.setValues(List.copyOf(organizationJoinRequest.toNonEmptyFieldsMap().values()));
 
-        List<String> columns = List.copyOf(insertFields.keySet());
-        List<Object> values = List.copyOf(insertFields.values());
+      LOGGER.debug("Insert Query: {}", query.toSQL());
+      LOGGER.debug("Query Params: {}", query.getQueryParams());
 
-        InsertQuery query = new InsertQuery();
-        query.setTable(Constants.ORG_JOIN_REQUEST_TABLE);
-        query.setColumns(columns);
-        query.setValues(values);
-        
         return postgresService.insert(query)
                 .compose(result -> {
                     if (result.getRows().isEmpty()) {

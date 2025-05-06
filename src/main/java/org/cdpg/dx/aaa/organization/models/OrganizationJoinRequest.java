@@ -23,7 +23,7 @@ public record OrganizationJoinRequest(
       Optional.ofNullable(orgJoinRequest.getString(Constants.ORG_JOIN_ID)).map(UUID::fromString),
       UUID.fromString(orgJoinRequest.getString(Constants.ORGANIZATION_ID)),
       UUID.fromString(orgJoinRequest.getString(Constants.USER_ID)),
-      orgJoinRequest.getString(Constants.STATUS),
+      Optional.ofNullable(orgJoinRequest.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
       orgJoinRequest.getString(Constants.JOB_TITLE),
       orgJoinRequest.getString(Constants.EMP_ID),
       Optional.ofNullable(orgJoinRequest.getString(Constants.REQUESTED_AT)),

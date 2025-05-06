@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface OrganizationJoinRequestDAO {
     Future<OrganizationJoinRequest> getById(UUID Id);
 
-    Future<OrganizationJoinRequest> join(UUID organizationId, UUID userId);
+    Future<OrganizationJoinRequest> join(OrganizationJoinRequest organizationJoinRequest);
 
     Future<List<OrganizationJoinRequest>> getAll(UUID orgId, Status status);
 

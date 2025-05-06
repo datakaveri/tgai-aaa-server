@@ -2,6 +2,8 @@ package org.cdpg.dx.aaa.organization.util;
 import org.bouncycastle.pqc.crypto.newhope.NHSecretKeyProcessor;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public final class Constants {
 
@@ -62,20 +64,39 @@ public final class Constants {
     ORG_SECTOR,
     ORG_WEBSITE,
     ORG_ADDRESS,
+    CERTIFICATE,
+    PANCARD,
+    RELEVANT_DOC,
     EMP_ID,
     JOB_TITLE,
+    PHONE_NO,
     CREATED_AT,
     UPDATED_AT
   );
 
+//  Optional<UUID> id,
+//  String orgName,
+//  Optional<String> orgLogo,
+//  String entityType,
+//  String orgSector,
+//  String websiteLink,
+//  String address,
+//  String certificatePath,
+//  String pancardPath,
+//  Optional<String> relevantDocPath,
+//  Optional<String> createdAt,
+//  Optional<String> updatedAt
   public static final List<String> ALL_ORG_FIELDS = List.of(
-    ORGANIZATION_TABLE,
     ORG_ID,
     ORG_NAME,
+    ORG_LOGO,
     ENTITY_TYPE,
     ORG_SECTOR,
     ORG_WEBSITE,
     ORG_ADDRESS,
+    CERTIFICATE,
+    PANCARD,
+    RELEVANT_DOC,
     CREATED_AT,
     UPDATED_AT
   );

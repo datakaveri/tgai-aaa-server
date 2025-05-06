@@ -115,8 +115,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Future<OrganizationJoinRequest> joinOrganizationRequest(UUID orgId, UUID userId) {
-        return joinRequestDAO.join(orgId, userId);
+    public Future<OrganizationJoinRequest> joinOrganizationRequest(OrganizationJoinRequest organizationJoinRequest) {
+        return joinRequestDAO.join(organizationJoinRequest);
     }
 
 
