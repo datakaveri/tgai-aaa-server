@@ -210,7 +210,7 @@ public class Constants {
 
   public static final String SQL_GET_ORG_ADMIN_ROLE =
       "SELECT 'ADMIN'::text AS role, array_agg(organization_id)::text[] AS org_ids" +
-              " FROM tgai.organization_users" +
+              " FROM organization_users" +
               " WHERE user_id = $1::uuid AND role = 'admin'" +
               " HAVING array_agg(organization_id) <> '{}'";
 
