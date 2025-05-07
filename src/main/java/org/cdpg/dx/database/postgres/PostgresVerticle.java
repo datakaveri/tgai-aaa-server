@@ -31,6 +31,7 @@ public class PostgresVerticle extends AbstractVerticle {
   private String databaseName;
   private String databaseUserName;
   private String databasePassword;
+  String databaseSchema;
   private int poolSize;
   private PostgresService pgService;
 
@@ -39,16 +40,21 @@ public class PostgresVerticle extends AbstractVerticle {
     try {
       LOGGER.info("PostgresVerticle start() invoked.");
       System.out.println(">>> Postgres verticle started.");
+
+      System.out.println(">>> Config >>>" +  config().toString());
+
       // Read configuration
       databaseIp = config().getString("databaseIP");
-      databasePort = config().getInteger("databasePort");
+      databasePort = Integer.parseInt(config().getString("databasePort"));
       databaseName = config().getString("databaseName");
       databaseUserName = config().getString("databaseUserName");
       databasePassword = config().getString("databasePassword");
+      databaseSchema = config().getString("databaseSchema");
       poolSize = config().getInteger("poolSize");
-      System.out.println(">>> Config >>>" +  config().toString());
 
       LOGGER.info("DATABASE CONFIG: IP={}, PORT={}, NAME={}, USER={}", databaseIp, databasePort, databaseName, databaseUserName);
+
+      Map<String, String> schemaProp = Map.of("search_path", databaseSchema);
 
       // Set up database connection
       PgConnectOptions connectOptions = new PgConnectOptions()
@@ -58,6 +64,7 @@ public class PostgresVerticle extends AbstractVerticle {
         .setUser(databaseUserName)
         .setPassword(databasePassword)
         .setReconnectAttempts(2)
+        .setProperties(schemaProp)
         .setReconnectInterval(1000L);
 
       // Set Schema Properties (if needed)

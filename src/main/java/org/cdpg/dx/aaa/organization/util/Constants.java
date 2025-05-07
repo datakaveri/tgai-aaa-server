@@ -14,7 +14,7 @@ public final class Constants {
 
   }
 
-  public static final String ORGANIZATION_TABLE="tgai.organizations";
+  public static final String ORGANIZATION_TABLE="organizations";
   public static final String ORG_ID = "id";
   public static final String ORG_NAME = "name";
   public static final String CREATED_AT = "created_at";
@@ -25,7 +25,7 @@ public final class Constants {
     return ALL_ORG_FIELDS;
   }
 
-  public static final String ORG_JOIN_REQUEST_TABLE = "tgai.organization_join_requests";
+  public static final String ORG_JOIN_REQUEST_TABLE = "organization_join_requests";
 
   public static final String ORG_JOIN_ID = "id";
   public static final String ORGANIZATION_ID = "organization_id";
@@ -39,7 +39,7 @@ public final class Constants {
 
   //CreateOrganizationRequest
   public static final String ORG_CREATE_ID="id";
-  public static final String ORG_CREATE_REQUEST_TABLE = "tgai.organization_create_requests";
+  public static final String ORG_CREATE_REQUEST_TABLE = "organization_create_requests";
   public static final String REQUESTED_BY="requested_by";
   public static final String ORG_LOGO="logo_path";
   public static final String ENTITY_TYPE="entity_type";
@@ -74,18 +74,6 @@ public final class Constants {
     UPDATED_AT
   );
 
-//  Optional<UUID> id,
-//  String orgName,
-//  Optional<String> orgLogo,
-//  String entityType,
-//  String orgSector,
-//  String websiteLink,
-//  String address,
-//  String certificatePath,
-//  String pancardPath,
-//  Optional<String> relevantDocPath,
-//  Optional<String> createdAt,
-//  Optional<String> updatedAt
   public static final List<String> ALL_ORG_FIELDS = List.of(
     ORG_ID,
     ORG_NAME,
@@ -102,7 +90,7 @@ public final class Constants {
   );
 
 
-  public static final String ORG_USER_TABLE = "tgai.organization_users";
+  public static final String ORG_USER_TABLE = "organization_users";
 
 
 }
