@@ -327,9 +327,6 @@ ALTER TABLE ONLY roles
 ALTER TABLE ONLY user_clients
     ADD CONSTRAINT user_clients_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id);
-
 --
 -- Access grants
 --
