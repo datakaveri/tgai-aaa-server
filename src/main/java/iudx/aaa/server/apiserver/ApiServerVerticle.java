@@ -677,16 +677,42 @@ public class ApiServerVerticle extends AbstractVerticle {
                 Future<OrganizationUser> orgUserFuture = organizationService
                         .getOrganizationUserInfo(UUID.fromString(user.getUserId()))
                 .onSuccess(orgInfo -> {
+
+                    JsonObject results = userDetails.getJsonObject("results", new JsonObject());
+
                     JsonObject orgInfoJson = orgInfo.toJson();
-                    userDetails.put("organizationInfo", orgInfoJson);
+                    orgInfoJson.remove("id");
+                    orgInfoJson.remove("user_id");
+                    orgInfoJson.remove("created_at");
+                    orgInfoJson.remove("updated_at");
+                    results.put("organizationInfo", orgInfoJson);
+
                 }).onFailure(err -> {
                     LOGGER.error("Error fetching organization info for user {}: {}", user.getUserId(), err.getMessage());
                 });
                 futures.add(orgUserFuture.recover(err -> Future.succeededFuture()));
 
+                Future<Boolean> creditFuture = creditService
+                        .hasUserComputeAccess(UUID.fromString(user.getUserId()))
+                        .onComplete(hasComputeAccess -> {
+
+                            if(hasComputeAccess.result()){
+                                JsonObject results = userDetails.getJsonObject("results", new JsonObject());
+                                JsonArray roles = results.getJsonArray("roles", new JsonArray());
+                                roles.add("compute");
+                                results.put("roles", roles);
+                                userDetails.put("results", results);
+                            }
+
+                        });
+
+                futures.add(creditFuture.recover(err -> Future.succeededFuture(false)));
+
                 return CompositeFuture.all(futures).map(v -> userDetails);
             })
-        .onSuccess(result -> processResponse(context.response(), result))
+        .onSuccess(result -> {
+            processResponse(context.response(), result);
+        })
         .onFailure(failure -> processResponse(context.response(), failure.getLocalizedMessage()));
   }
 
