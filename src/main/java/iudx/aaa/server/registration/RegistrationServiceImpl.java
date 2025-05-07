@@ -395,6 +395,16 @@ public class RegistrationServiceImpl implements RegistrationService {
                 }
               }
 
+                JsonArray pendingRoles = new JsonArray();
+                if (requestedRoles.contains(Roles.PROVIDER)) {
+                    for (String rs : requestedRsForProviderRole) {
+                        pendingRoles.add(new JsonObject()
+                                .put("role", Roles.PROVIDER.toString())
+                                .put("resourceServer", rs)
+                                .put("status", RoleStatus.PENDING.toString()));
+                    }
+                }
+
               User u =
                   new UserBuilder()
                       .name(user.getName().get("firstName"), user.getName().get("lastName"))
@@ -420,6 +430,8 @@ public class RegistrationServiceImpl implements RegistrationService {
               if (!clientDetails.result().isEmpty()) {
                 payload.put(RESP_CLIENT_ARR, new JsonArray(clientDetails.result()));
               }
+
+              payload.put("pending roles", pendingRoles);
 
               String title = SUCC_TITLE_ADDED_ROLES;
               if (requestedRoles.contains(Roles.PROVIDER)) {
