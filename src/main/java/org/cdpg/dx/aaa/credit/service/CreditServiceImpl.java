@@ -123,12 +123,13 @@ public class CreditServiceImpl implements CreditService {
 
 
   @Override
-  public Future<ComputeRole> create(ComputeRole computeRole) {
+  public Future<ComputeRole> createComputeRoleRequest(ComputeRole computeRole) {
     return computeRoleDAO.create(computeRole);
   }
 
   @Override
   public Future<List<ComputeRole>> getAllPendingComputeRequests() {
+    System.out.println("inside getAllPendingComputeRequests");
     return computeRoleDAO.getAll(Status.PENDING);
   }
 
