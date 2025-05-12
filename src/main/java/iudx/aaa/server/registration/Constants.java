@@ -119,7 +119,7 @@ public class Constants {
           + " VALUES ($1::uuid, $2::uuid, $3::text, $4::text, NOW(), NOW())";
 
   public static final String SQL_GET_RS_IDS_BY_URL =
-      "SELECT id, url FROM resource_server WHERE url = ANY($1::text[])";
+      "SELECT name, id FROM organizations WHERE id = ANY($1::uuid[])";
 
   public static final String SQL_GET_ALL_RS = "SELECT id, name, url, owner_id FROM resource_server";
 

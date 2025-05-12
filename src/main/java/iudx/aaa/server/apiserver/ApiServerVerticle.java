@@ -23,6 +23,7 @@ import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
+import io.vertx.sqlclient.Tuple;
 import iudx.aaa.server.admin.AdminService;
 import iudx.aaa.server.apd.ApdService;
 import iudx.aaa.server.apiserver.models.Response.ResponseBuilder;
@@ -737,6 +738,26 @@ public class ApiServerVerticle extends AbstractVerticle {
                         });
 
                 futures.add(creditFuture.recover(err -> Future.succeededFuture(false)));
+
+                PgPool pool = PgPool.pool(vertx, connectOptions, poolOptions);
+
+                Future<JsonArray> PendingRoles = pool.withConnection(conn ->
+                        conn.preparedQuery("SELECT role FROM roles WHERE user_id = $1 AND status = 'PENDING'")
+                                .execute(Tuple.of(UUID.fromString(user.getUserId())))
+                                .map(rows -> {
+                                    JsonArray rolesArray = new JsonArray();
+                                    rows.forEach(row -> rolesArray.add(row.getString("role")));
+                                    return rolesArray;
+                                })
+                ).onSuccess(rolesArray -> {
+                    JsonObject results = userDetails.getJsonObject("results", new JsonObject());
+                    results.put("pending_roles", rolesArray);
+                    userDetails.put("results", results);
+                }).onFailure(err -> {
+                    LOGGER.error("Error fetching roles for user {}: {}", user.getUserId(), err.getMessage());
+                });
+
+                futures.add(PendingRoles.recover(err -> Future.succeededFuture()));
 
                 return CompositeFuture.all(futures).map(v -> userDetails);
             })

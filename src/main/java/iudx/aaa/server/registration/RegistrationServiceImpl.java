@@ -80,12 +80,7 @@ import iudx.aaa.server.apiserver.util.ComposeException;
 import iudx.aaa.server.apiserver.util.Urn;
 import iudx.aaa.server.token.TokenService;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -152,6 +147,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         Stream.concat(requestedRsForConsumerRole.stream(), requestedRsForProviderRole.stream())
             .collect(Collectors.toSet());
 
+    System.out.println(allRequestedRs);
+
     if (requestedRoles.contains(Roles.PROVIDER)) {
       List<String> duplicateProviderRs =
           ownedRsForProviderRole.stream()
@@ -198,35 +195,46 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     Future<String> email = kc.getEmailId(user.getUserId());
     Collector<Row, ?, Map<String, UUID>> rsCollector =
-        Collectors.toMap(row -> row.getString("url"), row -> row.getUUID("id"));
+        Collectors.toMap(row -> row.getString("name"), row -> row.getUUID("id"));
+
+      UUID[] uuidArray = allRequestedRs.stream()
+              .map(UUID::fromString)
+              .toArray(UUID[]::new);
+
 
     Future<Map<String, UUID>> getRequestedRs =
         pool.withConnection(
             conn ->
                 conn.preparedQuery(SQL_GET_RS_IDS_BY_URL)
                     .collecting(rsCollector)
-                    .execute(Tuple.of(allRequestedRs.toArray(String[]::new)))
+                    .execute(Tuple.of(uuidArray))
                     .map(res -> res.value()));
+
 
     Future<Void> checkEmailAndResourceServerUrls =
         CompositeFuture.all(email, getRequestedRs)
             .compose(
                 arr -> {
-                  String emailId = arr.resultAt(0);
+//                  String emailId = arr.resultAt(0);
+
                   Map<String, UUID> rsDetails = arr.resultAt(1);
 
-                  if (emailId.length() == 0) {
-                    return Future.failedFuture(
-                        new ComposeException(
-                            400, URN_INVALID_INPUT, ERR_TITLE_USER_NOT_KC, ERR_DETAIL_USER_NOT_KC));
-                  }
+                  System.out.println(rsDetails);
 
-                  List<String> missingRs =
-                      allRequestedRs.stream()
-                          .filter(rs -> !rsDetails.containsKey(rs))
-                          .collect(Collectors.toList());
+//                  if (emailId.length() == 0) {
+//                    return Future.failedFuture(
+//                        new ComposeException(
+//                            400, URN_INVALID_INPUT, ERR_TITLE_USER_NOT_KC, ERR_DETAIL_USER_NOT_KC));
+//                  }
 
-                  if (!missingRs.isEmpty()) {
+
+
+//                  List<String> missingRs =
+//                      allRequestedRs.stream()
+//                          .filter(rs -> !rsDetails.containsKey(rs))
+//                          .collect(Collectors.toList());
+
+                  if (rsDetails.isEmpty()) {
                     Response resp =
                         new ResponseBuilder()
                             .type(Urn.URN_INVALID_INPUT)
@@ -235,7 +243,9 @@ public class RegistrationServiceImpl implements RegistrationService {
                             .detail(ERR_DETAIL_RS_NO_EXIST)
                             .errorContext(
                                 new JsonObject()
-                                    .put(ERR_CONTEXT_NOT_FOUND_RS_URLS, new JsonArray(missingRs)))
+                                    .put("Organisations", Arrays.stream(uuidArray)
+                                            .map(UUID::toString)
+                                            .collect(Collectors.toList())))
                             .build();
                     return Future.failedFuture(new ComposeException(resp));
                   }
@@ -250,10 +260,14 @@ public class RegistrationServiceImpl implements RegistrationService {
                 return Future.succeededFuture(roleListTup);
               }
 
+              System.out.println("requestedRsForProviderRole: " + requestedRsForProviderRole);
+
               Map<UUID, String> requestedRsIdsToUrl =
                   requestedRsForProviderRole.stream()
                       .collect(
                           Collectors.toMap(url -> getRequestedRs.result().get(url), url -> url));
+
+              System.out.println("requestedRsIdsToUrl: " + requestedRsIdsToUrl);
 
               Collector<Row, ?, Map<String, List<String>>> pendingRejectedUrlsCollector =
                   Collectors.groupingBy(
@@ -262,13 +276,15 @@ public class RegistrationServiceImpl implements RegistrationService {
                           row -> requestedRsIdsToUrl.get(row.getUUID("resource_server_id")),
                           Collectors.toList()));
 
+              System.out.println("pendingRejectedUrlsCollector: " + pendingRejectedUrlsCollector);
+
               UUID[] requestedRsIds = requestedRsIdsToUrl.keySet().toArray(UUID[]::new);
 
               return pool.withConnection(
                   conn ->
                       conn.preparedQuery(SQL_CHECK_PENDING_REJECTED_PROVIDER_ROLES)
                           .collecting(pendingRejectedUrlsCollector)
-                          .execute(Tuple.of(requestedRsIds, user.getUserId()))
+                          .execute(Tuple.of((Object) uuidArray , user.getUserId()))
                           .map(succ -> succ.value())
                           .compose(
                               map -> {
@@ -355,18 +371,37 @@ public class RegistrationServiceImpl implements RegistrationService {
                 });
 
     /* Insertion into users, roles tables */
-    Future<Void> insertUserAndRoles =
-        createRoleTuple.compose(
-            rolesListTuple ->
-                pool.withTransaction(
-                    conn ->
-                        conn.preparedQuery(SQL_CREATE_USER_IF_NOT_EXISTS)
-                            .execute(Tuple.of(user.getUserId(), phoneInReq, userInfo))
-                            .compose(
-                                userCreated ->
-                                    conn.preparedQuery(SQL_CREATE_ROLE)
-                                        .executeBatch(rolesListTuple)
-                                        .mapEmpty())));
+      Future<Void> insertUserAndRoles =
+              createRoleTuple.compose(
+                      rolesListTuple -> {
+                          String org_id = allRequestedRs.iterator().next();
+                          System.out.println("rolesListTuple: " + rolesListTuple);
+                          List<Tuple> updatedRoleTuples = rolesListTuple.stream()
+                                  .map(tuple -> {
+                                      Object[] elements = new Object[tuple.size()];
+                                      for (int i = 0; i < tuple.size(); i++) {
+                                          elements[i] = tuple.getValue(i);
+                                      }
+                                      elements[2] = org_id;
+                                        System.out.println("Updated tuple: " + Arrays.toString(elements));
+                                      return Tuple.of(elements[0], elements[1], elements[2], elements[3]);
+                                  })
+                                  .collect(Collectors.toList());
+
+                          System.out.println("updatedRoleTuples: " + updatedRoleTuples);
+
+
+                          return pool.withTransaction(
+                                  conn ->
+                                          conn.preparedQuery(SQL_CREATE_USER_IF_NOT_EXISTS)
+                                                  .execute(Tuple.of(user.getUserId(), phoneInReq, userInfo))
+                                                  .compose(
+                                                          userCreated ->
+                                                                  conn.preparedQuery(SQL_CREATE_ROLE)
+                                                                          .executeBatch(updatedRoleTuples)
+                                                                          .mapEmpty()));
+                      });
+
 
     insertUserAndRoles
         .onSuccess(
