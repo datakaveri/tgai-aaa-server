@@ -23,7 +23,7 @@ public interface CreditService {
 
   // ************ COMPUTE ROLE **********
 
-  Future<ComputeRole> create(ComputeRole computeRole);
+  Future<ComputeRole> createComputeRoleRequest(ComputeRole computeRole);
 
   Future<List<ComputeRole>> getAllPendingComputeRequests();
 

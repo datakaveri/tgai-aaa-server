@@ -7,11 +7,13 @@ import io.vertx.ext.web.RoutingContext;
 import iudx.aaa.server.apiserver.models.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.credit.models.ComputeRole;
 import org.cdpg.dx.aaa.credit.models.CreditRequest;
 import org.cdpg.dx.aaa.credit.models.CreditTransaction;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static iudx.aaa.server.apiserver.util.Constants.USER;
@@ -27,15 +29,7 @@ public class CreditHandler {
 
     }
 
-    public void getCreditRequestByStatus(RoutingContext routingContext){
-//        String status = routingContext.queryParam("status").get(0);
-//        LOGGER.info("Received request to get credit requests with status: {}", status);
-//
-//        if (status == null || status.isEmpty()) {
-//            LOGGER.error("Status parameter is missing or empty");
-//            processFailure(routingContext, 400 , "Status parameter is required");
-//            return;
-//        }
+    public void getPendingCreditRequest(RoutingContext routingContext){
 
         creditService.getAllPendingCreditRequests()
                 .onComplete(ar -> {
@@ -193,6 +187,88 @@ public class CreditHandler {
                 });
     }
 
+  public void getPendingComputeRole(RoutingContext routingContext) {
+      System.out.println("Inside getPendingComputeRole");
+      creditService.getAllPendingComputeRequests()
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          JsonArray jsonArray = new JsonArray();
+          for (ComputeRole req : ar.result()) {
+            jsonArray.add(req.toJson());
+          }
+          processSuccess(routingContext, jsonArray, 200, "Credit requests fetched successfully");
+        } else {
+          LOGGER.error("Failed to get credit requests: {}", ar.cause().getMessage());
+          processFailure(routingContext, 500, ar.cause().getMessage());
+        }
+      });
+    }
+
+  public void createComputeRoleRequest(RoutingContext routingContext) {
+    JsonObject computeRoleRequestJson = routingContext.getBodyAsJson();
+    // will send only user_id intially
+    LOGGER.info("Received request to create credit request: {}", computeRoleRequestJson);
+
+    User user = routingContext.get(USER);
+    computeRoleRequestJson.put("user_id", user.getUserId());
+
+    ComputeRole computeRoleRequest = ComputeRole.fromJson(computeRoleRequestJson);
+
+    creditService.createComputeRoleRequest(computeRoleRequest)
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          processSuccess(routingContext, ar.result().toJson(), 201, "Credit request created successfully");
+        } else {
+          LOGGER.error("Failed to create credit request: {}", ar.cause().getMessage());
+          processFailure(routingContext, 500, ar.cause().getMessage());
+        }
+      });
+    }
+
+  public void updateComputeRoleRequest(RoutingContext routingContext) {
+    JsonObject requestBody = routingContext.getBodyAsJson();
+    LOGGER.info("Received request to update credit request: {}", requestBody);
+
+    if (requestBody == null || !requestBody.containsKey("id") || !requestBody.containsKey("status")) {
+      LOGGER.error("Invalid request body");
+      processFailure(routingContext, 400, "Invalid request body");
+      return;
+    }
+
+    User transactedByUser = routingContext.get(USER);
+
+    String approvedByStr = transactedByUser.getUserId();
+    String requestIdStr = requestBody.getString("id");
+    String statusStr = requestBody.getString("status");
+
+    if (approvedByStr == null || requestIdStr.isEmpty() || statusStr == null || statusStr.isEmpty()) {
+      LOGGER.error("Request ID or status is missing or empty in the request body");
+      processFailure(routingContext, 400, "Request ID and status are required");
+      return;
+    }
+
+    UUID requestId,approveById;
+    try {
+      requestId = UUID.fromString(requestIdStr);
+      approveById = UUID.fromString(approvedByStr);
+    } catch (IllegalArgumentException e) {
+      LOGGER.error("Invalid request ID format: {}", requestIdStr);
+      processFailure(routingContext, 400, "Request ID must be a valid UUID");
+      return;
+    }
+
+    creditService.updateStatus(requestId, Status.fromString(statusStr),approveById)
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          processSuccess(routingContext, new JsonObject().put("updated", ar.result()), 200, "Credit request updated successfully");
+        } else {
+          LOGGER.error("Failed to update credit request: {}", ar.cause().getMessage());
+          processFailure(routingContext, 500, ar.cause().getMessage());
+        }
+      });
+    }
+
+
 //    public void GetOtherUserCreditBalance(RoutingContext routingContext) {
 //        JsonObject requestBody = routingContext.getBodyAsJson();
 //        LOGGER.info("Received request to get other user credit balance: {}", requestBody);
@@ -283,4 +359,6 @@ public class CreditHandler {
                 .putHeader("Content-Type", "application/json")
                 .end(response.encode());
     }
+
+
 }

@@ -277,7 +277,7 @@ paths:
           - `context` : a JSON object containing any extra information. The user may use this field to convey information to an APD in case the requested resource is backed by an APD policy
         required: true
       description: |
-        Request for a JWT (token). One can generate token using either by providing token header or providing clientId and clientSecret in the header. 
+        Request for a JWT (token). One can generate token using either by providing token header or providing clientId and clientSecret in the header.
 
         **NOTE : Either the JWT token in the `Authorization` header or `clientId`+`clientSecret` headers are required, not both**
 
@@ -286,25 +286,25 @@ paths:
           - Valid item types - `resource_server`, `cos` in case of COS admin
           - Item ID - URL of the resource server or COS
 
-        ## Conditions    
+        ## Conditions
           - If role is `admin`, the user must own/be the admin of the resource server.
           - If role is `cos_admin`, the user must be the COS Admin and the `itemId` must be the COS URL.
-          - For any other role, the user must have the role for the particular resource server. 
+          - For any other role, the user must have the role for the particular resource server.
           - Users can be permitted to obtain identity tokens with the `admin` role if required.**
 
         # Access Token
         An Access token is used to gain access to an Item on a resource server.
 
           ## Tokens for providers
-           - Valid item types - `resource`, `resource_group` 
+           - Valid item types - `resource`, `resource_group`
            - Users with the `provider` role can get tokens for all of the resources that belong to them without having to set any specific policies to access them.
 
           ## Tokens for delegates
           ### Delegation ID header
           - **The `delegationId` header must be included - the ID can be obtained by calling the GET /delegations API**
-          - **The delegation ID determines which user + role + resource server the token request is being made on behalf by the delegate**  
+          - **The delegation ID determines which user + role + resource server the token request is being made on behalf by the delegate**
         ---
-          - Valid item types - `resource`, `resource_group` 
+          - Valid item types - `resource`, `resource_group`
           - In case the delegate is making the request on behalf of a consumer, a token is issued if a successful APD verification takes place for the requested item and the associated consumer
           - In case the delegate is making the request on behalf of a provider,, a token is issued if the associated provider owns the item
           - On a successful token request, the access token will contain information about the delegator's user ID and role. See _JWT Access Token Response Structure_
@@ -326,23 +326,23 @@ paths:
            - `exp` : when the token will expire in Unix format
            - `iat` : indicates when the token was issued in Unix format
            - `iid` : resource type and resource id of the item for which the token is valid
-           - `role` : role of the user 
-           - `cons` : the constraints that the resource server recognizes. Constraints sent back by the APD are included here. 
+           - `role` : role of the user
+           - `cons` : the constraints that the resource server recognizes. Constraints sent back by the APD are included here.
            - `rg` : when the requested item is a resource, this field exists containing the associated resource group ID
            - `did` : when role is `delegate`, contains the user ID of the delegator
            - `drl` : when the role is `delegate`, contains the role for which the delegated action is made
 
-          # APD Verification 
+          # APD Verification
 
         For all access token requests for a consumer, the AAA server queries the APD associated with the requested item  with relevant information to verify if the consumer has access to the item. The APD may respond in three ways:
         - **Allow** : The user has access. The AAA server generates the access token based on the constraints defined in the policy and sends it back.
-            - In case the APD send constraints, these constraints will be put into the `apd` key in the JWT token in a JSON object called `apdConstraints`  
+            - In case the APD send constraints, these constraints will be put into the `apd` key in the JWT token in a JSON object called `apdConstraints`
 
         - **Deny** : The user does not have access. The AAA server returns a `403 Forbidden`.
-        - **Deny but the APD needs interaction** : The APD provides a mechanism for the user to interact with it. This interaction **may or may not** result in the user being given access. The AAA server sends a `403 Forbidden` but includes a special **APD JWT token** that the user must use when interacting with the APD. 
+        - **Deny but the APD needs interaction** : The APD provides a mechanism for the user to interact with it. This interaction **may or may not** result in the user being given access. The AAA server sends a `403 Forbidden` but includes a special **APD JWT token** that the user must use when interacting with the APD.
 
         ## Context object for extra information
-        An APD may require extra information during evaluation. Any such information can be included in the `context` JSON object field in the API request body. 
+        An APD may require extra information during evaluation. Any such information can be included in the `context` JSON object field in the API request body.
 
         In case an APD requires particular keys in the `context` object, The APD can send a **Deny** response with the details of the required keys and information.
 
@@ -887,8 +887,8 @@ paths:
                     organization: ACME Org.
                     natureOfOrg: Company
         description: |-
-          - Users can add the `provider` or `consumer` role along with a list of resource servers to be associated with said role  
-          - Resource server URLs in `provider` and `consumer` arrays must be **lowercase**  
+          - Users can add the `provider` or `consumer` role along with a list of resource servers to be associated with said role
+          - Resource server URLs in `provider` and `consumer` arrays must be **lowercase**
           - `userInfo` is an optional field that can be populated with data required for user information, if desired
         required: true
       tags:
@@ -1503,7 +1503,7 @@ paths:
                     title: Invalid client ID
                     detail: Requested client ID not found
       description: |-
-        A user may regenerate a client secret corresponding to a client ID in case they have lost the client secret or it has been compromised. A new client secret will be generated and sent as part of the output **and will not be shown again.** 
+        A user may regenerate a client secret corresponding to a client ID in case they have lost the client secret or it has been compromised. A new client secret will be generated and sent as part of the output **and will not be shown again.**
 
         ## Token revocation before regeneration
         In addition to regenerating the client secret, **the AAA server notifies all servers - resource servers and APDs - recognized by DX to revoke all tokens issued in the user's name (with the user's credentials) before the regeneration request was made**. The AAA server is effectively calling the `POST /auth/v1/token/revoke` API for all servers on behalf of the user. This is done to account for the scenario where the client secret has been compromised and tokens have been issued by a malicious user.
@@ -1821,7 +1821,7 @@ paths:
                     title: Domains exists
                     detail: A resource server exists with the given domain
       description: |-
-        Register a Resource Server. This operation can be performed by the **COS Admin only**. 
+        Register a Resource Server. This operation can be performed by the **COS Admin only**.
         - The resource server is also assigned an owner/admin user during registration. The assigned admin/owner must be registered on the UAC.
 
         ## Automatic Consumer role assignment for new Resource Servers
@@ -2584,7 +2584,7 @@ paths:
           description: |-
             - Bad Request
             - The resource server URL is not present on the server
-            - The user does not have the correct role for the requested resource server  
+            - The user does not have the correct role for the requested resource server
             - The requested user email is not registered on the UAC
           content:
             application/json:
@@ -2787,9 +2787,9 @@ paths:
                     detail: Missing auth details
       operationId: get-auth-v1-delegations-emails
       description: |-
-        A valid user with **trustee** role i.e. **owner of a registered and active APD** may get the email addresses of a user's delegates for communication purposes. The trustee supplies a user ID, role and resource server. If a user has valid delegates for the given role and resource server, the email addresses are returned. **The trustee is authenticated using client ID, client secret credentials.** 
+        A valid user with **trustee** role i.e. **owner of a registered and active APD** may get the email addresses of a user's delegates for communication purposes. The trustee supplies a user ID, role and resource server. If a user has valid delegates for the given role and resource server, the email addresses are returned. **The trustee is authenticated using client ID, client secret credentials.**
 
-        **NOTE**: A `200 OK` with an empty `delegateEmails` array is returned even if 
+        **NOTE**: A `200 OK` with an empty `delegateEmails` array is returned even if
           - The requested user **is not registered on the COS** or **does not exist on UAC**
           - The requested **resource server does not exist**
           - The requested user **does not have a role for the requested resource server**
@@ -3076,7 +3076,7 @@ paths:
                     detail: Please add roles or wait for provider role approvals
       operationId: get-auth-v1-apd
       description: |-
-        Returns registered APDs. 
+        Returns registered APDs.
         - If called by the COS Admin, returns all APD registrations
         - If called by a user with any other roles, returns all APDs in the **active** state
       parameters:
@@ -3230,7 +3230,7 @@ paths:
                     title: URL already exists
                     detail: An APD with the requested URL already exists
       description: |-
-        The COS Admin can add new APDs to the server. These APDs will be in the **active** state by default. 
+        The COS Admin can add new APDs to the server. These APDs will be in the **active** state by default.
         - The resource server is also assigned an owner/trustee user during registration. The assigned owner/trustee must be registered on the UAC. They will be given the **trustee role** as a result of successful APD registration.
 
         **NOTE**: The trustee role assignment exists as long as the APD is in active state.
@@ -4645,6 +4645,70 @@ paths:
       operationId: get-auth-v1-user-credit-id
       security:
         - authorization: []
+  /auth/v1/computerole:
+    get:
+      summary: Get All Pending ComputeRole Requests
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { }
+      operationId: get-auth-v1-compute-role-request
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Keycloak issued Token
+    post:
+      summary: Create Compute Role Request
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+      operationId: post-auth-v1-compute-role-request
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Keycloak issued Token
+    put:
+      summary: Update Compute Roles
+      tags: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { }
+      operationId: put-auth-v1-compute-role-request
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Keycloak issued Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                status:
+                  type: string
+              x-examples:
+                Example 1:
+                  id: string
+                  status: string
 components:
   schemas:
     RequestToken:

@@ -44,6 +44,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.dao.CreditDAOFactory;
+import org.cdpg.dx.aaa.credit.models.ComputeRole;
+import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.credit.service.CreditServiceImpl;
 import org.cdpg.dx.aaa.organization.dao.*;
@@ -308,7 +310,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                         .operation("get-auth-v1-credit")
                         .handler(ctx -> fetchRoles.fetch(ctx, Set.of(Roles.COS_ADMIN)))
                         .handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of(Roles.COS_ADMIN)))
-                        .handler(creditHandler::getCreditRequestByStatus)
+                        .handler(creditHandler::getPendingCreditRequest)
                         .failureHandler(failureHandler);
 
                 routerBuilder
@@ -345,6 +347,33 @@ public class ApiServerVerticle extends AbstractVerticle {
 //                        .handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of(Roles.COS_ADMIN)))
 //                        .handler(creditHandler::GetOtherUserCreditBalance)
 //                        .failureHandler(failureHandler);
+
+
+
+             //  ComputeRole Handler
+              routerBuilder
+                .operation("get-auth-v1-compute-role-request")
+                .handler(ctx -> fetchRoles.fetch(ctx, Set.of()))
+                .handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of()))
+                .handler(creditHandler::getPendingComputeRole)
+                .failureHandler(failureHandler);
+
+
+              routerBuilder
+                .operation("post-auth-v1-compute-role-request")
+                .handler(ctx -> fetchRoles.fetch(ctx, Set.of()))
+                .handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of()))
+                .handler(creditHandler::createComputeRoleRequest)
+                .failureHandler(failureHandler);
+
+
+              routerBuilder
+                .operation("put-auth-v1-compute-role-request")
+                .handler(ctx -> fetchRoles.fetch(ctx, Set.of()))
+                .handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of()))
+                .handler(creditHandler::updateComputeRoleRequest)
+                .failureHandler(failureHandler);
+
 
               // Post token create
               routerBuilder
@@ -693,7 +722,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                 futures.add(orgUserFuture.recover(err -> Future.succeededFuture()));
 
                 Future<Boolean> creditFuture = creditService
-                        .hasUserComputeAccess(UUID.fromString(user.getUserId()))
+                        .
+                  hasUserComputeAccess(UUID.fromString(user.getUserId()))
                         .onComplete(hasComputeAccess -> {
 
                             if(hasComputeAccess.result()){
