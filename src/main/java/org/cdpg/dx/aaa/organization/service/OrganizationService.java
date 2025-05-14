@@ -40,6 +40,8 @@ public interface OrganizationService {
 
   Future<Organization> getOrganizationById(UUID orgId);
 
+  Future<Organization> getOrganizationByName(String orgName);
+
   //update organization
   Future<Organization> updateOrganizationById(UUID orgId,UpdateOrgDTO updateOrgDTO);
 

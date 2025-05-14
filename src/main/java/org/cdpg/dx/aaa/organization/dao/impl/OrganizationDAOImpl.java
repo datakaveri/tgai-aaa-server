@@ -93,6 +93,8 @@ public class OrganizationDAOImpl implements OrganizationDAO {
                 });
     }
 
+
+
     @Override
     public Future<Boolean> delete(UUID id) {
       Condition condition = new Condition(Constants.ORG_ID, Condition.Operator.EQUALS, List.of(id.toString()));
@@ -128,6 +130,28 @@ public class OrganizationDAOImpl implements OrganizationDAO {
                 })
                 .recover(err -> {
                     LOGGER.error("Error fetching all organizations: {}", err.getMessage(), err);
+                    return Future.failedFuture(err);
+                });
+    }
+
+    @Override
+    public Future<Organization> getByName(String orgName){
+        SelectQuery query = new SelectQuery(
+                Constants.ORGANIZATION_TABLE,
+                Constants.ALL_ORG_FIELDS,
+                new Condition(Constants.ORG_NAME, Condition.Operator.EQUALS, List.of(orgName)),
+                null, null, null, null
+        );
+
+        return postgresService.select(query)
+                .compose(result -> {
+                    if (result.getRows().isEmpty()) {
+                        return Future.failedFuture("Select query returned no rows for organization name " + orgName);
+                    }
+                    return Future.succeededFuture(Organization.fromJson(result.getRows().getJsonObject(0)));
+                })
+                .recover(err -> {
+                    LOGGER.error("Error fetching organization with name {}: {}", orgName, err.getMessage(), err);
                     return Future.failedFuture(err);
                 });
     }
