@@ -196,7 +196,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       organizationDAOFactory = new OrganizationDAOFactory(postgresService);
       organizationService = new OrganizationServiceImpl(organizationDAOFactory);
       KeycloakHandler keycloakHandler = new KeycloakHandler(vertx, config());
-    OrganizationHandler organizationHandler = new OrganizationHandler(organizationService, keycloakHandler);
+    OrganizationHandler organizationHandler = new OrganizationHandler(organizationService, keycloakHandler, pgPool);
     RoleAuthorisationHandler roleAuthorisationHandler = new RoleAuthorisationHandler();
     creditDaoFactory = new CreditDAOFactory(postgresService);
     creditService = new CreditServiceImpl(creditDaoFactory);
@@ -679,6 +679,19 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject jsonRequest = context.body().asJsonObject();
     AddRolesRequest request = new AddRolesRequest(jsonRequest);
     User user = context.get(USER);
+
+    organizationService.getOrganizationUserInfo(UUID.fromString(user.getUserId()))
+        .onSuccess(orgUser -> {
+            if (orgUser.organizationId().toString().equals(jsonRequest.getString("provider")) || orgUser.organizationId().toString().equals(jsonRequest.getString("consumer")) || orgUser.organizationId().toString().equals(jsonRequest.getString("admin"))) {
+                System.out.println("User is part of the organization");
+            } else {
+                processResponse(context.response(), "User is not part of the organization");
+            }
+        })
+        .onFailure(err -> {
+            LOGGER.error("Error fetching organization info for user {}: {}", user.getUserId(), err.getMessage());
+            context.response().setStatusCode(500).end("Internal Server Error");
+        });
 
     registrationService
         .addRoles(request, user)

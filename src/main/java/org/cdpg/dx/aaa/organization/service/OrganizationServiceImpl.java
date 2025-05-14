@@ -184,4 +184,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Future<OrganizationUser> getOrganizationUserInfo(UUID userId) {
         return orgUserDAO.getById(userId);
     }
+
+    @Override
+    public Future<Organization> getOrganizationByName(String orgName) {return orgDAO.getByName(orgName);}
 }
