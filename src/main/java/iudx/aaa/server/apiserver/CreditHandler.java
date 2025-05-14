@@ -205,7 +205,7 @@ public class CreditHandler {
     }
 
   public void createComputeRoleRequest(RoutingContext routingContext) {
-    JsonObject computeRoleRequestJson = routingContext.getBodyAsJson();
+    JsonObject computeRoleRequestJson = new JsonObject();
     // will send only user_id intially
     LOGGER.info("Received request to create credit request: {}", computeRoleRequestJson);
 

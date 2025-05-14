@@ -178,6 +178,8 @@ public class OrganizationHandler {
       User user = routingContext.get(USER);
       OrgRequestJson.put("user_id", user.getUserId());
 
+      System.out.println("OrgRequestJson: " + OrgRequestJson);
+
       try {
         organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
 
@@ -186,10 +188,36 @@ public class OrganizationHandler {
         return;
       }
 
+        keycloakHandler.getUsernameByKeycloakId(user.getUserId())
+                .compose(userdetails -> {
+                    System.out.println("User details: " + userdetails);
+                    return pool.withConnection(conn ->
+                            conn.preparedQuery("SELECT COUNT(*) FROM aaa.users WHERE id = $1")
+                                    .execute(Tuple.of(UUID.fromString(user.getUserId())))
+                                    .compose(rows -> {
+                                        if (rows.iterator().next().getInteger(0) == 0) {
+                                            // User does not exist, perform the INSERT
+                                            return conn.preparedQuery("INSERT INTO aaa.users (id, phone, created_at, updated_at, userinfo) VALUES ($1, $2, $3, $4, $5)")
+                                                    .execute(Tuple.of(
+                                                            UUID.fromString(user.getUserId()),
+                                                            "000000000",
+                                                            LocalDateTime.now(),
+                                                            LocalDateTime.now(),
+                                                            new JsonObject().put("email", userdetails.getString("email"))
+                                                    ));
+                                        }
+                                        // User already exists, return a succeeded future
+                                        return Future.succeededFuture();
+                                    })
+                    );
+                })
+                .compose(inserted ->
+                        organizationService.joinOrganizationRequest(organizationJoinRequest)
+                                .onSuccess(createdRequest -> processSuccess(routingContext, createdRequest.toJson(), 201, "Created Join request"))
+                .onFailure(err ->
+                        processFailure(routingContext, 500, "Internal Server Error: " + err.getMessage())
+                ));
 
-        organizationService.joinOrganizationRequest(organizationJoinRequest)
-                .onSuccess(createdRequest -> processSuccess(routingContext, createdRequest.toJson(), 201, "Created Join request"))
-                .onFailure(err -> processFailure(routingContext, 500, "Internal Server Error: Failed to create Join request"));
     }
 
     public void approveOrganisationRequest(RoutingContext routingContext) {
@@ -290,9 +318,38 @@ public class OrganizationHandler {
             return;
         }
 
-        organizationService.createOrganizationRequest(organizationCreateRequest)
-                .onSuccess(createdRequest -> processSuccess(routingContext, createdRequest.toJson(), 201, "Organisation Successfully Created"))
-                .onFailure(err -> processFailure(routingContext, 500, "Internal Server Error"));
+        keycloakHandler.getUsernameByKeycloakId(user.getUserId())
+                .compose(userdetails -> {
+                    System.out.println("User details: " + userdetails);
+                    return pool.withConnection(conn ->
+                            conn.preparedQuery("SELECT COUNT(*) FROM aaa.users WHERE id = $1")
+                                    .execute(Tuple.of(UUID.fromString(user.getUserId())))
+                                    .compose(rows -> {
+                                        if (rows.iterator().next().getInteger(0) == 0) {
+                                            // User does not exist, perform the INSERT
+                                            return conn.preparedQuery("INSERT INTO aaa.users (id, phone, created_at, updated_at, userinfo) VALUES ($1, $2, $3, $4, $5)")
+                                                    .execute(Tuple.of(
+                                                            UUID.fromString(user.getUserId()),
+                                                            "000000000",
+                                                            LocalDateTime.now(),
+                                                            LocalDateTime.now(),
+                                                            new JsonObject().put("email", userdetails.getString("email"))
+                                                    ));
+                                        }
+                                        // User already exists, return a succeeded future
+                                        return Future.succeededFuture();
+                                    })
+                    );
+                })
+                .compose(inserted ->
+                        organizationService.createOrganizationRequest(organizationCreateRequest)
+                )
+                .onSuccess(createdRequest ->
+                        processSuccess(routingContext, createdRequest.toJson(), 201, "Organisation Successfully Created")
+                )
+                .onFailure(err ->
+                        processFailure(routingContext, 500, "Internal Server Error: " + err.getMessage())
+                );
     }
 
     public void deleteOrganisationUserById(RoutingContext routingContext) {

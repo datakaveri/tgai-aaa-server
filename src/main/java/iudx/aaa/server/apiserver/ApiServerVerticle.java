@@ -682,10 +682,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     organizationService.getOrganizationUserInfo(UUID.fromString(user.getUserId()))
         .onSuccess(orgUser -> {
-            if (orgUser.organizationId().toString().equals(jsonRequest.getString("provider")) || orgUser.organizationId().toString().equals(jsonRequest.getString("consumer")) || orgUser.organizationId().toString().equals(jsonRequest.getString("admin"))) {
+            System.out.println(jsonRequest.getString("provider"));
+            if (orgUser.organizationId().toString() == jsonRequest.getString("provider").replace("[", "").replace("]", "") || orgUser.organizationId().toString() == jsonRequest.getString("consumer").replace("[", "").replace("]", "") || orgUser.organizationId().toString() == jsonRequest.getString("admin").replace("[", "").replace("]", "")) {
                 System.out.println("User is part of the organization");
             } else {
-                processResponse(context.response(), "User is not part of the organization");
+                context.response().setStatusCode(500).end("User is not part of the organization");
             }
         })
         .onFailure(err -> {
