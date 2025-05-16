@@ -67,7 +67,7 @@ pipeline {
       post{
         failure{
           script{
-            sh 'mvn flyway:clean -Dflyway.configFiles=/home/ubuntu/configs/aaa-flyway.conf'
+            sh 'mvn flyway:clean -Dflyway.configFiles=/home/ubuntu/configs/tgdex/aaa-flyway.conf'
             sh 'docker compose -f docker-compose-test.yml down --remove-orphans'
           }
           cleanWs deleteDirs: true, disableDeferredWipeout: true
@@ -86,7 +86,7 @@ pipeline {
           }
         }
         script{
-            sh 'cp /home/ubuntu/configs/aaa-config-integ.json configs/config-integ.json'
+            sh 'cp /home/ubuntu/configs/tgdex/aaa-config-integ.json configs/config-integ.json'
             sh 'mvn test-compile failsafe:integration-test  -DskipUnitTests=true -DintTestProxyHost=jenkins-master-priv -DintTestProxyPort=8090 -DintTestHost=http://jenkins-slave1 -DintTestPort=8443'
             }
         node('built-in') {
@@ -112,7 +112,7 @@ pipeline {
         }
         cleanup{
           script{
-            sh 'mvn flyway:clean -Dflyway.configFiles=/home/ubuntu/configs/aaa-flyway.conf'
+            sh 'mvn flyway:clean -Dflyway.configFiles=/home/ubuntu/configs/tgdex/aaa-flyway.conf'
             sh 'docker compose -f docker-compose-test.yml down --remove-orphans'
           }
           cleanWs deleteDirs: true, disableDeferredWipeout: true
@@ -140,8 +140,8 @@ pipeline {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("5.6.0-alpha-${env.GIT_HASH}")
-                deplImage.push("5.6.0-alpha-${env.GIT_HASH}")
+                devImage.push("tgdex-5.6.0-${env.GIT_HASH}")
+                deplImage.push("tgdex-5.6.0-${env.GIT_HASH}")
               }
             }
           }
@@ -149,7 +149,7 @@ pipeline {
         stage('Docker Swarm deployment') {
           steps {
             script {
-              sh "ssh azureuser@docker-swarm 'docker service update auth_auth --image ghcr.io/datakaveri/aaa-depl:5.6.0-alpha-${env.GIT_HASH}'"
+              sh "ssh azureuser@docker-swarm 'docker service update auth-tgdex_auth-tgdex --image ghcr.io/datakaveri/aaa-depl:tgdex-5.6.0-${env.GIT_HASH}'"
               sh 'sleep 15'
               sh '''#!/bin/bash 
               response_code=$(curl -s -o /dev/null -w \'%{http_code}\\n\' --connect-timeout 5 --retry 5 --retry-connrefused -XGET https://authvertx.iudx.io/apis)
