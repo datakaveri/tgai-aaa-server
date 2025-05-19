@@ -7,7 +7,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
-		<vertx.version>4.5.4</vertx.version>
+		<vertx.version>4.5.11</vertx.version>
 		<hazelcast.version>4.0.2</hazelcast.version>
 		<micrometer.version>1.12.3</micrometer.version>
 		<curator.version>5.6.0</curator.version>
@@ -27,7 +27,7 @@
 		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
 		<restassured.version>5.4.0</restassured.version>
 		<openjdk.version>21</openjdk.version>
-		<keycloak.version>24.0.1</keycloak.version>
+		<keycloak.version>24.0.4</keycloak.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<exec.mainClass>iudx.aaa.server.deploy.Deployer</exec.mainClass>
 		<exec.mainClassDev>iudx.aaa.server.deploy.DeployerDev

@@ -2,79 +2,99 @@ package org.cdpg.dx.aaa.organization.models;
 
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.common.exception.DxValidationException;
+import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-public record Organization(
-  Optional<UUID> id,
-  String orgName,
-  Optional<String> orgLogo,
-  String entityType,
-  String orgSector,
-  String websiteLink,
-  String address,
-  String certificatePath,
-  String pancardPath,
-  Optional<String> relevantDocPath,
-  Optional<String> createdAt,
-  Optional<String> updatedAt
-) {
+import static org.cdpg.dx.common.util.DateTimeHelper.parseDateTime;
+import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
 
+import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
+
+public record Organization(
+        UUID id,
+        String orgName,
+        String orgLogo,
+        String entityType,
+        String orgSector,
+        String websiteLink,
+        String address,
+        String certificatePath,
+        String pancardPath,
+        String relevantDocPath,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+)  implements BaseEntity<Organization> {
   public static Organization fromJson(JsonObject orgDetails) {
-    return new Organization(
-      Optional.ofNullable(orgDetails.getString(Constants.ORG_ID)).map(UUID::fromString),
-      orgDetails.getString(Constants.ORG_NAME),
-      Optional.ofNullable(orgDetails.getString(Constants.ORG_LOGO)),
-      orgDetails.getString(Constants.ENTITY_TYPE),
-      orgDetails.getString(Constants.ORG_SECTOR),
-      orgDetails.getString(Constants.ORG_WEBSITE),
-      orgDetails.getString(Constants.ORG_ADDRESS),
-      orgDetails.getString(Constants.CERTIFICATE),
-      orgDetails.getString(Constants.PANCARD),
-      Optional.ofNullable(orgDetails.getString(Constants.RELEVANT_DOC)),
-      Optional.ofNullable(orgDetails.getString(Constants.CREATED_AT)),
-      Optional.ofNullable(orgDetails.getString(Constants.UPDATED_AT))
-    );
+    try {
+      return new Organization(
+              orgDetails.getString(Constants.ORG_ID) != null
+                      ? UUID.fromString(orgDetails.getString(Constants.ORG_ID))
+                      : null,
+              requireNonNull(orgDetails.getString(Constants.ORG_NAME), Constants.ORG_NAME),
+              orgDetails.getString(Constants.ORG_LOGO),
+              requireNonNull(orgDetails.getString(Constants.ENTITY_TYPE), Constants.ENTITY_TYPE),
+              requireNonNull(orgDetails.getString(Constants.ORG_SECTOR), Constants.ORG_SECTOR),
+              requireNonNull(orgDetails.getString(Constants.ORG_WEBSITE), Constants.ORG_WEBSITE),
+              requireNonNull(orgDetails.getString(Constants.ORG_ADDRESS), Constants.ORG_ADDRESS),
+              requireNonNull(orgDetails.getString(Constants.CERTIFICATE), Constants.CERTIFICATE),
+              requireNonNull(orgDetails.getString(Constants.PANCARD), Constants.PANCARD),
+              orgDetails.getString(Constants.RELEVANT_DOC),
+              parseDateTime(orgDetails.getString(Constants.CREATED_AT)),
+              parseDateTime(orgDetails.getString(Constants.UPDATED_AT))
+      );
+    } catch (IllegalArgumentException e) {
+      throw new DxValidationException("Missing or invalid required field: " + e.getMessage());
+    }
   }
 
+
+
+  @Override
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
 
-    id.ifPresent(value -> json.put(Constants.ORG_ID, value.toString()));
-    Optional.ofNullable(orgName).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.ORG_NAME, value));
-    orgLogo.ifPresent(value -> json.put(Constants.ORG_LOGO, value));
-    Optional.ofNullable(entityType).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.ENTITY_TYPE, value));
-    Optional.ofNullable(orgSector).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.ORG_SECTOR, value));
-    Optional.ofNullable(websiteLink).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.ORG_WEBSITE, value));
-    Optional.ofNullable(address).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.ORG_ADDRESS, value));
-    Optional.ofNullable(certificatePath).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.CERTIFICATE, value));
-    Optional.ofNullable(pancardPath).filter(e -> !e.isEmpty()).ifPresent(value -> json.put(Constants.PANCARD, value));
-    relevantDocPath.ifPresent(value -> json.put(Constants.RELEVANT_DOC, value));
-    createdAt.ifPresent(value -> json.put(Constants.CREATED_AT, value));
-    updatedAt.ifPresent(value -> json.put(Constants.UPDATED_AT, value));
+    json.put(Constants.ORG_ID, id.toString());
+    json.put(Constants.ORG_NAME, orgName);
+    if (orgLogo != null && !orgLogo.isEmpty()) json.put(Constants.ORG_LOGO, orgLogo);
+    json.put(Constants.ENTITY_TYPE, entityType);
+    json.put(Constants.ORG_SECTOR, orgSector);
+    json.put(Constants.ORG_WEBSITE, websiteLink);
+    json.put(Constants.ORG_ADDRESS, address);
+    json.put(Constants.CERTIFICATE, certificatePath);
+    json.put(Constants.PANCARD, pancardPath);
+    if (relevantDocPath != null && !relevantDocPath.isEmpty()) json.put(Constants.RELEVANT_DOC, relevantDocPath);
+    if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
+    if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 
     return json;
   }
-
+  @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();
 
-    id.ifPresent(value -> map.put(Constants.ORG_ID, value.toString()));
-    if (orgName != null && !orgName.isEmpty()) map.put(Constants.ORG_NAME, orgName);
-    orgLogo.ifPresent(value -> map.put(Constants.ORG_LOGO, value));
-    if (entityType != null && !entityType.isEmpty()) map.put(Constants.ENTITY_TYPE, entityType);
-    if (orgSector != null && !orgSector.isEmpty()) map.put(Constants.ORG_SECTOR, orgSector);
-    if (websiteLink != null && !websiteLink.isEmpty()) map.put(Constants.ORG_WEBSITE, websiteLink);
-    if (address != null && !address.isEmpty()) map.put(Constants.ORG_ADDRESS, address);
-    if (certificatePath != null && !certificatePath.isEmpty()) map.put(Constants.CERTIFICATE, certificatePath);
-    if (pancardPath != null && !pancardPath.isEmpty()) map.put(Constants.PANCARD, pancardPath);
-    relevantDocPath.ifPresent(value -> map.put(Constants.RELEVANT_DOC, value));
-    createdAt.ifPresent(value -> map.put(Constants.CREATED_AT, value));
-    updatedAt.ifPresent(value -> map.put(Constants.UPDATED_AT, value));
+    map.put(Constants.ORG_ID, id.toString());
+    if (!orgName.isEmpty()) map.put(Constants.ORG_NAME, orgName);
+    if (orgLogo != null && !orgLogo.isEmpty()) map.put(Constants.ORG_LOGO, orgLogo);
+    if (!entityType.isEmpty()) map.put(Constants.ENTITY_TYPE, entityType);
+    if (!orgSector.isEmpty()) map.put(Constants.ORG_SECTOR, orgSector);
+    if (!websiteLink.isEmpty()) map.put(Constants.ORG_WEBSITE, websiteLink);
+    if (!address.isEmpty()) map.put(Constants.ORG_ADDRESS, address);
+    if (!certificatePath.isEmpty()) map.put(Constants.CERTIFICATE, certificatePath);
+    if (!pancardPath.isEmpty()) map.put(Constants.PANCARD, pancardPath);
+    if (relevantDocPath != null && !relevantDocPath.isEmpty()) map.put(Constants.RELEVANT_DOC, relevantDocPath);
+    if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
+    if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 
     return map;
+  }
+
+  @Override
+  public String getTableName() {
+    return Constants.ORGANIZATION_TABLE;
   }
 }

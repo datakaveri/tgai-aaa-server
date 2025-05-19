@@ -2,20 +2,22 @@ package org.cdpg.dx.database.postgres.models;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @DataObject(generateConverter = true)
 public class UpdateQuery implements Query {
     private  String table;
     private List<String> columns;
     private  List<Object> values;
-    private  Condition condition;
+    private Condition condition;
     private  List<OrderBy> orderBy;
     private  Integer limit;
+  private static final Logger LOGGER = LogManager.getLogger(UpdateQuery.class);
 
     public UpdateQuery(String table, List<String> columns, List<Object> values,
                        Condition condition, List<OrderBy> orderBy, Integer limit) {
@@ -47,21 +49,6 @@ public class UpdateQuery implements Query {
         return json;
     }
 
-//    @Override
-//    public String toSQL() {
-//        StringBuilder query = new StringBuilder("UPDATE ").append(table).append(" SET ");
-//        query.append(columns.stream().map(column -> column + " = ?").collect(Collectors.joining(", ")));
-//
-//        if (condition != null) query.append(" WHERE ").append(condition.toSQL());
-//
-//        if (orderBy != null && !orderBy.isEmpty()) {
-//            query.append(" ORDER BY ")
-//                    .append(orderBy.stream().map(OrderBy::toSQL).collect(Collectors.joining(", ")));
-//        }
-//        if (limit != null) query.append(" LIMIT ").append(limit);
-//
-//        return query.toString();
-//    }
 
   @Override
   public String toSQL() {
@@ -93,6 +80,9 @@ public class UpdateQuery implements Query {
     }
 
     query.append(" RETURNING *");
+    LOGGER.info("Query is : {}", query.toString());
+
+//    String q = query.toString().replace("$1", "'$1'::uuid");
 
     return query.toString();
   }
@@ -113,47 +103,58 @@ public class UpdateQuery implements Query {
         return table;
     }
 
-    public void setTable(String table) {
-        this.table = table;
-    }
 
     public List<String> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
 
     public List<Object> getValues() {
         return values;
     }
 
-    public void setValues(List<Object> values) {
-        this.values = values;
-    }
 
     public Condition getCondition() {
         return condition;
     }
 
-    public void setCondition(Condition condition) {
-        this.condition = condition;
-    }
 
     public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(Integer limit) {
-        this.limit = limit;
-    }
+  public UpdateQuery setTable(String table) {
+    this.table = table;
+    return this;
+  }
 
-    public List<OrderBy> getOrderBy() {
+  public UpdateQuery setColumns(List<String> columns) {
+    this.columns = columns;
+    return this;
+  }
+
+  public UpdateQuery setValues(List<Object> values) {
+    this.values = values;
+    return this;
+  }
+
+  public UpdateQuery setCondition(Condition condition) {
+    this.condition = condition;
+    return this;
+  }
+
+  public UpdateQuery setOrderBy(List<OrderBy> orderBy) {
+    this.orderBy = orderBy;
+    return this;
+  }
+
+  public UpdateQuery setLimit(Integer limit) {
+    this.limit = limit;
+    return this;
+  }
+
+  public List<OrderBy> getOrderBy() {
         return orderBy;
     }
 
-    public void setOrderBy(List<OrderBy> orderBy) {
-        this.orderBy = orderBy;
-    }
 }

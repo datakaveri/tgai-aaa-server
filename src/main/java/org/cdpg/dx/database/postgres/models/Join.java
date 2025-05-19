@@ -3,8 +3,6 @@ package org.cdpg.dx.database.postgres.models;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Objects;
-
 @DataObject(generateConverter = true)
 public class Join {
 
@@ -80,41 +78,50 @@ public class Join {
         return joinType;
     }
 
-    public void setJoinType(JoinType joinType) {
-        this.joinType = joinType;
-    }
 
     public String getTable() {
         return table;
     }
 
-    public void setTable(String table) {
+    public Join setJoinType(JoinType joinType) {
+        this.joinType = joinType;
+        return this;
+    }
+
+    public Join setTable(String table) {
         this.table = table;
+        return this;
+    }
+
+    public Join setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+        return this;
+    }
+
+    public Join setOnColumn(String onColumn) {
+        this.onColumn = onColumn;
+        return this;
+    }
+
+    public Join setJoinColumn(String joinColumn) {
+        this.joinColumn = joinColumn;
+        return this;
     }
 
     public String getTableAlias() {
         return tableAlias;
     }
 
-    public void setTableAlias(String tableAlias) {
-        this.tableAlias = tableAlias;
-    }
 
     public String getOnColumn() {
         return onColumn;
     }
 
-    public void setOnColumn(String onColumn) {
-        this.onColumn = onColumn;
-    }
 
     public String getJoinColumn() {
         return joinColumn;
     }
 
-    public void setJoinColumn(String joinColumn) {
-        this.joinColumn = joinColumn;
-    }
 
     public String toSQL() {
         String tableWithAlias = (tableAlias != null && !tableAlias.isEmpty())

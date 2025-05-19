@@ -2,7 +2,6 @@ package org.cdpg.dx.database.postgres.models;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,16 +35,27 @@ public class InsertQuery implements Query {
 
     // Getters & Setters (Required for DataObject)
     public String getTable() { return table; }
-    public void setTable(String table) { this.table = table; }
 
     public List<String> getColumns() { return columns; }
-    public void setColumns(List<String> columns) { this.columns = columns; }
 
     public List<Object> getValues() { return values; }
-    public void setValues(List<Object> values) { this.values = values; }
 
+    public InsertQuery setTable(String table) {
+        this.table = table;
+        return this;
+    }
 
-@Override
+    public InsertQuery setColumns(List<String> columns) {
+        this.columns = columns;
+        return this;
+    }
+
+    public InsertQuery setValues(List<Object> values) {
+        this.values = values;
+        return this;
+    }
+
+    @Override
 public String toSQL() {
   String placeholders =
     java.util.stream.IntStream.range(0, columns.size())

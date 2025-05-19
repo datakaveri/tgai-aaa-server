@@ -3,7 +3,6 @@ package org.cdpg.dx.database.postgres.models;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,36 +17,6 @@ public class Condition {
   private LogicalOperator logicalOperator; // Used for condition groups
   private boolean isGroup; // Flag to distinguish between single condition and group
 
-  public enum Operator {
-    EQUALS("="), NOT_EQUALS("!="), GREATER(">"), LESS("<"), GREATER_EQUALS(">="), LESS_EQUALS("<="),
-    LIKE("LIKE"), IN("IN"), NOT_IN("NOT IN"), BETWEEN("BETWEEN"),
-    IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL");
-
-    private final String symbol;
-
-    Operator(String symbol) {
-      this.symbol = symbol;
-    }
-
-    public String getSymbol() {
-      return symbol;
-    }
-  }
-
-  public enum LogicalOperator {
-    AND("AND"), OR("OR");
-
-    private final String symbol;
-
-    LogicalOperator(String symbol) {
-      this.symbol = symbol;
-    }
-
-    public String getSymbol() {
-      return symbol;
-    }
-  }
-
   // Default constructor
   public Condition() {
   }
@@ -60,7 +29,7 @@ public class Condition {
     this.isGroup = false;
   }
 
-  // Constructor for condition group
+//  // Constructor for condition group
   public Condition(List<Condition> conditions, LogicalOperator logicalOperator) {
     this.conditions = Objects.requireNonNull(conditions, "Conditions cannot be null");
     this.logicalOperator = Objects.requireNonNull(logicalOperator, "Logical operator cannot be null");
@@ -140,6 +109,7 @@ public class Condition {
   }
 
   public String toSQL(List<Object> params) {
+    System.out.println("hereeee 3 : is group" + isGroup);
     if (isGroup) {
       return conditions.stream()
         .map(cond -> "(" + cond.toSQL(params) + ")") // Recursively build condition strings
@@ -169,7 +139,6 @@ public class Condition {
     }
   }
 
-
   // Get query parameters
   public List<Object> getQueryParams() {
     if (isGroup) {
@@ -186,47 +155,96 @@ public class Condition {
     return column;
   }
 
-  public void setColumn(String column) {
+  public Condition setColumn(String column) {
     this.column = column;
+    return this;
   }
 
   public Operator getOperator() {
     return operator;
   }
 
-  public void setOperator(Operator operator) {
+  public Condition setOperator(Operator operator) {
     this.operator = operator;
+    return this;
   }
 
   public List<Object> getValues() {
     return values;
   }
 
-  public void setValues(List<Object> values) {
+  public Condition setValues(List<Object> values) {
     this.values = values;
+    return this;
   }
 
   public List<Condition> getConditions() {
     return conditions;
   }
 
-  public void setConditions(List<Condition> conditions) {
+  public Condition setConditions(List<Condition> conditions) {
     this.conditions = conditions;
+    return this;
   }
 
   public LogicalOperator getLogicalOperator() {
     return logicalOperator;
   }
 
-  public void setLogicalOperator(LogicalOperator logicalOperator) {
+  public Condition setLogicalOperator(LogicalOperator logicalOperator) {
     this.logicalOperator = logicalOperator;
+    return this;
   }
 
   public boolean isGroup() {
     return isGroup;
   }
 
-  public void setGroup(boolean group) {
+  public Condition setGroup(boolean group) {
     isGroup = group;
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return "Condition{" +
+        "column='" + column + '\'' +
+        ", operator=" + operator +
+        ", values=" + values +
+        ", conditions=" + conditions +
+        ", logicalOperator=" + logicalOperator +
+        ", isGroup=" + isGroup +
+        '}';
+  }
+
+
+  public enum Operator {
+    EQUALS("="), NOT_EQUALS("!="), GREATER(">"), LESS("<"), GREATER_EQUALS(">="), LESS_EQUALS("<="),
+    LIKE("LIKE"), IN("IN"), NOT_IN("NOT IN"), BETWEEN("BETWEEN"),
+    IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL");
+
+    private final String symbol;
+
+    Operator(String symbol) {
+      this.symbol = symbol;
+    }
+
+    public String getSymbol() {
+      return symbol;
+    }
+  }
+
+  public enum LogicalOperator {
+    AND("AND"), OR("OR");
+
+    private final String symbol;
+
+    LogicalOperator(String symbol) {
+      this.symbol = symbol;
+    }
+
+    public String getSymbol() {
+      return symbol;
+    }
   }
 }

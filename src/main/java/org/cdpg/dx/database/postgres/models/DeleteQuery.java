@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class DeleteQuery implements Query {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteQuery.class);
     private  String table;
-    private  Condition condition;
+    private Condition condition;
     private  List<OrderBy> orderBy;
     private  Integer limit; // Optional, so keep as Integer
 
@@ -37,21 +38,6 @@ public class DeleteQuery implements Query {
 
     // JSON Constructor
     public DeleteQuery(JsonObject json) {
-//        if(json.getInteger("limit")!= null){
-//            this.limit = json.getInteger("limit");
-//        }
-//        if(json.getString("table") != null){
-//            this.table = json.getString("table");
-//        }
-//        if(json.getValue("condition") != null)
-//        {
-//
-//      this.condition = (Condition) json.getValue("condition");
-//        }
-//        if(json.getValue("orderBy") != null){
-//            this.orderBy = (List<OrderBy>) json.getValue("orderBy");
-//        }
-
         DeleteQueryConverter.fromJson(json, this);
     }
 
@@ -64,28 +50,35 @@ public class DeleteQuery implements Query {
 
     public String getTable() { return table; }
 
-    public void setTable(String table) {
-        this.table = table;
-    }
 
     public Condition getCondition() {
         return condition;
     }
 
-    public void setCondition(Condition condition) {
-        this.condition = condition;
-    }
 
     public List<OrderBy> getOrderBy() { return orderBy; }
 
-    public void setOrderBy(List<OrderBy> orderBy) {
-        this.orderBy = orderBy;
-    }
 
     public Integer getLimit() { return limit; }
 
-    public void setLimit(Integer limit) {
+    public DeleteQuery setTable(String table) {
+        this.table = table;
+        return this;
+    }
+
+    public DeleteQuery setCondition(Condition condition) {
+        this.condition = condition;
+        return this;
+    }
+
+    public DeleteQuery setOrderBy(List<OrderBy> orderBy) {
+        this.orderBy = orderBy;
+        return this;
+    }
+
+    public DeleteQuery setLimit(Integer limit) {
         this.limit = limit;
+        return this;
     }
 
     @Override

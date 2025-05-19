@@ -4,6 +4,9 @@ import io.vertx.core.Future;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.common.exception.BaseDxException;
+import org.cdpg.dx.common.exception.DxNotFoundException;
+import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 
 public class OrganizationServiceImpl implements OrganizationService {
 
@@ -35,32 +39,51 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<List<OrganizationCreateRequest>> getAllPendingOrganizationCreateRequests() {
-        return createRequestDAO.getAllByStatus(Status.PENDING);
+        Map<String, Object> filterMap = Map.of(
+                Constants.STATUS, Status.PENDING.getStatus()
+        );
+        return createRequestDAO.getAllWithFilters(filterMap);
     }
 
     @Override
     public Future<OrganizationCreateRequest> getOrganizationCreateRequests(UUID requestId) {
-        return createRequestDAO.getById(requestId);
+        return createRequestDAO.get(requestId);
     }
 
     @Override
     public Future<Boolean> updateOrganizationCreateRequestStatus(UUID requestId, Status status) {
-      return createRequestDAO.updateStatus(requestId, status)
-                .compose(approved -> {
-                    if (!approved) return Future.succeededFuture(false);
+        Map<String, Object> conditionMap = Map.of(
+                Constants.ORG_CREATE_ID, requestId.toString()
+        );
+        Map<String, Object> updateDataMap = Map.of(
+                Constants.STATUS, status.getStatus()
+        );
+
+        return createRequestDAO.update(conditionMap, updateDataMap).
+                compose(updated -> {
+                    if (!updated) return Future.failedFuture("Unexpected Error");
                     if (Status.APPROVED.getStatus().equals(status.getStatus())) {
-                      return createOrganizationFromRequest(requestId);
+                        return createOrganizationFromRequest(requestId);
                     }
                     return Future.succeededFuture(true);
-                });
+            }).recover(err -> {
+            BaseDxException dxEx = BaseDxException.from(err);
+            if (dxEx instanceof NoRowFoundException) {
+                return Future.failedFuture(
+                        new DxNotFoundException("No request found with given ID", dxEx)
+                );
+            }
+            return Future.failedFuture(dxEx);
+        });
+
     }
 
 
     private Future<Boolean> createOrganizationFromRequest(UUID requestId) {
-      return createRequestDAO.getById(requestId)
+      return createRequestDAO.get(requestId)
         .compose(request -> {
           Organization org = new Organization(
-            Optional.empty(),
+                  null,
               request.name(),
               request.logoPath(),
               request.entityType(),
@@ -69,16 +92,15 @@ public class OrganizationServiceImpl implements OrganizationService {
               request.address(),
               request.certificatePath(),
               request.pancardPath(),
-              request.relevantDocPath(),
-            Optional.empty(),
-            Optional.empty()
+              request.relevantDocPath(), null,
+            null
           );
           return orgDAO.create(org)
             .compose(createdOrg ->
             {
               OrganizationUser orgUser = new OrganizationUser(
                 Optional.empty(),
-                createdOrg.id().get(),
+                createdOrg.id(),
                 request.requestedBy(),
                 Role.ADMIN,
                 request.jobTitle(),
@@ -106,7 +128,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<Organization> updateOrganizationById(UUID orgId, UpdateOrgDTO updateOrgDTO) {
-        return orgDAO.update(orgId, updateOrgDTO);
+
+        Map<String, Object> conditionMap = Map.of(
+                Constants.ORG_CREATE_ID, orgId.toString()
+        );
+        Map<String, Object> updateDataMap = updateOrgDTO.toNonEmptyFieldsMap();
+
+        return orgDAO.update(conditionMap, updateDataMap).compose(
+                updated -> orgDAO.get(orgId)
+        );
     }
 
     @Override
@@ -186,5 +216,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Future<Organization> getOrganizationByName(String orgName) {return orgDAO.getByName(orgName);}
+    public Future<Organization> getOrganizationByName(String orgName) {
+
+        Map<String, Object> filterMap = Map.of(Constants.ORG_NAME, orgName);
+
+        return orgDAO.getAllWithFilters(filterMap).compose(orgList -> {
+            if (orgList.isEmpty()) {
+                return Future.failedFuture("Organization not found with name: " + orgName);
+            } else if (orgList.size() > 1) {
+                return Future.succeededFuture(orgList.getFirst());
+            } else {
+                return Future.failedFuture("Multiple organizations found with name: " + orgName);
+            }
+        }).recover(
+        err -> {
+            // Log or transform the error if needed
+            return Future.failedFuture("Failed to fetch organization: " + err.getMessage());
+        });
+    }
 }
