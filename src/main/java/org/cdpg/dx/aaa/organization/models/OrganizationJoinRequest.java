@@ -2,60 +2,83 @@ package org.cdpg.dx.aaa.organization.models;
 
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.common.exception.DxValidationException;
+import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
+import static org.cdpg.dx.common.util.DateTimeHelper.parseDateTime;
+import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
+
 public record OrganizationJoinRequest(
-  Optional<UUID> id,
+  UUID id,
   UUID organizationId,
   UUID userId,
   String status,
   String jobTitle,
   String empId,
-  Optional<String> requestedAt,
-  Optional<String> processedAt
-) {
+  LocalDateTime requestedAt,
+  LocalDateTime processedAt
+) implements BaseEntity<OrganizationJoinRequest> {
+
   public static OrganizationJoinRequest fromJson(JsonObject orgJoinRequest) {
-    return new OrganizationJoinRequest(
-      Optional.ofNullable(orgJoinRequest.getString(Constants.ORG_JOIN_ID)).map(UUID::fromString),
-      UUID.fromString(orgJoinRequest.getString(Constants.ORGANIZATION_ID)),
-      UUID.fromString(orgJoinRequest.getString(Constants.USER_ID)),
-      Optional.ofNullable(orgJoinRequest.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
-      orgJoinRequest.getString(Constants.JOB_TITLE),
-      orgJoinRequest.getString(Constants.EMP_ID),
-      Optional.ofNullable(orgJoinRequest.getString(Constants.REQUESTED_AT)),
-      Optional.ofNullable(orgJoinRequest.getString(Constants.PROCESSED_AT))
-    );
+    try {
+      return new OrganizationJoinRequest(
+        orgJoinRequest.getString(Constants.ORG_JOIN_ID) != null
+          ? UUID.fromString(orgJoinRequest.getString(Constants.ORG_JOIN_ID))
+          : null,
+        UUID.fromString(requireNonNull(orgJoinRequest.getString(Constants.ORGANIZATION_ID), Constants.ORGANIZATION_ID)),
+        UUID.fromString(requireNonNull(orgJoinRequest.getString(Constants.USER_ID), Constants.USER_ID)),
+        Optional.ofNullable(orgJoinRequest.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
+        requireNonNull(orgJoinRequest.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
+        requireNonNull(orgJoinRequest.getString(Constants.EMP_ID), Constants.EMP_ID),
+        parseDateTime(orgJoinRequest.getString(Constants.REQUESTED_AT)),
+        parseDateTime(orgJoinRequest.getString(Constants.PROCESSED_AT))
+      );
+    } catch (IllegalArgumentException e) {
+      throw new DxValidationException("Missing or invalid required field: " + e.getMessage());
+    }
   }
 
+  @Override
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
-    id.ifPresent(value -> json.put(Constants.ORG_JOIN_ID, value.toString()));
-    json.put(Constants.ORGANIZATION_ID, organizationId.toString())
-      .put(Constants.USER_ID, userId.toString())
-      .put(Constants.STATUS, status)
-      .put(Constants.JOB_TITLE, jobTitle)
-      .put(Constants.EMP_ID, empId)
-      .put(Constants.REQUESTED_AT, requestedAt.orElse(null))
-      .put(Constants.PROCESSED_AT, processedAt.orElse(null));
+
+    if (id != null) json.put(Constants.ORG_JOIN_ID, id.toString());
+    json.put(Constants.ORGANIZATION_ID, organizationId.toString());
+    json.put(Constants.USER_ID, userId.toString());
+    json.put(Constants.STATUS, status);
+    json.put(Constants.JOB_TITLE, jobTitle);
+    json.put(Constants.EMP_ID, empId);
+    if (requestedAt != null) json.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
+    if (processedAt != null) json.put(Constants.PROCESSED_AT, processedAt.format(FORMATTER));
+
     return json;
   }
 
+  @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();
 
-    id.ifPresent(uuid -> map.put(Constants.ORG_JOIN_ID, uuid.toString()));
+    if (id != null) map.put(Constants.ORG_JOIN_ID, id.toString());
     map.put(Constants.ORGANIZATION_ID, organizationId.toString());
     map.put(Constants.USER_ID, userId.toString());
-    map.put(Constants.STATUS, status);
-    map.put(Constants.JOB_TITLE, jobTitle);
-    map.put(Constants.EMP_ID, empId);
-    requestedAt.ifPresent(value -> map.put(Constants.REQUESTED_AT, value));
-    processedAt.ifPresent(value -> map.put(Constants.PROCESSED_AT, value));
+    if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
+    if (jobTitle != null && !jobTitle.isEmpty()) map.put(Constants.JOB_TITLE, jobTitle);
+    if (empId != null && !empId.isEmpty()) map.put(Constants.EMP_ID, empId);
+    if (requestedAt != null) map.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
+    if (processedAt != null) map.put(Constants.PROCESSED_AT, processedAt.format(FORMATTER));
 
     return map;
+  }
+
+  @Override
+  public String getTableName() {
+    return Constants.ORG_JOIN_REQUEST_TABLE;
   }
 }

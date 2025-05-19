@@ -2,60 +2,90 @@ package org.cdpg.dx.aaa.organization.models;
 
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.common.exception.DxValidationException;
+import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public record OrganizationUser(Optional<UUID> id,
-                               UUID organizationId,
-                               UUID userId,
-                               Role role,
-                               String jobTitle,
-                               String empId,
-                               Optional<String> orgManagerPhoneNo,
-                               Optional<String> createdAt,
-                               Optional<String> updatedAt) {
-    public static OrganizationUser fromJson(JsonObject json) {
-        return new OrganizationUser(
-          Optional.ofNullable(json.getString(Constants.ORG_USER_ID)).map(UUID::fromString),
-          UUID.fromString(json.getString(Constants.ORGANIZATION_ID)),
-          UUID.fromString(json.getString(Constants.USER_ID)),
-          Role.fromString(json.getString(Constants.ROLE)),
-          json.getString(Constants.JOB_TITLE),
-          json.getString(Constants.EMP_ID),
-          Optional.ofNullable(json.getString(Constants.PHONE_NO)),
-          Optional.ofNullable(json.getString(Constants.CREATED_AT)),
-          Optional.ofNullable(json.getString(Constants.UPDATED_AT))
-        );
-    }
+import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
+import static org.cdpg.dx.common.util.DateTimeHelper.parseDateTime;
+import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
 
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        id.ifPresent(value -> json.put(Constants.ORG_USER_ID,value));
-        json.put(Constants.ORGANIZATION_ID, organizationId.toString())
-                .put(Constants.USER_ID, userId.toString())
-                .put(Constants.ROLE, role.getRoleName())
-                .put(Constants.JOB_TITLE, jobTitle)
-                .put(Constants.EMP_ID, empId);
-        orgManagerPhoneNo.ifPresent(value->json.put(Constants.PHONE_NO,value));
-        createdAt.ifPresent(value-> json.put(Constants.CREATED_AT,value));
-        updatedAt.ifPresent(value -> json.put(Constants.UPDATED_AT, value));
-        return json;
-    }
+public record OrganizationUser(
+  UUID id,
+  UUID organizationId,
+  UUID userId,
+  Role role,
+  String jobTitle,
+  String empId,
+  String orgManagerPhoneNo,
+  LocalDateTime createdAt,
+  LocalDateTime updatedAt
+) implements BaseEntity<OrganizationUser> {
 
-    public Map<String, Object> toNonEmptyFieldsMap() {
-        Map<String, Object> map = new HashMap<>();
-        id.ifPresent(value -> map.put(Constants.ORG_USER_ID, value));
-        map.put(Constants.ORGANIZATION_ID, organizationId.toString());
-        map.put(Constants.USER_ID, userId.toString());
-        map.put(Constants.ROLE, role.getRoleName());
-        map.put(Constants.JOB_TITLE, jobTitle);
-        map.put(Constants.EMP_ID, empId);
-        orgManagerPhoneNo.ifPresent(value->map.put(Constants.PHONE_NO,value));
-        createdAt.ifPresent(value -> map.put(Constants.CREATED_AT, value));
-        updatedAt.ifPresent(value -> map.put(Constants.UPDATED_AT, value));
-        return map;
+  public static OrganizationUser fromJson(JsonObject json) {
+    try {
+      return new OrganizationUser(
+        json.getString(Constants.ORG_USER_ID) != null
+          ? UUID.fromString(json.getString(Constants.ORG_USER_ID))
+          : null,
+        UUID.fromString(json.getString(Constants.ORGANIZATION_ID)),
+        UUID.fromString(json.getString(Constants.USER_ID)),
+        Role.fromString(requireNonNull(json.getString(Constants.ROLE), Constants.ROLE)),
+        requireNonNull(json.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
+        requireNonNull(json.getString(Constants.EMP_ID), Constants.EMP_ID),
+        json.getString(Constants.PHONE_NO),
+        parseDateTime(json.getString(Constants.CREATED_AT)),
+        parseDateTime(json.getString(Constants.UPDATED_AT))
+      );
+    } catch (IllegalArgumentException e) {
+      throw new DxValidationException("Missing or invalid required field: " + e.getMessage());
     }
+  }
+
+  @Override
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+
+    if (id != null) json.put(Constants.ORG_USER_ID, id.toString());
+    json.put(Constants.ORGANIZATION_ID, organizationId.toString());
+    json.put(Constants.USER_ID, userId.toString());
+    json.put(Constants.ROLE, role.getRoleName());
+    json.put(Constants.JOB_TITLE, jobTitle);
+    json.put(Constants.EMP_ID, empId);
+    if (orgManagerPhoneNo != null && !orgManagerPhoneNo.isEmpty())
+      json.put(Constants.PHONE_NO, orgManagerPhoneNo);
+    if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
+    if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
+
+    return json;
+  }
+
+  @Override
+  public Map<String, Object> toNonEmptyFieldsMap() {
+    Map<String, Object> map = new HashMap<>();
+
+    if (id != null) map.put(Constants.ORG_USER_ID, id.toString());
+    map.put(Constants.ORGANIZATION_ID, organizationId.toString());
+    map.put(Constants.USER_ID, userId.toString());
+    map.put(Constants.ROLE, role.getRoleName());
+    if (!jobTitle.isEmpty()) map.put(Constants.JOB_TITLE, jobTitle);
+    if (!empId.isEmpty()) map.put(Constants.EMP_ID, empId);
+    if (orgManagerPhoneNo != null && !orgManagerPhoneNo.isEmpty())
+      map.put(Constants.PHONE_NO, orgManagerPhoneNo);
+    if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
+    if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
+
+    return map;
+  }
+
+  @Override
+  public String getTableName() {
+    return Constants.ORG_USER_TABLE;
+  }
 }
+
