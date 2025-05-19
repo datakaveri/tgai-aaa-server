@@ -6,14 +6,21 @@ import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.dao.*;
 import org.cdpg.dx.aaa.credit.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
+import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.common.exception.BaseDxException;
+import org.cdpg.dx.common.exception.DxNotFoundException;
+import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.postgresql.core.TransactionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.cdpg.dx.aaa.credit.util.Constants.*;
 
 public class CreditServiceImpl implements CreditService {
 
@@ -129,13 +136,32 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<List<ComputeRole>> getAllPendingComputeRequests() {
-    System.out.println("inside getAllPendingComputeRequests");
-    return computeRoleDAO.getAll(Status.PENDING);
+    Map<String, Object> filterMap = Map.of(Constants.STATUS, Status.PENDING);
+    return computeRoleDAO.getAllWithFilters(filterMap);
   }
 
   @Override
   public Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy) {
-    return computeRoleDAO.updateStatus(requestId,status,approvedBy);
+//    return computeRoleDAO.update(requestId,status,approvedBy);
+    Map<String, Object> conditionMap = Map.of(
+      COMPUTE_ROLE_ID, requestId.toString());
+
+
+    Map<String, Object> updateDataMap = Map.of(
+      Constants.STATUS, status.getStatus(),
+      APPROVED_BY, approvedBy.toString()
+    );
+
+    return computeRoleDAO.update(conditionMap, updateDataMap)
+      .recover(err -> {
+        BaseDxException dxEx = BaseDxException.from(err);
+        if (dxEx instanceof NoRowFoundException) {
+          return Future.failedFuture(
+            new DxNotFoundException("No matching requestId found in computeRole table", dxEx)
+          );
+        }
+        return Future.failedFuture(dxEx);
+      });
   }
 
   @Override

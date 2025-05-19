@@ -99,15 +99,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             .compose(createdOrg ->
             {
               OrganizationUser orgUser = new OrganizationUser(
-                Optional.empty(),
+                null,
                 createdOrg.id(),
                 request.requestedBy(),
                 Role.ADMIN,
                 request.jobTitle(),
                 request.empId(),
-                Optional.ofNullable(request.orgManagerphoneNo()),
-                Optional.empty(),
-                Optional.empty()
+                request.orgManagerphoneNo(),
+                null,
+                null
               );
 
               return orgUserDAO.create(orgUser).map(user -> true);
@@ -146,35 +146,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<OrganizationJoinRequest> joinOrganizationRequest(OrganizationJoinRequest organizationJoinRequest) {
-        return joinRequestDAO.join(organizationJoinRequest);
+        return joinRequestDAO.create(organizationJoinRequest);
     }
 
 
     @Override
     public Future<Boolean> updateOrganizationJoinRequestStatus(UUID requestId, Status status) {
-        return joinRequestDAO.updateStatus(requestId, status)
+      Map<String, Object> conditionMap = Map.of(
+        Constants.ORG_JOIN_ID, requestId.toString()
+      );
+      Map<String, Object> updateDataMap = Map.of(
+        Constants.STATUS, status.getStatus()
+      );
+
+        return joinRequestDAO.update(conditionMap, updateDataMap)
                 .compose(approved -> {
                     if (!approved) return Future.succeededFuture(false);
                     if (Status.APPROVED.getStatus().equals(status.getStatus())) {
                         return addUserToOrganizationFromRequest(requestId);
                     }
                     return Future.succeededFuture(true);
-                });
+                }).recover(err -> {
+        BaseDxException dxEx = BaseDxException.from(err);
+        if (dxEx instanceof NoRowFoundException) {
+          return Future.failedFuture(
+            new DxNotFoundException("No request found with given ID", dxEx)
+          );
+        }
+        return Future.failedFuture(dxEx);
+      });
     }
 
     private Future<Boolean> addUserToOrganizationFromRequest(UUID requestId) {
-      return joinRequestDAO.getById(requestId)
+      return joinRequestDAO.get(requestId)
                 .compose(request -> {
                     OrganizationUser orgUser = new OrganizationUser(
-                      Optional.empty(),
+                      null,
                       request.organizationId(),
                       request.userId(),
                       Role.USER,
                       request.jobTitle(),
                       request.empId(),
-                      Optional.empty(),
-                      Optional.empty(),
-                      Optional.empty()
+                      null,
+                      null,
+                      null
                     );
                     return orgUserDAO.create(orgUser).map(created -> true);
                 });
@@ -182,17 +197,44 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<List<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(UUID orgId) {
-        return joinRequestDAO.getAll(orgId, Status.PENDING);
+      Map<String, Object> filterMap = Map.of(
+        Constants.STATUS, Status.PENDING.getStatus()
+      );
+
+      return joinRequestDAO.getAllWithFilters(filterMap);
     }
 
-    @Override
-    public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
-        return orgUserDAO.getAll(orgId);
-    }
+  @Override
+  public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
+    Map<String, Object> filterMap = Map.of(Constants.ORG_ID, orgId.toString());
+
+    return orgUserDAO.getAllWithFilters(filterMap);
+  }
+
 
     @Override
     public Future<Boolean> updateUserRole(UUID orgId, UUID userId, Role role) {
-        return orgUserDAO.updateRole(orgId, userId, role);
+
+      Map<String, Object> conditionMap = Map.of(
+        Constants.ORG_ID, orgId.toString(),
+        Constants.USER_ID, userId.toString()
+      );
+
+
+      Map<String, Object> updateDataMap = Map.of(
+        Constants.ROLE, role.getRoleName()
+      );
+
+      return orgUserDAO.update(conditionMap, updateDataMap)
+        .recover(err -> {
+          BaseDxException dxEx = BaseDxException.from(err);
+          if (dxEx instanceof NoRowFoundException) {
+            return Future.failedFuture(
+              new DxNotFoundException("No matching user found in organization", dxEx)
+            );
+          }
+          return Future.failedFuture(dxEx);
+        });
     }
 
   @Override
@@ -202,7 +244,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
   @Override
     public Future<Boolean> deleteOrganizationUser(UUID orgId, UUID userId) {
-        return orgUserDAO.delete(orgId, userId);
+
+    return orgUserDAO.deleteUsersByOrgId(orgId, List.of(userId));
     }
 
     @Override
@@ -212,7 +255,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<OrganizationUser> getOrganizationUserInfo(UUID userId) {
-        return orgUserDAO.getById(userId);
+        return orgUserDAO.get(userId);
     }
 
     @Override
