@@ -9,7 +9,7 @@ services:
   prod:
     image: iudx/aaa-depl:latest
     environment:
-      - AUTH_URL=https://authorization.iudx.org.in
+      - AUTH_URL=https://authorization.tgdex.iudx.org.in
       - LOG_LEVEL=INFO
       - AUTH_JAVA_OPTS=-Xmx4096m
     volumes:
@@ -33,11 +33,11 @@ services:
   dev:
     image: iudx/aaa-dev:latest
     environment:
-      - AUTH_URL=https://authorization.iudx.org.in
+      - AUTH_URL=https://authorization.tgdex.iudx.org.in
       - LOG_LEVEL=INFO
       - AUTH_JAVA_OPTS=-Xmx4096m
     volumes:
-      - ./configs/config-dev.json:/usr/share/app/configs/config.json
+      - ./configs/aaa-config-dev.json:/usr/share/app/configs/config.json
       - ./configs/keystore.jks:/usr/share/app/configs/keystore.jks
     ports:
       - "9000:9000"
