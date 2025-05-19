@@ -3,48 +3,71 @@ package org.cdpg.dx.aaa.credit.models;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.util.Constants;
 import org.cdpg.dx.aaa.organization.models.Status;
+import org.cdpg.dx.common.exception.DxValidationException;
+import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
 
 public record ComputeRole(
-  Optional<UUID> id,
+  UUID id,
   UUID userId,
   String status,
-  Optional<UUID> approvedBy,
-  Optional<String> createdAt,
-  Optional<String> updatedAt
-) {
+  UUID approvedBy,
+  String createdAt,
+  String updatedAt
+) implements BaseEntity<ComputeRole> {
 
   public static ComputeRole fromJson(JsonObject json) {
-    return new ComputeRole(
-      Optional.ofNullable(json.getString(Constants.COMPUTE_ROLE_ID)).map(UUID::fromString),
-      UUID.fromString(json.getString(Constants.USER_ID)),
-      Optional.ofNullable(json.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
-      Optional.ofNullable(json.getString(Constants.APPROVED_BY)).map(UUID::fromString),
-      Optional.ofNullable(json.getString(Constants.CREATED_AT)),
-      Optional.ofNullable(json.getString(Constants.UPDATED_AT))
-    );
+    try {
+      return new ComputeRole(
+        json.containsKey(Constants.COMPUTE_ROLE_ID)
+          ? UUID.fromString(json.getString(Constants.COMPUTE_ROLE_ID))
+          : null,
+        UUID.fromString(requireNonNull(json.getString(Constants.USER_ID), Constants.USER_ID)),
+        json.getString(Constants.STATUS) != null
+          ? json.getString(Constants.STATUS)
+          : Status.PENDING.getStatus(),
+        json.containsKey(Constants.APPROVED_BY)
+          ? UUID.fromString(json.getString(Constants.APPROVED_BY))
+          : null,
+        json.getString(Constants.CREATED_AT),
+        json.getString(Constants.UPDATED_AT)
+      );
+    } catch (IllegalArgumentException e) {
+      throw new DxValidationException("Missing or invalid required field: " + e.getMessage());
+    }
   }
 
+  @Override
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
-    id.ifPresent(value -> json.put(Constants.COMPUTE_ROLE_ID, value));
+    if (id != null) json.put(Constants.COMPUTE_ROLE_ID, id.toString());
     json.put(Constants.USER_ID, userId.toString());
-    json.put(Constants.STATUS, status);
-    approvedBy.ifPresent(value -> json.put(Constants.APPROVED_BY, value.toString()));
-    createdAt.ifPresent(value -> json.put(Constants.CREATED_AT, value));
-    updatedAt.ifPresent(value -> json.put(Constants.UPDATED_AT, value));
+    if (status != null && !status.isEmpty()) json.put(Constants.STATUS, status);
+    if (approvedBy != null) json.put(Constants.APPROVED_BY, approvedBy.toString());
+    if (createdAt != null && !createdAt.isEmpty()) json.put(Constants.CREATED_AT, createdAt);
+    if (updatedAt != null && !updatedAt.isEmpty()) json.put(Constants.UPDATED_AT, updatedAt);
     return json;
   }
 
+  @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();
-    id.ifPresent(value -> map.put(Constants.COMPUTE_ROLE_ID, value));
-    map.put(Constants.USER_ID, userId.toString());
-    map.put(Constants.STATUS, status);
-    approvedBy.ifPresent(value -> map.put(Constants.APPROVED_BY, value.toString()));
-    createdAt.ifPresent(value -> map.put(Constants.CREATED_AT, value));
-    updatedAt.ifPresent(value -> map.put(Constants.UPDATED_AT, value));
+    if (id != null) map.put(Constants.COMPUTE_ROLE_ID, id.toString());
+    if (userId != null) map.put(Constants.USER_ID, userId.toString());
+    if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
+    if (approvedBy != null) map.put(Constants.APPROVED_BY, approvedBy.toString());
+    if (createdAt != null && !createdAt.isEmpty()) map.put(Constants.CREATED_AT, createdAt);
+    if (updatedAt != null && !updatedAt.isEmpty()) map.put(Constants.UPDATED_AT, updatedAt);
     return map;
+  }
+
+  @Override
+  public String getTableName() {
+    return Constants.COMPUTE_ROLE_TABLE;
   }
 }
