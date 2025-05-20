@@ -66,6 +66,11 @@
 			<artifactId>vertx-service-proxy</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180813</version>
+		</dependency>
+		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-service-discovery</artifactId>
 		</dependency>
