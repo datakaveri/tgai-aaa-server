@@ -18,14 +18,14 @@ public class KYCServiceImpl implements KYCService {
     public Future<JsonObject> getKYCData(String userId, String authCode, String codeVerifier) {
         CacheService cacheService = new CacheServiceImpl();
 
-        String tokenUrl = "https://digilocker.meripehchaan.gov.in/public/oauth2/1/token";
+        String tokenUrl = "";
         MultiMap form = MultiMap.caseInsensitiveMultiMap();
-        form.add("grant_type", "authorization_code");
-        form.add("client_id", "RAE7313316");
-        form.add("client_secret", "ccd23187582d345238b8");
+        form.add("grant_type", "");
+        form.add("client_id", "");
+        form.add("client_secret", "");
         form.add("code", authCode);
         form.add("code_verifier", codeVerifier);
-        form.add("redirect_uri", "https://catalogue.tgdex.iudx.io/kyc");
+        form.add("redirect_uri", "");
 
         return WebClient.create(vertx)
                 .postAbs(tokenUrl)
@@ -37,7 +37,7 @@ public class KYCServiceImpl implements KYCService {
                     String accessToken = response.bodyAsJsonObject().getString("access_token");
 
                     if ("Y".equals(response.bodyAsJsonObject().getString("eaadhaar"))) {
-                        String aadhaarUrl = "https://digilocker.meripehchaan.gov.in/public/oauth2/3/xml/eaadhaar";
+                        String aadhaarUrl = "";
                         return WebClient.create(vertx)
                                 .getAbs(aadhaarUrl)
                                 .bearerTokenAuthentication(accessToken)
