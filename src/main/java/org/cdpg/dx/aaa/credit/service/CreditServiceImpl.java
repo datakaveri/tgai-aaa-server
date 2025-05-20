@@ -47,86 +47,127 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<List<CreditRequest>> getAllPendingCreditRequests() {
-    return creditRequestDAO.getAll(Status.PENDING);
+    Map<String,Object> conditionMap = Map.of(Constants.STATUS, Status.PENDING);
+
+    return creditRequestDAO.getAllWithFilters(conditionMap);
   }
 
 
   // ***************************************************************************************
-  @Override
-  public Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy) {
-
-    return creditRequestDAO.updateStatus(requestId, status)
-      .compose(approved -> {
-        if (!approved) return Future.succeededFuture(false);
-        if (status==Status.APPROVED) {
-          return creditRequestDAO.getCreditRequestById(requestId)
-            .compose(cr ->{
-             UUID userId = cr.userId();
-             double amount = cr.amount();
-
-             return getBalance(userId)
-               .compose(balance-> userCreditDAO.updateBalance(userId,balance+amount))
-               .compose(log->{
-
-                 CreditTransaction creditTransaction = new CreditTransaction(
-                   Optional.empty(),
-                   userId,
-                   Optional.of(amount),
-                   Optional.of(transactedBy),
-                   Optional.of(TransactionStatus.SUCCESS.getStatus()),
-                   Optional.of(TransactionType.CREDIT.getType()),
-                   Optional.of(Instant.now().toString())
-                 );
-
-                  return creditTransactionDAO.logTransaction(creditTransaction);
-               })
-               .map(true);
-            });
-          } else {
-            return Future.succeededFuture(false);
-          }
-      });
-  }
-
+//  @Override
+//  public Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status, UUID transactedBy) {
+//    Map<String, Object> conditionMap = Map.of(
+//      CREDIT_REQUEST_ID, requestId.toString()
+//    );
+//
+//    Map<String, Object> updateDataMap = Map.of(
+//      STATUS, status.getStatus()
+//    );
+//
+//    return creditRequestDAO.update(conditionMap, updateDataMap)
+//      .compose(updated -> {
+//        if (!updated) return Future.succeededFuture(false);
+//
+//        // Proceed only if status is APPROVED
+//        if (status == Status.APPROVED) {
+//          return creditRequestDAO.get(requestId)
+//            .compose(cr -> {
+//              UUID userId = cr.userId();
+//              double amount = cr.amount();
+//
+//              return getBalance(userId)
+//                .compose(balance -> {
+//                  double newBalance = balance + amount;
+//
+//                  Map<String, Object> balanceUpdateCondition = Map.of(
+//                    USER_ID, userId.toString()
+//                  );
+//                  Map<String, Object> balanceUpdateData = Map.of(
+//                    BALANCE, newBalance
+//                  );
+//
+//                  return userCreditDAO.update(balanceUpdateCondition, balanceUpdateData)
+//                    .compose(updateResult -> {
+//                      CreditTransaction creditTransaction = new CreditTransaction(
+//                        null,
+//                        userId,
+//                        amount,
+//                        transactedBy,
+//                        TransactionStatus.SUCCESS.getStatus(),
+//                        TransactionType.CREDIT.getType(),
+//                        Instant.now().toString()
+//                      );
+//
+//                      return creditTransactionDAO.create(creditTransaction);
+//                    })
+//                    .map(true);
+//                });
+//            });
+//        } else {
+//          return Future.succeededFuture(true);
+//        }
+//      })
+//      .recover(err -> {
+//        BaseDxException dxEx = BaseDxException.from(err);
+//        if (dxEx instanceof NoRowFoundException) {
+//          return Future.failedFuture(new DxNotFoundException("No request found with given ID", dxEx));
+//        }
+//        return Future.failedFuture(dxEx);
+//      });
+//  }
 
   //***************************************************************************************
-  @Override
-  public Future<Double> getBalance(UUID userId) {
-    return userCreditDAO.getBalance(userId);
-  }
+//  @Override
+//  public Future<Double> getBalance(UUID userId) {
+//    return userCreditDAO.getFilterWithFilters();
+//  }
 
 
-  @Override
-  public Future<Boolean> deductCredits(CreditTransaction creditTransaction) {
-    UUID userId = creditTransaction.userId();
-    if (creditTransaction.amount().isEmpty()) {
-      return Future.failedFuture("Amount is missing in CreditTransaction");
-    }
-    Double amount = creditTransaction.amount().get();
+//  @Override
+//  public Future<Boolean> deductCredits(CreditTransaction creditTransaction) {
+//    UUID userId = creditTransaction.userId();
+//    if (creditTransaction.amount() == null) {
+//      return Future.failedFuture("Amount is missing in CreditTransaction");
+//    }
+//
+//    Double amount = creditTransaction.amount();
+//
+//    return getBalance(userId)
+//      .compose(balance -> {
+//        if (balance < amount) {
+//          return Future.succeededFuture(false);
+//        } else {
+//          double updatedBalance = balance - amount;
+//
+//          Map<String, Object> conditionMap = Map.of(USER_ID, userId);
+//          Map<String, Object> updatedMap = Map.of(BALANCE, updatedBalance);
+//
+//          return userCreditDAO.update(conditionMap, updatedMap)
+//            .compose(v -> {
+//              CreditTransaction completeTransaction = new CreditTransaction(
+//                null,
+//                userId,
+//                amount,
+//                creditTransaction.transactedBy(),
+//                TransactionStatus.SUCCESS.getStatus(),
+//                TransactionType.DEBIT.getType(),
+//                Instant.now().toString()
+//              );
+//
+//              return creditTransactionDAO.create(completeTransaction);
+//            })
+//            .map(true);
+//        }
+//      })
+//      .recover(err -> {
+//        BaseDxException dxEx = BaseDxException.from(err);
+//        if (dxEx instanceof NoRowFoundException) {
+//          return Future.failedFuture(new DxNotFoundException("User or balance entry not found", dxEx));
+//        }
+//        return Future.failedFuture(dxEx);
+//      });
+//  }
 
-    return getBalance(userId)
-      .compose(balance -> {
-        if (balance < amount) {
-          return Future.succeededFuture(false);
-        } else {
-          return userCreditDAO.updateBalance(userId, balance - amount)
-            .compose(v -> {
-              CreditTransaction completeTransaction = new CreditTransaction(
-                Optional.empty(),
-                userId,
-                Optional.of(amount),
-                creditTransaction.transactedBy(),
-                Optional.of(TransactionStatus.SUCCESS.getStatus()),
-                Optional.of(TransactionType.DEBIT.getType()),                                  // transactionType (or "CREDIT" if adding)
-                Optional.of(Instant.now().toString())
-              );
-
-              return creditTransactionDAO.logTransaction(completeTransaction);
-            })
-            .map(true);
-        }
-      });
-  }
 
 
   @Override
@@ -142,7 +183,6 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy) {
-//    return computeRoleDAO.update(requestId,status,approvedBy);
     Map<String, Object> conditionMap = Map.of(
       COMPUTE_ROLE_ID, requestId.toString());
 

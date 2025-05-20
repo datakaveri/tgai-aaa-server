@@ -2,46 +2,79 @@ package org.cdpg.dx.aaa.credit.models;
 
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.util.Constants;
+import org.cdpg.dx.common.exception.DxValidationException;
+import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-public record CreditTransaction(Optional<UUID> id, UUID userId, Optional<Double> amount, Optional<UUID> transactedBy, Optional<String> transactionStatus,Optional<String> transactionType,
-                              Optional<String> createdAt) {
+import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
+
+public record CreditTransaction(
+  UUID id,
+  UUID userId,
+  Double amount,
+  UUID transactedBy,
+  String transactionStatus,
+  String transactionType,
+  String createdAt
+) implements BaseEntity<CreditTransaction> {
 
   public static CreditTransaction fromJson(JsonObject json) {
-    return new CreditTransaction(
-      Optional.ofNullable(json.getString(Constants.CREDIT_TRANSACTION_ID)).map(UUID::fromString),
-      UUID.fromString(json.getString(Constants.USER_ID)),
-      Optional.ofNullable(json.getDouble(Constants.AMOUNT)),
-      Optional.ofNullable(json.getString(Constants.TRANSACTED_BY)).map(UUID::fromString),
-      Optional.ofNullable(json.getString(Constants.TRANSACTION_STATUS)),
-      Optional.ofNullable(json.getString(Constants.TRANSACTION_TYPE)),
-      Optional.ofNullable(json.getString(Constants.CREATED_AT))
-    );
+    try {
+      return new CreditTransaction(
+        json.containsKey(Constants.CREDIT_TRANSACTION_ID)
+          ? UUID.fromString(json.getString(Constants.CREDIT_TRANSACTION_ID))
+          : null,
+        UUID.fromString(requireNonNull(json.getString(Constants.USER_ID), Constants.USER_ID)),
+        json.getDouble(Constants.AMOUNT),
+        json.containsKey(Constants.TRANSACTED_BY)
+          ? UUID.fromString(json.getString(Constants.TRANSACTED_BY))
+          : null,
+        json.getString(Constants.TRANSACTION_STATUS),
+        json.getString(Constants.TRANSACTION_TYPE),
+        json.getString(Constants.CREATED_AT)
+      );
+    } catch (IllegalArgumentException e) {
+      throw new DxValidationException("Missing or invalid field: " + e.getMessage());
+    }
   }
 
+  @Override
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
-    id.ifPresent(value -> json.put(Constants.CREDIT_TRANSACTION_ID, value.toString()));
+    if (id != null) json.put(Constants.CREDIT_TRANSACTION_ID, id.toString());
     json.put(Constants.USER_ID, userId.toString());
-    amount.ifPresent(value->json.put(Constants.AMOUNT,value));
-    transactedBy.ifPresent(value->json.put(Constants.TRANSACTED_BY,value));
-    transactionStatus.ifPresent(value -> json.put(Constants.TRANSACTION_STATUS, value));
-    transactionType.ifPresent(value -> json.put(Constants.TRANSACTION_TYPE, value));
-    createdAt.ifPresent(value -> json.put(Constants.CREATED_AT, value));
+    if (amount != null) json.put(Constants.AMOUNT, amount);
+    if (transactedBy != null) json.put(Constants.TRANSACTED_BY, transactedBy.toString());
+    if (transactionStatus != null && !transactionStatus.isEmpty())
+      json.put(Constants.TRANSACTION_STATUS, transactionStatus);
+    if (transactionType != null && !transactionType.isEmpty())
+      json.put(Constants.TRANSACTION_TYPE, transactionType);
+    if (createdAt != null && !createdAt.isEmpty())
+      json.put(Constants.CREATED_AT, createdAt);
     return json;
   }
 
+  @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();
-    id.ifPresent(value -> map.put(Constants.CREDIT_TRANSACTION_ID, value));
+    if (id != null) map.put(Constants.CREDIT_TRANSACTION_ID, id.toString());
     map.put(Constants.USER_ID, userId.toString());
-    amount.ifPresent(value -> map.put(Constants.AMOUNT, value));
-    transactedBy.ifPresent(value -> map.put(Constants.TRANSACTED_BY, value));
-    transactionStatus.ifPresent(value -> map.put(Constants.TRANSACTION_STATUS, value));
-    transactionType.ifPresent(value -> map.put(Constants.TRANSACTION_TYPE, value));
-    createdAt.ifPresent(value -> map.put(Constants.CREATED_AT, value));
+    if (amount != null) map.put(Constants.AMOUNT, amount);
+    if (transactedBy != null) map.put(Constants.TRANSACTED_BY, transactedBy.toString());
+    if (transactionStatus != null && !transactionStatus.isEmpty())
+      map.put(Constants.TRANSACTION_STATUS, transactionStatus);
+    if (transactionType != null && !transactionType.isEmpty())
+      map.put(Constants.TRANSACTION_TYPE, transactionType);
+    if (createdAt != null && !createdAt.isEmpty())
+      map.put(Constants.CREATED_AT, createdAt);
     return map;
   }
-}
 
+  @Override
+  public String getTableName() {
+    return Constants.CREDIT_TRANSACTION_TABLE;
+  }
+}
