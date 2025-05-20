@@ -18,6 +18,31 @@ public class OrganizationController implements ApiController {
 
     @Override
     public void register(RouterBuilder routerBuilder) {
+
+        routerBuilder
+            .operation("get-auth-v1-getAllOrgReq")
+            .handler(organizationHandler::getOrganisationRequest);
+
+        routerBuilder
+          .operation("post-auth-v1-organisations-request")
+            .handler(organizationHandler::createOrganisationRequest);
+
+        routerBuilder
+          .operation("post-auth-v1-organisations-request")
+          .handler(organizationHandler::approveOrganisationRequest);
+
+        routerBuilder
+          .operation("post-auth-v1-joinOrg")
+            .handler(organizationHandler::joinOrganisationRequest);
+
+        routerBuilder
+          .operation("get-auth-v1-organisations-join")
+            .handler(organizationHandler::getJoinOrganisationRequests);
+
+        routerBuilder
+          .operation("post-auth-v1-approve")
+            .handler(organizationHandler::approveJoinOrganisationRequests);
+
         routerBuilder
                 .operation("get-auth-v1-org")
                 //.handler(ctx -> fetchRoles.fetch(ctx, Set.of()))

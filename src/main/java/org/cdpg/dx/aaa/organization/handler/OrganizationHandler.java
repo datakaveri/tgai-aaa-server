@@ -58,34 +58,34 @@ public class OrganizationHandler {
 
     }
 
-//    public void approveJoinOrganisationRequests(RoutingContext ctx) {
-//
-//        JsonObject OrgRequestJson = ctx.body().asJsonObject();
-//
-//        UUID requestId;
-//        Status status;
-//
-//        JsonObject responseObject = OrgRequestJson.copy();
-//        responseObject.remove("status");
-//
-//        requestId = UUID.fromString(OrgRequestJson.getString("req_id"));
-//        status = Status.fromString(OrgRequestJson.getString("status"));
-//
-//
-//        organizationService.updateOrganizationJoinRequestStatus(requestId, status)
-//                .onSuccess(approved -> {
-//                    if(approved){
-//
-//                        processSuccess(ctx, responseObject, 200, "Approved Organisation Join Request");
-//                    }
-//                    else {
-//
-//                        processFailure(ctx, 400, "Request Not Found");
-//                    }
-//                })
-//                .onFailure(err -> processFailure(ctx, 500, "Failed to approve Organisation Join Request"));
-//
-//    }
+    public void approveJoinOrganisationRequests(RoutingContext ctx) {
+
+        JsonObject OrgRequestJson = ctx.body().asJsonObject();
+
+        UUID requestId;
+        Status status;
+
+        JsonObject responseObject = OrgRequestJson.copy();
+        responseObject.remove("status");
+
+        requestId = UUID.fromString(OrgRequestJson.getString("req_id"));
+        status = Status.fromString(OrgRequestJson.getString("status"));
+
+
+        organizationService.updateOrganizationJoinRequestStatus(requestId, status)
+                .onSuccess(approved -> {
+                    if(approved){
+
+                        processSuccess(ctx, responseObject, 200, "Approved Organisation Join Request");
+                    }
+                    else {
+
+                        processFailure(ctx, 400, "Request Not Found");
+                    }
+                })
+                .onFailure(err -> processFailure(ctx, 500, "Failed to approve Organisation Join Request"));
+
+    }
 
     public void getJoinOrganisationRequests(RoutingContext ctx) {
 
