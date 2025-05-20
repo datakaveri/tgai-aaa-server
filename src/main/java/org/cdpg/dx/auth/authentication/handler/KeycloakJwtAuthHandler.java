@@ -26,13 +26,10 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
             ctx.response().setStatusCode(401).end("Missing Bearer token");
             return;
         }
-        LOGGER.info("Extracted token: '{}'", token);
-        LOGGER.info("Token length: {}", token.length());
+
 
         jwtAuth.authenticate(new JsonObject().put("token", token))
                 .onSuccess(user -> {
-                    LOGGER.debug("User principal: " + user.principal().encodePrettily());
-                    LOGGER.info("Authentication success for user: {}", user.principal().getString("sub"));
                     ctx.setUser(user);
                     ctx.next();
                 })

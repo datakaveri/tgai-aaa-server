@@ -1,4 +1,18 @@
-DROP TABLE organizations;
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+-- we create the pgcrypto extension to use gen_random_uuid
+-- it is created on the default public schema so that all
+-- schemas in the database may use it (if required).
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
 
 CREATE TABLE IF NOT EXISTS organizations (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,

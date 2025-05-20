@@ -6,12 +6,12 @@
   "clusterId": "iudx-aaa-cluster",
   "options":{
     "postgresOptions": {
-      "databaseIP": "asdsadsad",
+      "databaseIP": "localhost",
       "databasePort": 5433,
-      "databaseName": "asdsad",
-      "databaseSchema":"asdsad",
-      "databaseUserName": "asds",
-      "databasePassword": "asdsadsa"
+      "databaseName": "test",
+      "databaseSchema": "test",
+      "databaseUserName": "test-user",
+      "databasePassword": "test-password"
     },
     "commonOptions":{
       "cosDomain":"asdasd",
