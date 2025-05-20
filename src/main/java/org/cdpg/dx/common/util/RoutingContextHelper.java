@@ -1,6 +1,6 @@
 package org.cdpg.dx.common.util;
 
-import static org.cdpg.dx.util.Constants.ID;
+
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -77,12 +77,13 @@ public final class RoutingContextHelper {
     return (Long) event.data().get(RESPONSE_SIZE);
   }
 
+  //TODO why this is needed
   public static void setId(RoutingContext event, String id) {
-    event.put(ID, id);
+    event.put("ID", id);
   }
 
   public static String getId(RoutingContext event) {
-    return event.get(ID);
+    return event.get("ID");
   }
 
   public static String getRequestPath(RoutingContext routingContext) {

@@ -6,9 +6,9 @@ import io.vertx.core.Vertx;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-//import org.cdpg.dx.aaa.activity.controller.ActivityController;
-//import org.cdpg.dx.auditingserver.activity.factory.ActivityFactory;
-//import org.cdpg.dx.auditingserver.activity.service.ActivityService;
+import org.cdpg.dx.aaa.organization.controller.OrganizationController;
+import org.cdpg.dx.aaa.organization.factory.OrganizationFactory;
+import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
 public class ControllerFactory {
@@ -19,8 +19,11 @@ public class ControllerFactory {
   public static List<ApiController> createControllers(Vertx vertx) {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
 
-//    ActivityService activityService = ActivityFactory.create(pgService);
+    OrganizationHandler organizationHandler = OrganizationFactory.createHandler(pgService);
+    ApiController organizationController = new OrganizationController(organizationHandler);
 
-    return List.of();
+    //TODO create other controllers
+
+    return List.of(organizationController);
   }
 }

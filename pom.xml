@@ -29,8 +29,8 @@
 		<openjdk.version>21</openjdk.version>
 		<keycloak.version>24.0.4</keycloak.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<exec.mainClass>iudx.aaa.server.deploy.Deployer</exec.mainClass>
-		<exec.mainClassDev>iudx.aaa.server.deploy.DeployerDev
+		<exec.mainClass>org.cdpg.dx.deploy.Deployer</exec.mainClass>
+		<exec.mainClassDev>org.cdpg.dx.deploy.DeployerDev
 		</exec.mainClassDev>
 		<skipUnitTests>false</skipUnitTests>
 	</properties>
@@ -514,7 +514,7 @@
 					<execution>
 						<id>aaa-server</id>
 						<configuration>
-							<mainClass>iudx.aaa.server.deploy.DeployerDev </mainClass>
+							<mainClass>org.cdpg.dx.deploy.DeployerDev</mainClass>
 							<systemProperties>
 								<systemProperty>
 									<key>vertx.logger-delegate-factory-class-name</key>
