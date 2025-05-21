@@ -18,16 +18,18 @@
       "cosAdminUserId": "asdas"
     },
     "keycloakOptions":{
-      "keycloakRealm": "tgai",
+      "keycloakRealm": "myrealm",
       "keycloakUrl": "http://localhost:8080/",
-      "keycloakAdminClientId": "keycloak-admin",
-      "keycloakAdminClientSecret": "asdasds",
+      "keycloakAdminClientId": "admin-cli",
+      "keycloakAdminClientSecret": "",
       "keycloakAdminPoolSize": "10",
       "keycloakJwtLeeway": 90,
       "keycloakCertUrl": "http://localhost:8080/realms/myrealm/protocol/openid-connect/certs",
       "iss": "http://localhost:8080/realms/myrealm",
       "jwtIgnoreExpiry": true,
-      "jwksRefreshIntervalMs": 21600000
+      "jwksRefreshIntervalMs": 21600000,
+      "adminUsername": "admin",
+      "adminPassword": "admin"
     },
     "jwtKeystoreOptions":{
       "keystorePath": "configs/keystore.jks",

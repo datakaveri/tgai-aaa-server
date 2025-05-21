@@ -24,7 +24,7 @@ public class ControllerFactory {
   public static List<ApiController> createControllers(Vertx vertx, JsonObject  config) {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
 
-    OrganizationHandler organizationHandler = OrganizationFactory.createHandler(pgService);
+    OrganizationHandler organizationHandler = OrganizationFactory.createHandler(pgService, config);
     ApiController organizationController = new OrganizationController(organizationHandler);
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
@@ -32,6 +32,6 @@ public class ControllerFactory {
 
     //TODO create other controllers
 
-    return List.of(organizationController, kycController);
+    return List.of(organizationController);
   }
 }
