@@ -1,7 +1,5 @@
 package org.cdpg.dx.aaa.kyc.controller;
 
-
-
 import io.vertx.ext.web.openapi.RouterBuilder;
 import org.cdpg.dx.aaa.apiserver.ApiController;
 

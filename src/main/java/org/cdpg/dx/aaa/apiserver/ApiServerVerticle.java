@@ -2,6 +2,7 @@ package org.cdpg.dx.aaa.apiserver;
 
 import static org.cdpg.dx.aaa.apiserver.config.ApiConstants.*;
 
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -30,6 +31,12 @@ import org.cdpg.dx.auth.authentication.provider.JwtAuthProvider;
 import org.cdpg.dx.common.FailureHandler;
 import org.cdpg.dx.common.HttpStatusCode;
 
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.vertx.core.json.jackson.DatabindCodec;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 public class ApiServerVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
     private int port;
@@ -47,7 +54,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     @Override
     public void start() {
         port = config().getInteger("httpPort", 8443);
-        //String dxApiBasePath = config().getString("dxApiBasePath");
+        // Register the module for default Vert.x ObjectMapper
+        ObjectMapper mapper = DatabindCodec.mapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        ObjectMapper prettyMapper = DatabindCodec.prettyMapper();
+        prettyMapper.registerModule(new JavaTimeModule());
+        prettyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 
         Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/updated_spec.yaml");

@@ -77,7 +77,7 @@ public record Organization(
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();
 
-    map.put(Constants.ORG_ID, id.toString());
+    if (id != null) map.put(Constants.ORG_ID, id.toString());
     if (!orgName.isEmpty()) map.put(Constants.ORG_NAME, orgName);
     if (orgLogo != null && !orgLogo.isEmpty()) map.put(Constants.ORG_LOGO, orgLogo);
     if (!entityType.isEmpty()) map.put(Constants.ENTITY_TYPE, entityType);

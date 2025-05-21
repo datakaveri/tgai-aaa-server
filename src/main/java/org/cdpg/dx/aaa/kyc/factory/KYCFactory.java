@@ -2,8 +2,12 @@ package org.cdpg.dx.aaa.kyc.factory;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.cache.service.CacheService;
+import org.cdpg.dx.aaa.cache.service.CacheServiceImpl;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
 import org.cdpg.dx.aaa.kyc.service.KYCServiceImpl;
@@ -21,8 +25,9 @@ public class KYCFactory {
 
     public static KYCHandler createHandler(Vertx vertx, JsonObject config) {
 
-        KYCService kycService = new KYCServiceImpl(vertx, config);
-
+        WebClient webClient = WebClient.create(vertx);
+        CacheService cacheService = new CacheServiceImpl();
+        KYCService kycService = new KYCServiceImpl(webClient, cacheService, config);
         return new KYCHandler(kycService);
     }
 }

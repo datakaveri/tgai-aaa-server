@@ -1,35 +1,39 @@
 package org.cdpg.dx.aaa.cache.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 public class CacheServiceImpl implements CacheService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CacheServiceImpl.class);
 
+    private final Cache<String, JsonObject> cache;
+
     public CacheServiceImpl() {
-        // Constructor
+        // TTL-based cache setup: 10 minutes
+        this.cache = Caffeine.newBuilder()
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .maximumSize(1000) // optional size bound
+                .build();
     }
 
     @Override
     public void store(String key, JsonObject data) {
-        vertx.sharedData()
-                .<String, JsonObject>getLocalMap("digilocker_auth_cache")
-                .put(key, data);
-
+        cache.put(key, data);
+        LOG.debug("Stored cache key: {}", key);
     }
 
     @Override
     public Future<JsonObject> retrieve(String key) {
-        JsonObject cachedData = vertx.sharedData()
-                .<String, JsonObject>getLocalMap("digilocker_auth_cache")
-                .get(key);
-
-        return Future.succeededFuture(cachedData);
+        JsonObject value = cache.getIfPresent(key);
+        LOG.debug("Retrieved cache key: {}, found: {}", key, value != null);
+        return Future.succeededFuture(value);
     }
-
-
 }

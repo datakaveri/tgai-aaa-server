@@ -8,7 +8,6 @@ import io.vertx.ext.web.RoutingContext;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cdpg.dx.auth.authentication.model.JwtData;
 
 public final class RoutingContextHelper {
   private static final Logger LOGGER = LogManager.getLogger(RoutingContextHelper.class);
@@ -45,13 +44,13 @@ public final class RoutingContextHelper {
             .map(authHeader -> authHeader.substring(BEARER_PREFIX.length()).trim());
   }
 
-  public static void setJwtData(RoutingContext routingContext, JwtData jwtData) {
-    routingContext.put(JWT_DATA, jwtData);
-  }
-
-  public static Optional<JwtData> getJwtData(RoutingContext routingContext) {
-    return Optional.ofNullable(routingContext.get(JWT_DATA));
-  }
+//  public static void setJwtData(RoutingContext routingContext, JwtData jwtData) {
+//    routingContext.put(JWT_DATA, jwtData);
+//  }
+//
+//  public static Optional<JwtData> getJwtData(RoutingContext routingContext) {
+//    return Optional.ofNullable(routingContext.get(JWT_DATA));
+//  }
 
   /*  public static void setAuditingLog(RoutingContext routingContext, List<AuditLog> auditingLog) {
     routingContext.put(AUDITING_LOG, auditingLog);
