@@ -4528,7 +4528,7 @@ paths:
       operationId: delete-auth-v1-organisations-users-id
       security:
         - authorization: []
-  '/auth/v1/organization/users/role':
+  /auth/v1/organization/users/role:
     put:
       summary: Update Organization User Role
       tags:
@@ -4667,7 +4667,7 @@ paths:
   /auth/v1/computerole:
     get:
       summary: Get All Pending ComputeRole Requests
-      tags: [ ]
+      tags: []
       responses:
         '200':
           description: OK
@@ -4675,7 +4675,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}
       operationId: get-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -4683,9 +4683,11 @@ paths:
           in: header
           name: Authorization
           description: Keycloak issued Token
+      security:
+        - authorization: []
     post:
       summary: Create Compute Role Request
-      tags: [ ]
+      tags: []
       responses:
         '200':
           description: OK
@@ -4696,9 +4698,11 @@ paths:
           in: header
           name: Authorization
           description: Keycloak issued Token
+      security:
+        - authorization: []
     put:
       summary: Update Compute Roles
-      tags: [ ]
+      tags: []
       responses:
         '200':
           description: OK
@@ -4706,7 +4710,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}
       operationId: put-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -4728,6 +4732,48 @@ paths:
                 Example 1:
                   id: string
                   status: string
+      security:
+        - authorization: []
+  /auth/v1/kyc/verify:
+    post:
+      summary: Verify KYC
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: post-auth-v1-kyc-verify
+      security:
+        - authorization: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                auth_code:
+                  type: string
+                  x-stoplight:
+                    id: eikz9ldpfspdn
+                code_verifier:
+                  type: string
+                  x-stoplight:
+                    id: ezofp921rrnqi
+  '/auth/v1/kyc/confirm/{id}':
+    get:
+      summary: Confirm KYC verification
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-kyc-confirm
+      security:
+        - authorization: []
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
 components:
   schemas:
     RequestToken:

@@ -8,6 +8,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import org.cdpg.dx.aaa.cache.service.CacheService;
+import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,14 +78,17 @@ public class KYCServiceImpl implements KYCService {
     @Override
     public Future<JsonObject> confirmKYCData(String userId, String codeVerifier) {
         Promise<JsonObject> promise = Promise.promise();
+        KeycloakUserService keycloakUserService = new KeycloakUserService(config);
 
         cacheService.retrieve(userId).onComplete(ar -> {
             if (ar.succeeded()) {
                 JsonObject cachedData = ar.result();
                 if (cachedData != null) {
                     if (codeVerifier.equals(cachedData.getString("code_verifier"))) {
+                        keycloakUserService.setKycVerifiedTrue(userId);
                         promise.complete(cachedData);
                     } else {
+                        keycloakUserService.setKycVerifiedFalse(userId);
                         promise.fail("Code verifier mismatch");
                     }
                 } else {

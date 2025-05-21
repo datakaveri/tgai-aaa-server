@@ -10,6 +10,7 @@ import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
+import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
 
 public class KYCHandler {
@@ -58,6 +59,7 @@ public class KYCHandler {
 
         kycService.confirmKYCData(user.subject(), codeVerifier)
                 .onSuccess(res -> {
+
                     ResponseBuilder.sendSuccess(ctx, res);
 
                 })
