@@ -23,13 +23,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.cdpg.dx.aaa.organization.util.Constants.ORG_ID;
+import static org.cdpg.dx.aaa.organization.util.Constants.ORG_JOIN_ID;
 
 public class OrganizationJoinRequestDAOImpl extends AbstractBaseDAO<OrganizationJoinRequest> implements OrganizationJoinRequestDAO {
 
     private static final Logger LOGGER = LogManager.getLogger(OrganizationJoinRequestDAOImpl.class);
 
     public OrganizationJoinRequestDAOImpl(PostgresService postgresService) {
-      super(postgresService, Constants.ORG_JOIN_REQUEST_TABLE, ORG_ID, OrganizationJoinRequest::fromJson);
+      super(postgresService, Constants.ORG_JOIN_REQUEST_TABLE, ORG_JOIN_ID, OrganizationJoinRequest::fromJson);
 
     }
 

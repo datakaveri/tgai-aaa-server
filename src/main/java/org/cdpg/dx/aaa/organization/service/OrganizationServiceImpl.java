@@ -204,7 +204,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
   @Override
   public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
-    Map<String, Object> filterMap = Map.of(Constants.ORG_ID, orgId.toString());
+    Map<String, Object> filterMap = Map.of(Constants.ORGANIZATION_ID, orgId.toString());
 
     return orgUserDAO.getAllWithFilters(filterMap);
   }

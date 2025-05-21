@@ -17,13 +17,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.cdpg.dx.aaa.organization.util.Constants.ORG_ID;
+import static org.cdpg.dx.aaa.organization.util.Constants.ORG_USER_ID;
 
 public class OrganizationUserDAOImpl extends AbstractBaseDAO<OrganizationUser> implements  OrganizationUserDAO {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationUserDAOImpl.class);
 
   public OrganizationUserDAOImpl(PostgresService postgresService) {
-    super(postgresService, Constants.ORG_USER_TABLE, ORG_ID, OrganizationUser::fromJson);
+    super(postgresService, Constants.ORG_USER_TABLE, ORG_USER_ID, OrganizationUser::fromJson);
   }
 
  // TODO - relook into this
