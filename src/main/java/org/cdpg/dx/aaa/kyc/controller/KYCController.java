@@ -1,7 +1,5 @@
 package org.cdpg.dx.aaa.kyc.controller;
 
-
-
 import io.vertx.ext.web.openapi.RouterBuilder;
 import org.cdpg.dx.aaa.apiserver.ApiController;
 
@@ -13,7 +11,7 @@ import java.util.Set;
 
 
 public class KYCController implements ApiController {
-    private static final Logger LOGGER = LogManager.getLogger(org.cdpg.dx.aaa.organization.controller.OrganizationController.class);
+    private static final Logger LOGGER = LogManager.getLogger(KYCController.class);
     private final KYCHandler kycHandler;
 
     public KYCController(KYCHandler  kycHandler) {

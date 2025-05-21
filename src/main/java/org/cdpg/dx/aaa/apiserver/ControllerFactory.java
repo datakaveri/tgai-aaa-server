@@ -4,6 +4,8 @@ import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.*;
 
 import io.vertx.core.Vertx;
 import java.util.List;
+
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.kyc.controller.KYCController;
@@ -19,17 +21,17 @@ public class ControllerFactory {
 
   private ControllerFactory() {}
 
-  public static List<ApiController> createControllers(Vertx vertx) {
+  public static List<ApiController> createControllers(Vertx vertx, JsonObject  config) {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
 
     OrganizationHandler organizationHandler = OrganizationFactory.createHandler(pgService);
     ApiController organizationController = new OrganizationController(organizationHandler);
 
-    KYCHandler kycHandler = KYCFactory.createHandler(pgService);
+    KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
 
     //TODO create other controllers
 
-    return List.of(organizationController);
+    return List.of(organizationController, kycController);
   }
 }

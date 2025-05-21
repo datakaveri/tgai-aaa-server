@@ -74,11 +74,10 @@ public class OrganizationHandler {
 
         organizationService.updateOrganizationJoinRequestStatus(requestId, status)
                 .onSuccess(approved -> {
-                    if(approved){
+                    if (approved) {
 
                         processSuccess(ctx, responseObject, 200, "Approved Organisation Join Request");
-                    }
-                    else {
+                    } else {
 
                         processFailure(ctx, 400, "Request Not Found");
                     }
@@ -141,6 +140,7 @@ public class OrganizationHandler {
     }
 
     public void approveOrganisationRequest(RoutingContext ctx) {
+        LOGGER.debug("Got request>>>>>>>>>>>>>>>>>>>>");
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
         UUID requestId = UUID.fromString(OrgRequestJson.getString("req_id"));
@@ -148,12 +148,11 @@ public class OrganizationHandler {
 
         JsonObject responseObject = OrgRequestJson.copy();
         responseObject.remove("status");
-
+        LOGGER.debug("Calling service >>>>>>>>>>>>>>>>>>>>");
         organizationService.updateOrganizationCreateRequestStatus(requestId, status)
                 .onSuccess(updated -> {
                     ResponseBuilder.sendSuccess(ctx, "Updated Sucessfully");
                 })
-
                 .onFailure(ctx::fail);
     }
 

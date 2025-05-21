@@ -10,15 +10,13 @@ import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.Map;
 
 public class OrganizationServiceImpl implements OrganizationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OrganizationServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationServiceImpl.class);
 
     private final OrganizationCreateRequestDAO createRequestDAO;
     private final OrganizationUserDAO orgUserDAO;

@@ -8,6 +8,7 @@ import io.vertx.ext.web.handler.AuthenticationHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.auth.authentication.util.BearerTokenExtractor;
+import org.cdpg.dx.common.exception.DxUnauthorizedException;
 
 public class KeycloakJwtAuthHandler implements AuthenticationHandler {
     private static final Logger LOGGER = LogManager.getLogger(KeycloakJwtAuthHandler.class);
@@ -23,7 +24,7 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
         String token = BearerTokenExtractor.extract(ctx);
         if (token == null || token.isBlank()) {
             LOGGER.warn("Missing or invalid Authorization header");
-            ctx.response().setStatusCode(401).end("Missing Bearer token");
+            ctx.fail(new DxUnauthorizedException("Missing Bearer token"));
             return;
         }
 
@@ -35,7 +36,7 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
                 })
                 .onFailure(err -> {
                     LOGGER.warn("Authentication failed: {}", err.getMessage());
-                    ctx.response().setStatusCode(401).end("Unauthorized");
+                    ctx.fail(new DxUnauthorizedException("Unauthorized"));
                 });
     }
 }

@@ -16,8 +16,9 @@ public class FailureHandler implements Handler<RoutingContext> {
 
   public void handle(RoutingContext context) {
     Throwable failure = context.failure();
-    LOGGER.info("FailureHandler: {}", failure.getClass());
+
     if (failure == null) {
+      LOGGER.warn("FailureHandler triggered without an actual Throwable. Possibly context.fail(statusCode) was used.");
       failure = new RuntimeException("Unknown server error");
     }
 

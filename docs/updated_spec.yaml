@@ -3974,6 +3974,25 @@ paths:
           description: Organisation ID
       security:
         - authorization: []
+  /auth/v1/organisations/{id}/join_requests:
+    get:
+      summary: Get all requests for an organisation
+      tags:
+        - Organisation APIs
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-organisations-join-requests
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the organisation
+          schema:
+            type: string
+            format: uuid
+      security:
+        - authorization: [ ]
   /auth/v1/organisations/join/approve:
     post:
       summary: Approve joining of organisation

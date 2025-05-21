@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
 import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.common.exception.DxBadRequestException;
+import org.cdpg.dx.common.response.ResponseBuilder;
 
 
 public class KYCHandler {
@@ -19,49 +21,47 @@ public class KYCHandler {
         this.kycService = kycService;
     }
 
-    public void verifyKYC(RoutingContext routingContext){
-        User user = routingContext.get("user");
+    public void verifyKYC(RoutingContext ctx) {
+        User user = ctx.user();
 
-        JsonObject OrgRequestJson = routingContext.body().asJsonObject();
+        JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
-        System.out.println("orgRequestJson: " + OrgRequestJson);
+        LOGGER.debug("orgRequestJson: " + OrgRequestJson);
 
         String code = OrgRequestJson.getString("auth_code");
         String codeVerifier = OrgRequestJson.getString("code_verifier");
 
         if (code == null || codeVerifier == null) {
-            routingContext.response().setStatusCode(400).end("Missing required parameters");
+            ctx.fail(new DxBadRequestException("Required parameter missing"));
             return;
         }
-        kycService.getKYCData(user.get("username"), code, codeVerifier)
+        kycService.getKYCData(user.subject(), code, codeVerifier)
                 .onComplete(ar -> {
                     if (ar.succeeded()) {
-                        routingContext.response().setStatusCode(200).end(ar.toString());
+                        ctx.response().setStatusCode(200).end(ar.toString());
                     } else {
-                        routingContext.response().setStatusCode(500).end(ar.cause().getMessage());
+                        ctx.response().setStatusCode(500).end(ar.cause().getMessage());
                     }
                 });
 
 
     }
 
-    public void confirmKYC(RoutingContext routingContext){
-        User user = routingContext.get("user");
-        String codeVerifier = routingContext.pathParam("id");
+    public void confirmKYC(RoutingContext ctx) {
+        User user = ctx.user();
+        String codeVerifier = ctx.pathParam("id");
 
         if (codeVerifier == null) {
-            routingContext.response().setStatusCode(400).end("Missing required parameters");
+            ctx.fail(new DxBadRequestException("Missing required parameters"));
             return;
         }
 
-        kycService.confirmKYCData(user.get("username"), codeVerifier)
-                .onComplete(ar -> {
-                    if (ar.succeeded()) {
-                        routingContext.response().setStatusCode(200).end(ar.toString());
-                    } else {
-                        routingContext.response().setStatusCode(500).end(ar.cause().getMessage());
-                    }
-                });
+        kycService.confirmKYCData(user.subject(), codeVerifier)
+                .onSuccess(res -> {
+                    ResponseBuilder.sendSuccess(ctx, res);
+
+                })
+                .onFailure(ctx::fail);
     }
 
 
