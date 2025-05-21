@@ -20,7 +20,9 @@ public class KYCHandler {
     }
 
     public void verifyKYC(RoutingContext routingContext){
-        User user = routingContext.get("user");
+        User user = routingContext.user();
+
+        System.out.println("user: " + user);
 
         JsonObject OrgRequestJson = routingContext.body().asJsonObject();
 
@@ -47,6 +49,8 @@ public class KYCHandler {
 
     public void confirmKYC(RoutingContext routingContext){
         User user = routingContext.get("user");
+        System.out.println("user: " + user);
+
         String codeVerifier = routingContext.pathParam("id");
 
         if (codeVerifier == null) {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import org.cdpg.dx.aaa.cache.service.CacheService;
@@ -14,18 +15,26 @@ import org.json.XML;
 
 public class KYCServiceImpl implements KYCService {
 
+    private final Vertx vertx;
+    private final JsonObject config;
+
+    public KYCServiceImpl(Vertx vertx, JsonObject config) {
+        this.vertx = vertx;
+        this.config = config;
+    }
+
     @Override
     public Future<JsonObject> getKYCData(String userId, String authCode, String codeVerifier) {
         CacheService cacheService = new CacheServiceImpl();
 
-        String tokenUrl = "";
+        String tokenUrl = config.getString("digilockerUrl") + "/1/token";
         MultiMap form = MultiMap.caseInsensitiveMultiMap();
-        form.add("grant_type", "");
-        form.add("client_id", "");
-        form.add("client_secret", "");
+        form.add("grant_type", "authorization_code");
+        form.add("client_id", config.getString("digilockerClientId"));
+        form.add("client_secret", config.getString("digilockerClientSecret"));
         form.add("code", authCode);
         form.add("code_verifier", codeVerifier);
-        form.add("redirect_uri", "");
+        form.add("redirect_uri", config.getString("digilockerRedirectUrl"));
 
         return WebClient.create(vertx)
                 .postAbs(tokenUrl)
@@ -37,7 +46,7 @@ public class KYCServiceImpl implements KYCService {
                     String accessToken = response.bodyAsJsonObject().getString("access_token");
 
                     if ("Y".equals(response.bodyAsJsonObject().getString("eaadhaar"))) {
-                        String aadhaarUrl = "";
+                        String aadhaarUrl = config.getString("digilockerUrl") + "/3/xml/eaadhaar";
                         return WebClient.create(vertx)
                                 .getAbs(aadhaarUrl)
                                 .bearerTokenAuthentication(accessToken)

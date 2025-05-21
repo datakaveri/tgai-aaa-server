@@ -13,19 +13,20 @@ import org.cdpg.dx.aaa.organization.controller.OrganizationController;
 import org.cdpg.dx.aaa.organization.factory.OrganizationFactory;
 import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
+import io.vertx.core.json.JsonObject;
 
 public class ControllerFactory {
   private static final Logger LOGGER = LogManager.getLogger(ControllerFactory.class);
 
   private ControllerFactory() {}
 
-  public static List<ApiController> createControllers(Vertx vertx) {
+  public static List<ApiController> createControllers(Vertx vertx, JsonObject config) {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
 
     OrganizationHandler organizationHandler = OrganizationFactory.createHandler(pgService);
     ApiController organizationController = new OrganizationController(organizationHandler);
 
-    KYCHandler kycHandler = KYCFactory.createHandler(pgService);
+    KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
 
     //TODO create other controllers

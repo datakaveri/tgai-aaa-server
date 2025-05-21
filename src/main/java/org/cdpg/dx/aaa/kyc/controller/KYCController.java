@@ -13,7 +13,7 @@ import java.util.Set;
 
 
 public class KYCController implements ApiController {
-    private static final Logger LOGGER = LogManager.getLogger(org.cdpg.dx.aaa.organization.controller.OrganizationController.class);
+    private static final Logger LOGGER = LogManager.getLogger(KYCController.class);
     private final KYCHandler kycHandler;
 
     public KYCController(KYCHandler  kycHandler) {

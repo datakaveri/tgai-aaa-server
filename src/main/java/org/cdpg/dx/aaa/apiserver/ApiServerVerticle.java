@@ -53,7 +53,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/updated_spec.yaml");
         Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
 
-        List<ApiController> controllers = ControllerFactory.createControllers(vertx);
+        List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());
 
         Future.all(routerFuture, authFuture)
                 .onSuccess(cf -> {

@@ -1,5 +1,7 @@
 package org.cdpg.dx.aaa.kyc.factory;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
@@ -17,9 +19,9 @@ public class KYCFactory {
 
     private KYCFactory() {}
 
-    public static KYCHandler createHandler(PostgresService pgService) {
+    public static KYCHandler createHandler(Vertx vertx, JsonObject config) {
 
-        KYCService kycService = new KYCServiceImpl();
+        KYCService kycService = new KYCServiceImpl(vertx, config);
 
         return new KYCHandler(kycService);
     }
