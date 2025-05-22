@@ -3,7 +3,7 @@ package org.cdpg.dx.aaa.organization.models;
 public enum Status {
   PENDING("pending"),
   REJECTED("rejected"),
-  APPROVED("approved");
+  GRANTED("granted");
 
   private final String status;
 

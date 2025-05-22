@@ -12,6 +12,7 @@ public class Constants {
   public static final String STATUS = "status";
   public static final String REQUESTED_AT = "requested_at";
   public static final String PROCESSED_AT = "processed_at";
+  public static final String USER_NAME = "user_name";
 
 
   public static final List<String> ALL_CREDIT_REQUEST_FIELDS = List.of(

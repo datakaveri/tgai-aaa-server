@@ -27,6 +27,7 @@ public record OrganizationCreateRequest(
         String pancardPath,
         String relevantDocPath,
         String status,
+        String userName,
         String empId,
         String jobTitle,
         String orgManagerphoneNo,
@@ -53,7 +54,8 @@ public record OrganizationCreateRequest(
               json.getString(Constants.STATUS) != null
                       ? json.getString(Constants.STATUS)
                       : Status.PENDING.getStatus(),
-              requireNonNull(json.getString(Constants.EMP_ID), Constants.EMP_ID),
+        requireNonNull(json.getString(Constants.USER_NAME), Constants.USER_NAME),
+        requireNonNull(json.getString(Constants.EMP_ID), Constants.EMP_ID),
               requireNonNull(json.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
               requireNonNull(json.getString(Constants.PHONE_NO), Constants.PHONE_NO),
               parseDateTime(json.getString(Constants.CREATED_AT)),
@@ -80,6 +82,7 @@ public record OrganizationCreateRequest(
     json.put(Constants.PANCARD, pancardPath);
     if (relevantDocPath != null && !relevantDocPath.isEmpty()) json.put(Constants.RELEVANT_DOC, relevantDocPath);
     json.put(Constants.STATUS, status);
+    json.put(Constants.USER_NAME, userName);
     json.put(Constants.EMP_ID, empId);
     json.put(Constants.JOB_TITLE, jobTitle);
     json.put(Constants.PHONE_NO, orgManagerphoneNo);
@@ -104,6 +107,7 @@ public record OrganizationCreateRequest(
     if (!pancardPath.isEmpty()) map.put(Constants.PANCARD, pancardPath);
     if (relevantDocPath != null && !relevantDocPath.isEmpty()) map.put(Constants.RELEVANT_DOC, relevantDocPath);
     if (!status.isEmpty()) map.put(Constants.STATUS, status);
+    if (!userName.isEmpty()) map.put(Constants.USER_NAME, userName);
     if (!empId.isEmpty()) map.put(Constants.EMP_ID, empId);
     if (!jobTitle.isEmpty()) map.put(Constants.JOB_TITLE, jobTitle);
     if (!orgManagerphoneNo.isEmpty()) map.put(Constants.PHONE_NO, orgManagerphoneNo);

@@ -6,19 +6,23 @@ import org.cdpg.dx.aaa.organization.models.Status;
 import org.cdpg.dx.common.exception.DxValidationException;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
+import static org.cdpg.dx.common.util.DateTimeHelper.parseDateTime;
 import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
 
 public record ComputeRole(
   UUID id,
   UUID userId,
+  String userName,
   String status,
   UUID approvedBy,
-  String createdAt,
-  String updatedAt
+  LocalDateTime createdAt,
+  LocalDateTime updatedAt
 ) implements BaseEntity<ComputeRole> {
 
   public static ComputeRole fromJson(JsonObject json) {
@@ -28,14 +32,15 @@ public record ComputeRole(
           ? UUID.fromString(json.getString(Constants.COMPUTE_ROLE_ID))
           : null,
         UUID.fromString(requireNonNull(json.getString(Constants.USER_ID), Constants.USER_ID)),
+        requireNonNull(json.getString(Constants.USER_NAME),Constants.USER_NAME),
         json.getString(Constants.STATUS) != null
           ? json.getString(Constants.STATUS)
           : Status.PENDING.getStatus(),
         json.containsKey(Constants.APPROVED_BY)
           ? UUID.fromString(json.getString(Constants.APPROVED_BY))
           : null,
-        json.getString(Constants.CREATED_AT),
-        json.getString(Constants.UPDATED_AT)
+        parseDateTime(json.getString(Constants.CREATED_AT)),
+        parseDateTime(json.getString(Constants.UPDATED_AT))
       );
     } catch (IllegalArgumentException e) {
       throw new DxValidationException("Missing or invalid required field: " + e.getMessage());
@@ -47,10 +52,11 @@ public record ComputeRole(
     JsonObject json = new JsonObject();
     if (id != null) json.put(Constants.COMPUTE_ROLE_ID, id.toString());
     json.put(Constants.USER_ID, userId.toString());
+    if (userName != null) json.put(Constants.USER_NAME, userName.toString());
     if (status != null && !status.isEmpty()) json.put(Constants.STATUS, status);
     if (approvedBy != null) json.put(Constants.APPROVED_BY, approvedBy.toString());
-    if (createdAt != null && !createdAt.isEmpty()) json.put(Constants.CREATED_AT, createdAt);
-    if (updatedAt != null && !updatedAt.isEmpty()) json.put(Constants.UPDATED_AT, updatedAt);
+    if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
+    if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
     return json;
   }
 
@@ -59,10 +65,11 @@ public record ComputeRole(
     Map<String, Object> map = new HashMap<>();
     if (id != null) map.put(Constants.COMPUTE_ROLE_ID, id.toString());
     if (userId != null) map.put(Constants.USER_ID, userId.toString());
+    if  (userName!=null) map.put(Constants.USER_NAME, userName.toString());
     if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
     if (approvedBy != null) map.put(Constants.APPROVED_BY, approvedBy.toString());
-    if (createdAt != null && !createdAt.isEmpty()) map.put(Constants.CREATED_AT, createdAt);
-    if (updatedAt != null && !updatedAt.isEmpty()) map.put(Constants.UPDATED_AT, updatedAt);
+    if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
+    if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
     return map;
   }
 

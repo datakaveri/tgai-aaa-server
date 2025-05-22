@@ -13,13 +13,13 @@ public interface CreditService {
 
   Future<List<CreditRequest>> getAllPendingCreditRequests();
 
-//  Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy); //done -> on approval will create a new entry in userCredit table
+  Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy); //done -> on approval will create a new entry in userCredit table
 
   // ************ USER CREDIT *********
 
-//  Future<Boolean> deductCredits(CreditTransaction creditTransaction);
+  Future<Boolean> deductCredits(CreditTransaction creditTransaction);
 
-//  Future<Double> getBalance(UUID userId);
+  Future<Double> getBalance(UUID userId);
 
   // ************ COMPUTE ROLE **********
 
@@ -27,7 +27,7 @@ public interface CreditService {
 
   Future<List<ComputeRole>> getAllPendingComputeRequests();
 
-  Future<Boolean> updateStatus(UUID requestId, Status status,UUID approvedBy);
+  Future<Boolean> updateComputeRoleStatus(UUID requestId, Status status,UUID approvedBy);
 
   Future<Boolean> hasUserComputeAccess(UUID userId);
 }
