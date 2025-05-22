@@ -18,20 +18,29 @@
       "cosAdminUserId": "asdas"
     },
     "keycloakOptions":{
-      "keycloakRealm": "tgai",
+      "keycloakRealm": "myrealm",
       "keycloakUrl": "http://localhost:8080/",
-      "keycloakAdminClientId": "keycloak-admin",
-      "keycloakAdminClientSecret": "asdasds",
+      "keycloakAdminClientId": "admin-cli",
+      "keycloakAdminClientSecret": "",
       "keycloakAdminPoolSize": "10",
       "keycloakJwtLeeway": 90,
       "keycloakCertUrl": "http://localhost:8080/realms/myrealm/protocol/openid-connect/certs",
       "iss": "http://localhost:8080/realms/myrealm",
       "jwtIgnoreExpiry": true,
-      "jwksRefreshIntervalMs": 21600000
+      "jwksRefreshIntervalMs": 21600000,
+      "adminUsername": "admin",
+      "adminPassword": "admin"
     },
     "jwtKeystoreOptions":{
       "keystorePath": "configs/keystore.jks",
       "keystorePassword": "secret"
+    },
+    "KYCOptions": {
+      "digilockerTokenUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/1/token",
+      "digilockerAadhaarUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/3/xml/eaadhaar",
+      "clientId" :"xxxxxx",
+      "clientSecret": "xxxxxxxxxxx",
+      "redirectUri":"xxxxx"
     }
   },
   "modules": [
@@ -39,7 +48,7 @@
       "id": "org.cdpg.dx.aaa.apiserver.ApiServerVerticle",
       "verticleInstances": 1,
       "httpPort":8443,
-      "required":["postgresOptions", "commonOptions", "keycloakOptions", "jwtKeystoreOptions"],
+      "required":["postgresOptions", "commonOptions", "keycloakOptions", "jwtKeystoreOptions", "KYCOptions"],
       "poolSize": "5",
       "serverTimeoutMs": 30000,
       "corsRegexString":"^https://.+\\.iudx\\.org\\.in$"

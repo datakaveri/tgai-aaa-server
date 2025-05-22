@@ -23,15 +23,11 @@ public class KYCController implements ApiController {
 
         routerBuilder
                 .operation("get-auth-v1-kyc-confirm")
-                //.handler(ctx -> fetchRoles.fetch(ctx, Set.of()))
-                //.handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of()))
                 .handler(kycHandler::confirmKYC);
 
 
         routerBuilder
                 .operation("post-auth-v1-kyc-verify")
-                //.handler(ctx -> fetchRoles.fetch(ctx, Set.of()))
-                //.handler(ctx -> roleAuthorisationHandler.validateRole(ctx, Set.of()))
                 .handler(kycHandler::verifyKYC);
 
 

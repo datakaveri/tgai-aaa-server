@@ -26,6 +26,7 @@ public class JwksClient {
                 .requestAbs(HttpMethod.GET, certUrl)
                 .send()
                 .compose(resp -> {
+
                     if (resp.statusCode() == 200 && resp.bodyAsJsonObject().containsKey("keys")) {
                         return Future.succeededFuture(resp.bodyAsJsonObject());
                     } else {

@@ -4,9 +4,11 @@ import io.vertx.core.Future;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
+import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +24,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationUserDAO orgUserDAO;
     private final OrganizationDAO orgDAO;
     private final OrganizationJoinRequestDAO joinRequestDAO;
+    private final KeycloakUserService  keycloakUserService;
 
-    public OrganizationServiceImpl(OrganizationDAOFactory factory) {
+    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService  keycloakUserService) {
         this.createRequestDAO = factory.organizationCreateRequest();
         this.orgUserDAO = factory.organizationUserDAO();
         this.orgDAO = factory.organizationDAO();
         this.joinRequestDAO = factory.organizationJoinRequestDAO();
+        this.keycloakUserService = keycloakUserService;
     }
 
     @Override
@@ -108,6 +112,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 null
               );
 
+              // TODO need to improve this , Setting role orgid to user
+              keycloakUserService.assignRealmRoleToUser(request.requestedBy().toString(), DxRole.ORG_ADMIN);
+              keycloakUserService.setOrganisationDetails(request.requestedBy(), createdOrg.id(), createdOrg.orgName());
+
               return orgUserDAO.create(orgUser).map(user -> true);
 
             });
@@ -176,20 +184,36 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private Future<Boolean> addUserToOrganizationFromRequest(UUID requestId) {
-      return joinRequestDAO.get(requestId)
-                .compose(request -> {
-                    OrganizationUser orgUser = new OrganizationUser(
-                      null,
-                      request.organizationId(),
-                      request.userId(),
-                      Role.USER,
-                      request.jobTitle(),
-                      request.empId(),
-                      null,
-                      null,
-                      null
-                    );
-                    return orgUserDAO.create(orgUser).map(created -> true);
+        return joinRequestDAO.get(requestId)
+                .compose(joinRequest -> {
+                    UUID orgId = joinRequest.organizationId();
+                    UUID userId = joinRequest.userId();
+
+                    return orgDAO.get(orgId)
+                            .compose(organization -> {
+                                OrganizationUser newOrgUser = new OrganizationUser(
+                                        null,
+                                        orgId,
+                                        userId,
+                                        Role.USER,
+                                        joinRequest.jobTitle(),
+                                        joinRequest.empId(),
+                                        null,
+                                        null,
+                                        null
+                                );
+
+                                return orgUserDAO.create(newOrgUser)
+                                        .map(createdUser -> {
+                                            // Step 4: Call Keycloak and wrap boolean response in Future
+                                            boolean success = keycloakUserService.setOrganisationDetails(
+                                                    userId,
+                                                    orgId,
+                                                    organization.orgName()
+                                            );
+                                            return success;
+                                        });
+                            });
                 });
     }
 

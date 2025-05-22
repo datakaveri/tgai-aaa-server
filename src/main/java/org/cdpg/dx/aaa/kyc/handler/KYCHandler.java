@@ -10,6 +10,7 @@ import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
+import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
 
 public class KYCHandler {
@@ -22,6 +23,7 @@ public class KYCHandler {
     }
 
     public void verifyKYC(RoutingContext ctx) {
+        LOGGER.debug("verifyKYC: >>>>>>>>>>>>>>>>");
         User user = ctx.user();
 
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
@@ -36,13 +38,10 @@ public class KYCHandler {
             return;
         }
         kycService.getKYCData(user.subject(), code, codeVerifier)
-                .onComplete(ar -> {
-                    if (ar.succeeded()) {
-                        ctx.response().setStatusCode(200).end(ar.toString());
-                    } else {
-                        ctx.response().setStatusCode(500).end(ar.cause().getMessage());
-                    }
-                });
+                .onSuccess(res -> {
+                    ResponseBuilder.sendSuccess(ctx, res);
+                })
+                .onFailure(ctx::fail);
 
 
     }
@@ -59,7 +58,6 @@ public class KYCHandler {
         kycService.confirmKYCData(user.subject(), codeVerifier)
                 .onSuccess(res -> {
                     ResponseBuilder.sendSuccess(ctx, res);
-
                 })
                 .onFailure(ctx::fail);
     }
