@@ -76,13 +76,13 @@ public class CreditHandler {
       .onSuccess(approved -> {
         if (approved) {
 
-          processSuccess(ctx, responseObject, 200, "Approved Organisation Join Request");
+          processSuccess(ctx, responseObject, 200, "Approved  Compute Role Compute Role Request");
         } else {
 
           processFailure(ctx, 400, "Request Not Found");
         }
       })
-      .onFailure(err -> processFailure(ctx, 500, "Failed to approve Organisation Join Request"));
+      .onFailure(err -> processFailure(ctx, 500, "Failed to approve Compute Role Request"));
 
   }
 
@@ -149,13 +149,13 @@ public class CreditHandler {
       .onSuccess(approved -> {
         if (approved) {
 
-          processSuccess(ctx, responseObject, 200, "Approved Organisation Join Request");
+          processSuccess(ctx, responseObject, 200, "Approved Compute Role Request");
         } else {
 
           processFailure(ctx, 400, "Request Not Found");
         }
       })
-      .onFailure(err -> processFailure(ctx, 500, "Failed to approve Organisation Join Request"));
+      .onFailure(err -> processFailure(ctx, 500, "Failed to approve  Compute Role Request"));
 
   }
 
