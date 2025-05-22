@@ -20,9 +20,7 @@ pipeline {
           echo 'Pulled - ' + env.GIT_BRANCH
           // Switch to Java 21 temporarily for the build
           sh 'sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java'
-          devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
           deplImage = docker.build( deplRegistry, "-f ./docker/depl.dockerfile .")
-          testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
         }
       }
       post {
