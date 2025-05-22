@@ -33,6 +33,6 @@ public class ControllerFactory {
 
     //TODO create other controllers
 
-    return List.of(organizationController);
+    return List.of(organizationController, kycController);
   }
 }

@@ -1,12 +1,18 @@
 package org.cdpg.dx.keyclock.service;
 
-
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
+
+import java.util.Collections;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,25 +26,12 @@ public class KeycloakUserService {
     private final Keycloak keycloak;
     private final String realm;
 
-//    "keycloakRealm": "myrealm",
-//            "keycloakUrl": "http://localhost:8080/",
-//            "keycloakAdminClientId": "admin-cli",
-//            "keycloakAdminClientSecret": "",
-//            "keycloakAdminPoolSize": "10",
-//            "keycloakJwtLeeway": 90,
-//            "keycloakCertUrl": "http://localhost:8080/realms/myrealm/protocol/openid-connect/certs",
-//            "iss": "http://localhost:8080/realms/myrealm",
-//            "jwtIgnoreExpiry": true,
-//            "jwksRefreshIntervalMs": 21600000,
-//            "adminUsername": "admin",
-//            "adminPassword": "admin"
-
     public KeycloakUserService(JsonObject config) {
         this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(config.getString("keycloakUrl"))
                 .realm("master") // Auth realm to log in as admin
                 .clientId(config.getString("keycloakAdminClientId"))
-                //.clientSecret(config.getString("clientSecret"))
+                //.clientSecret(config.getString("clientSecret")) // Only needed for confidential clients
                 .username(config.getString("adminUsername"))
                 .password(config.getString("adminPassword"))
                 .grantType("password")
@@ -48,45 +41,114 @@ public class KeycloakUserService {
     }
 
     /**
-     * Reusable method to update a user's custom attribute.
+     * Reusable method to update multiple custom attributes for a user.
      */
-    private boolean updateUserAttribute(String userId, String key, String value) {
+    private boolean updateUserAttributes(String userId, Map<String, String> attributesToUpdate) {
         try {
-            UserRepresentation user = keycloak.realm(realm).users().get(userId).toRepresentation();
+            UserResource userResource = keycloak.realm(realm).users().get(userId);
+            UserRepresentation user = userResource.toRepresentation();
 
-            Map<String, List<String>> attributes = user.getAttributes();
-            if (attributes == null) {
-                attributes = new HashMap<>();
+            Map<String, List<String>> currentAttributes = user.getAttributes();
+            if (currentAttributes == null) {
+                currentAttributes = new HashMap<>();
             }
 
-            attributes.put(key, List.of(value));
-            user.setAttributes(attributes);
-            keycloak.realm(realm).users().get(userId).update(user);
+            for (Map.Entry<String, String> entry : attributesToUpdate.entrySet()) {
+                currentAttributes.put(entry.getKey(), List.of(entry.getValue()));
+            }
 
-            LOGGER.info("Updated attribute '{}' to '{}' for user {}", key, value, userId);
+            user.setAttributes(currentAttributes);
+
+            LOGGER.info("Attributes before update for user {}: {}", userId, currentAttributes);
+            userResource.update(user);
+
+            // Confirm update
+            UserRepresentation updated = userResource.toRepresentation();
+            Map<String, List<String>> updatedAttributes = updated.getAttributes();
+
+            for (Map.Entry<String, String> entry : attributesToUpdate.entrySet()) {
+                String key = entry.getKey();
+                String expectedValue = entry.getValue();
+                String actualValue = updatedAttributes.getOrDefault(key, List.of("")).get(0);
+                if (!expectedValue.equals(actualValue)) {
+                    LOGGER.warn("Attribute {} update mismatch for user {}. Expected: {}, Found: {}", key, userId, expectedValue, actualValue);
+                    return false;
+                }
+            }
+
+            LOGGER.info("Successfully updated attributes for user {}: {}", userId, attributesToUpdate.keySet());
             return true;
 
         } catch (Exception e) {
-            LOGGER.error("Error updating attribute '{}' for user {}: {}", key, userId, e.getMessage(), e);
+            LOGGER.error("Error updating attributes {} for user {}: {}", attributesToUpdate.keySet(), userId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Set both `organisation_id` and `organisation_name` for a user.
+     */
+    public boolean setOrganisationDetails(UUID userId, UUID orgId, String orgName) {
+        if (orgId == null || orgName == null || orgName.isBlank()) {
+            LOGGER.warn("Invalid organisation_id or organisation_name for user {}", userId);
+            return false;
         }
 
-        return false;
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("organisation_id", orgId.toString());
+        attributes.put("organisation_name", orgName);
+
+        LOGGER.debug("Setting organisation_id and organisation_name for user {} to {}, {}", userId, orgId, orgName);
+        return updateUserAttributes(userId.toString(), attributes);
     }
 
-    // Public method to set kyc_verified to true
-    public boolean setKycVerifiedTrue(String userId) {
-        return updateUserAttribute(userId, "kyc_verified", "true");
+    public boolean assignRealmRoleToUser(String userId, DxRole dxRole) {
+        try {
+            RealmResource realmResource = keycloak.realm(realm);
+            UsersResource usersResource = realmResource.users();
+            RoleRepresentation role = realmResource.roles().get(dxRole.getRole()).toRepresentation();
+
+            if (role == null) {
+                LOGGER.warn("Role '{}' not found in realm '{}'", dxRole.getRole(), realm);
+                return false;
+            }
+
+            usersResource.get(userId).roles().realmLevel().add(Collections.singletonList(role));
+            LOGGER.info("Assigned role '{}' to user '{}'", dxRole.getRole(), userId);
+            return true;
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to assign role '{}' to user '{}': {}", dxRole.getRole(), userId, e.getMessage(), e);
+            return false;
+        }
     }
 
-    // Public method to set kyc_verified to false
+    public boolean setKycVerifiedTrueWithData(String userId, JsonObject aadhaarKycJson) {
+        if (aadhaarKycJson == null) {
+            LOGGER.warn("aadhaarKycJson is null for user {}", userId);
+            return false;
+        }
+
+        String minifiedJson = aadhaarKycJson.encode();
+        LOGGER.debug("Setting kyc_verified to true and aadhaar_kyc_data for user {}: {}", userId, minifiedJson);
+
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("kyc_verified", "true");
+        attributes.put("aadhaar_kyc_data", minifiedJson);
+
+        return updateUserAttributes(userId, attributes);
+    }
+
+    /**
+     * Set `kyc_verified` to "false" and clear `aadhaar_kyc_data` by setting it to an empty JSON.
+     */
     public boolean setKycVerifiedFalse(String userId) {
-        return updateUserAttribute(userId, "kyc_verified", "false");
-    }
+        LOGGER.debug("Setting kyc_verified to false and clearing aadhaar_kyc_data for user {}", userId);
 
-    // Public method to set organisation_id
-    public boolean setOrganisationId(UUID userId, UUID orgId) {
-        LOGGER.debug("Setting organisation_id for user {} to {}", userId, orgId);
-        return updateUserAttribute(userId.toString(), "organisation_id", orgId.toString());
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("kyc_verified", "false");
+        attributes.put("aadhaar_kyc_data", "{}");
+
+        return updateUserAttributes(userId, attributes);
     }
 }
-

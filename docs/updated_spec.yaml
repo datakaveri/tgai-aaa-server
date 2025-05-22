@@ -4742,8 +4742,13 @@ paths:
         '200':
           description: OK
       operationId: post-auth-v1-kyc-verify
-      security:
-        - authorization: []
+      parameters:
+        - schema:
+            type: string
+          in: header
+          description: Keycloak Issued Token
+          name: Authorization
+          required: true
       requestBody:
         content:
           application/json:
@@ -4752,12 +4757,10 @@ paths:
               properties:
                 auth_code:
                   type: string
-                  x-stoplight:
-                    id: eikz9ldpfspdn
                 code_verifier:
                   type: string
-                  x-stoplight:
-                    id: ezofp921rrnqi
+      security:
+        - authorization: []
   '/auth/v1/kyc/confirm/{id}':
     get:
       summary: Confirm KYC verification
@@ -4768,12 +4771,12 @@ paths:
       operationId: get-auth-v1-kyc-confirm
       security:
         - authorization: []
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
+      parameters:
+        - schema:
+            type: string
+          name: id
+          in: path
+          required: true
 components:
   schemas:
     RequestToken:

@@ -17,6 +17,7 @@ import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.database.postgres.service.PostgresService;
+import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
 public class KYCFactory {
     private static final Logger LOGGER = LogManager.getLogger(KYCFactory.class);
@@ -27,7 +28,9 @@ public class KYCFactory {
 
         WebClient webClient = WebClient.create(vertx);
         CacheService cacheService = new CacheServiceImpl();
-        KYCService kycService = new KYCServiceImpl(webClient, cacheService, config);
+        KeycloakUserService  keycloakUserService = new KeycloakUserService(config);
+
+        KYCService kycService = new KYCServiceImpl(webClient, cacheService, keycloakUserService, config);
         return new KYCHandler(kycService);
     }
 }

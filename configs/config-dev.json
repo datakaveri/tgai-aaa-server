@@ -34,6 +34,13 @@
     "jwtKeystoreOptions":{
       "keystorePath": "configs/keystore.jks",
       "keystorePassword": "secret"
+    },
+    "KYCOptions": {
+      "digilockerTokenUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/1/token",
+      "digilockerAadhaarUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/3/xml/eaadhaar",
+      "clientId" :"xxxxxx",
+      "clientSecret": "xxxxxxxxxxx",
+      "redirectUri":"xxxxx"
     }
   },
   "modules": [
@@ -41,7 +48,7 @@
       "id": "org.cdpg.dx.aaa.apiserver.ApiServerVerticle",
       "verticleInstances": 1,
       "httpPort":8443,
-      "required":["postgresOptions", "commonOptions", "keycloakOptions", "jwtKeystoreOptions"],
+      "required":["postgresOptions", "commonOptions", "keycloakOptions", "jwtKeystoreOptions", "KYCOptions"],
       "poolSize": "5",
       "serverTimeoutMs": 30000,
       "corsRegexString":"^https://.+\\.iudx\\.org\\.in$"
