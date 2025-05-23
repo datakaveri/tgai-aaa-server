@@ -647,10 +647,10 @@ paths:
       security:
         - authorization: []
     parameters: []
-  /auth/v1/user/roles:
+  /auth/v1/user:
     post:
       summary: Add roles
-      operationId: post-auth-v1-user-roles
+      operationId: post-auth-v1-roles
       responses:
         '200':
           description: The roles have been added.
@@ -906,7 +906,7 @@ paths:
           description: Unauthorized
         '404':
           description: Not Found
-      operationId: put-auth-v1-user-roles
+      operationId: put-auth-v1-roles
       parameters:
         - schema:
             type: string
@@ -934,7 +934,7 @@ paths:
                     id: rsrdhwzns1nq3
     get:
       summary: List User Roles
-      operationId: get-auth-v1-user-roles
+      operationId: get-auth-v1-roles
       responses:
         '200':
           description: Successfully list user information and their approved roles
@@ -1091,6 +1091,7 @@ paths:
         - User APIs
       security:
         - authorization: []
+    parameters: []
   /auth/v1/user/search:
     get:
       summary: Search for User - Trustee
@@ -3974,7 +3975,7 @@ paths:
           description: Organisation ID
       security:
         - authorization: []
-  /auth/v1/organisations/{id}/join_requests:
+  '/auth/v1/organisations/{id}/join_requests':
     get:
       summary: Get all requests for an organisation
       tags:
@@ -3992,7 +3993,7 @@ paths:
             type: string
             format: uuid
       security:
-        - authorization: [ ]
+        - authorization: []
   /auth/v1/organisations/join/approve:
     post:
       summary: Approve joining of organisation
@@ -4667,7 +4668,8 @@ paths:
   /auth/v1/computerole:
     get:
       summary: Get All Pending ComputeRole Requests
-      tags: []
+      tags:
+        - Compute APIs
       responses:
         '200':
           description: OK
@@ -4687,7 +4689,8 @@ paths:
         - authorization: []
     post:
       summary: Create Compute Role Request
-      tags: []
+      tags:
+        - Compute APIs
       responses:
         '200':
           description: OK
@@ -4702,7 +4705,8 @@ paths:
         - authorization: []
     put:
       summary: Update Compute Roles
-      tags: []
+      tags:
+        - Compute APIs
       responses:
         '200':
           description: OK
@@ -4737,7 +4741,8 @@ paths:
   /auth/v1/kyc/verify:
     post:
       summary: Verify KYC
-      tags: []
+      tags:
+        - KYC APIs
       responses:
         '200':
           description: OK
@@ -4764,7 +4769,8 @@ paths:
   '/auth/v1/kyc/confirm/{id}':
     get:
       summary: Confirm KYC verification
-      tags: []
+      tags:
+        - KYC APIs
       responses:
         '200':
           description: OK
@@ -4777,6 +4783,49 @@ paths:
           name: id
           in: path
           required: true
+  /auth/v1/user/roles:
+    parameters: []
+    post:
+      summary: Create a Provider Role Request
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: post-auth-v1-user-roles
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                org_id:
+                  type: string
+                  x-stoplight:
+                    id: l9svqkwc3ik2j
+    put:
+      summary: Approve a Provider Role Request
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: put-auth-v1-user-roles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                req_id:
+                  type: string
+                  x-stoplight:
+                    id: cgwxn1dvphexr
+                status:
+                  type: string
+                  x-stoplight:
+                    id: idttjmml4yni9
+      security:
+        - authorization: []
 components:
   schemas:
     RequestToken:

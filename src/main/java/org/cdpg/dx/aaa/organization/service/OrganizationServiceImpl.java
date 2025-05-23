@@ -1,6 +1,7 @@
 package org.cdpg.dx.aaa.organization.service;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
@@ -24,6 +25,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationUserDAO orgUserDAO;
     private final OrganizationDAO orgDAO;
     private final OrganizationJoinRequestDAO joinRequestDAO;
+    private final ProviderRoleRequestDAO providerRequestDAO;
     private final KeycloakUserService  keycloakUserService;
 
     public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService  keycloakUserService) {
@@ -31,6 +33,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.orgUserDAO = factory.organizationUserDAO();
         this.orgDAO = factory.organizationDAO();
         this.joinRequestDAO = factory.organizationJoinRequestDAO();
+        this.providerRequestDAO = factory.providerRoleRequestDAO();
         this.keycloakUserService = keycloakUserService;
     }
 
@@ -278,6 +281,43 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Future<OrganizationUser> getOrganizationUserInfo(UUID userId) {
         return orgUserDAO.get(userId);
+    }
+
+    @Override
+    public Future<ProviderRoleRequest> createProviderRequest(ProviderRoleRequest providerRoleRequest) {
+        return providerRequestDAO.create(providerRoleRequest);
+    }
+
+    @Override
+    public Future<Boolean> updateProviderRequestStatus(UUID requestId, Status status) {
+        Map<String, Object> conditionMap = Map.of(
+                Constants.ORG_CREATE_ID, requestId.toString()
+        );
+        Map<String, Object> updateDataMap = Map.of(
+                Constants.STATUS, status.getStatus()
+        );
+
+        //Doubt
+        return providerRequestDAO.update(conditionMap, updateDataMap).
+                compose(updated -> {
+                    if (!updated) return Future.failedFuture("Unexpected Error");
+                    if (Status.APPROVED.getStatus().equals(status.getStatus())) {
+                        keycloakUserService.assignRealmRoleToUser(
+                                updated.toString(),
+                                DxRole.PROVIDER
+                        );
+
+                    }
+                    return Future.succeededFuture(true);
+                }).recover(err -> {
+                    BaseDxException dxEx = BaseDxException.from(err);
+                    if (dxEx instanceof NoRowFoundException) {
+                        return Future.failedFuture(
+                                new DxNotFoundException("No request found with given ID", dxEx)
+                        );
+                    }
+                    return Future.failedFuture(dxEx);
+                });
     }
 
     @Override

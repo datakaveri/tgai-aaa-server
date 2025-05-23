@@ -5,7 +5,7 @@ import io.vertx.core.Future;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.models.Role;
 import org.cdpg.dx.aaa.organization.models.Status;
-
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 import java.util.UUID;
@@ -61,8 +61,16 @@ public interface OrganizationService {
 
   Future<OrganizationUser> getOrganizationUserInfo(UUID userId);
 
+
+
   // to check - info about the users
  // Future<OrganizationUser> getOrganizationUserById(UUID userId);
+
+  //############################Provider Request#############################
+
+  Future<ProviderRoleRequest> createProviderRequest(ProviderRoleRequest providerRoleRequest);
+
+  Future<Boolean> updateProviderRequestStatus(UUID requestId, Status status);
 
 
 }

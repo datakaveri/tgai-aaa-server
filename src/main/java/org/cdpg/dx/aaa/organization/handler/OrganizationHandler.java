@@ -262,6 +262,28 @@ public class OrganizationHandler {
 
     }
 
+    public void createProviderRequest(RoutingContext ctx) {
+        JsonObject OrgRequestJson = ctx.body().asJsonObject();
+        User user = ctx.user();
+        OrgRequestJson.put("user_id", user.subject());
+        ProviderRoleRequest providerRoleRequest = ProviderRoleRequest.fromJson(OrgRequestJson);
+
+        organizationService.createProviderRequest(providerRoleRequest)
+                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+                .onFailure(ctx::fail);
+    }
+
+    public void updateProviderRequest(RoutingContext ctx) {
+        JsonObject OrgRequestJson = ctx.body().asJsonObject();
+
+        Status status = Status.fromString(OrgRequestJson.getString("status"));
+
+        organizationService.updateProviderRequestStatus(UUID.fromString(OrgRequestJson.getString("req_id")),status)
+                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+                .onFailure(ctx::fail);
+    }
+
+
     public Future<Void> processFailure(RoutingContext ctx, int statusCode, String msg) {
 
         if (statusCode == 400) {

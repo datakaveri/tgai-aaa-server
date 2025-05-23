@@ -17,4 +17,6 @@ public interface OrganizationUserDAO extends BaseDAO<OrganizationUser> {
 
     Future<Boolean> isOrgAdmin(UUID orgid, UUID userid);
 
+
+
 }
