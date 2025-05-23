@@ -6,6 +6,8 @@ import org.cdpg.dx.aaa.organization.util.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
+
 public record UpdateOrgDTO(
         String orgName,
         String orgLogo,
@@ -34,6 +36,23 @@ public record UpdateOrgDTO(
     if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt);
 
     return map;
+  }
+
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+
+    json.put(Constants.ORG_NAME, orgName);
+    if (orgLogo != null && !orgLogo.isEmpty()) json.put(Constants.ORG_LOGO, orgLogo);
+    json.put(Constants.ENTITY_TYPE, entityType);
+    json.put(Constants.ORG_SECTOR, orgSector);
+    json.put(Constants.ORG_WEBSITE, websiteLink);
+    json.put(Constants.ORG_ADDRESS, address);
+    json.put(Constants.CERTIFICATE, certificatePath);
+    json.put(Constants.PANCARD, pancardPath);
+    if (relevantDocPath != null && !relevantDocPath.isEmpty()) json.put(Constants.RELEVANT_DOC, relevantDocPath);
+    if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(String.valueOf(FORMATTER)));
+
+    return json;
   }
 
   public static UpdateOrgDTO fromJson(JsonObject orgDetails) {

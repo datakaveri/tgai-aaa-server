@@ -52,6 +52,7 @@ public final class Constants {
   public static final String EMP_ID="emp_id";
   public static final String JOB_TITLE="job_title";
   public static final String PHONE_NO="phone_no";
+  public static final String USER_NAME = "user_name";
 
 
 

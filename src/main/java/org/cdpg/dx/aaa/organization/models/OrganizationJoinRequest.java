@@ -19,6 +19,7 @@ public record OrganizationJoinRequest(
   UUID id,
   UUID organizationId,
   UUID userId,
+  String userName,
   String status,
   String jobTitle,
   String empId,
@@ -34,6 +35,7 @@ public record OrganizationJoinRequest(
           : null,
         UUID.fromString(requireNonNull(orgJoinRequest.getString(Constants.ORGANIZATION_ID), Constants.ORGANIZATION_ID)),
         UUID.fromString(requireNonNull(orgJoinRequest.getString(Constants.USER_ID), Constants.USER_ID)),
+        requireNonNull(orgJoinRequest.getString(Constants.USER_NAME),Constants.USER_NAME),
         Optional.ofNullable(orgJoinRequest.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
         requireNonNull(orgJoinRequest.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
         requireNonNull(orgJoinRequest.getString(Constants.EMP_ID), Constants.EMP_ID),
@@ -52,6 +54,7 @@ public record OrganizationJoinRequest(
     if (id != null) json.put(Constants.ORG_JOIN_ID, id.toString());
     json.put(Constants.ORGANIZATION_ID, organizationId.toString());
     json.put(Constants.USER_ID, userId.toString());
+    json.put(Constants.USER_NAME, userName.toString());
     json.put(Constants.STATUS, status);
     json.put(Constants.JOB_TITLE, jobTitle);
     json.put(Constants.EMP_ID, empId);
@@ -68,6 +71,7 @@ public record OrganizationJoinRequest(
     if (id != null) map.put(Constants.ORG_JOIN_ID, id.toString());
     map.put(Constants.ORGANIZATION_ID, organizationId.toString());
     map.put(Constants.USER_ID, userId.toString());
+    map.put(Constants.USER_NAME, userName.toString());
     if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
     if (jobTitle != null && !jobTitle.isEmpty()) map.put(Constants.JOB_TITLE, jobTitle);
     if (empId != null && !empId.isEmpty()) map.put(Constants.EMP_ID, empId);

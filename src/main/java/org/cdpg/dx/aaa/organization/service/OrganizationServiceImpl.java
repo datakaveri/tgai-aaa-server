@@ -67,7 +67,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return createRequestDAO.update(conditionMap, updateDataMap).
                 compose(updated -> {
                     if (!updated) return Future.failedFuture("Unexpected Error");
-                    if (Status.APPROVED.getStatus().equals(status.getStatus())) {
+                    if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return createOrganizationFromRequest(requestId);
                     }
                     return Future.succeededFuture(true);
@@ -171,7 +171,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return joinRequestDAO.update(conditionMap, updateDataMap)
                 .compose(approved -> {
                     if (!approved) return Future.succeededFuture(false);
-                    if (Status.APPROVED.getStatus().equals(status.getStatus())) {
+                    if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return addUserToOrganizationFromRequest(requestId);
                     }
                     return Future.succeededFuture(true);
@@ -231,7 +231,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
   @Override
   public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
-    Map<String, Object> filterMap = Map.of(Constants.ORG_ID, orgId.toString());
+    Map<String, Object> filterMap = Map.of(Constants.ORGANIZATION_ID, orgId.toString());
 
     return orgUserDAO.getAllWithFilters(filterMap);
   }

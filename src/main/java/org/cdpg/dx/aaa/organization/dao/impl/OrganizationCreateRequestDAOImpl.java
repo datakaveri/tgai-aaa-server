@@ -22,15 +22,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.cdpg.dx.aaa.organization.util.Constants.ORGANIZATION_TABLE;
-import static org.cdpg.dx.aaa.organization.util.Constants.ORG_ID;
+import static org.cdpg.dx.aaa.organization.util.Constants.*;
 
 public class OrganizationCreateRequestDAOImpl extends AbstractBaseDAO<OrganizationCreateRequest> implements OrganizationCreateRequestDAO {
 
     private static final Logger LOGGER = LogManager.getLogger(OrganizationCreateRequestDAOImpl.class);
 
     public OrganizationCreateRequestDAOImpl(PostgresService postgresService) {
-        super(postgresService, Constants.ORG_CREATE_REQUEST_TABLE, ORG_ID, OrganizationCreateRequest::fromJson);
+        super(postgresService, Constants.ORG_CREATE_REQUEST_TABLE, ORG_CREATE_ID, OrganizationCreateRequest::fromJson);
     }
 
 }
