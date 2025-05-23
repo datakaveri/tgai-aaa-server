@@ -18,17 +18,7 @@ pipeline {
       steps{
         script {
           echo 'Pulled - ' + env.GIT_BRANCH
-          // Switch to Java 21 temporarily for the build
-          sh 'sudo update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java'
-          devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
           deplImage = docker.build( deplRegistry, "-f ./docker/depl.dockerfile .")
-          testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
-        }
-      }
-      post {
-        always {
-          // Reset Java version to 11
-          sh 'sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java'
         }
       }
     }
@@ -52,7 +42,6 @@ pipeline {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("tgdex-5.6.0-${env.GIT_HASH}")
                 deplImage.push("tgdex-5.6.0-${env.GIT_HASH}")
               }
             }
