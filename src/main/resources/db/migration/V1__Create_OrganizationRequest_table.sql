@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS organization_join_requests (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
     organization_id UUID NOT NULL REFERENCES organizations(id),
     user_id UUID NOT NULL UNIQUE,
+    user_name VARCHAR NOT NULL,
     job_title VARCHAR NOT NULL,
     emp_id VARCHAR NOT NULL,
     status VARCHAR NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
@@ -64,6 +65,7 @@ CREATE TABLE IF NOT EXISTS organization_create_requests (
     certificate_path VARCHAR NOT NULL,
     pancard_path VARCHAR NOT NULL,
     relevant_doc_path VARCHAR,
+    user_name VARCHAR NOT NULL,
     emp_id VARCHAR NOT NULL,
     job_title VARCHAR NOT NULL,
     phone_no VARCHAR NOT NULL,
@@ -71,3 +73,5 @@ CREATE TABLE IF NOT EXISTS organization_create_requests (
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+
