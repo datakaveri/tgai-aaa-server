@@ -100,7 +100,7 @@ public class OrganizationHandler {
         User user = ctx.user();
         OrgRequestJson.put("user_id", user.subject());
 
-        String userName = user.principal().getString("user_name");
+        String userName = user.principal().getString("name");
         OrgRequestJson.put("user_name", userName);
 
         System.out.println("OrgRequestJson: " + OrgRequestJson);
@@ -149,7 +149,7 @@ public class OrganizationHandler {
         User user = ctx.user();
         OrgRequestJson.put("requested_by", user.subject());
 
-        String userName = user.principal().getString("user_name");
+        String userName = user.principal().getString("name");
         OrgRequestJson.put("user_name", userName);
 
        OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
