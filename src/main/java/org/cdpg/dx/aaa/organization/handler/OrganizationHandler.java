@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
@@ -75,14 +76,12 @@ public class OrganizationHandler {
         organizationService.updateOrganizationJoinRequestStatus(requestId, status)
                 .onSuccess(approved -> {
                     if (approved) {
-
-                        processSuccess(ctx, responseObject, 200, "Approved Organisation Join Request");
+                        ResponseBuilder.sendSuccess(ctx,  "Approved Organisation Join Request");
                     } else {
-
-                        processFailure(ctx, 400, "Request Not Found");
+                        ctx.fail(new DxNotFoundException("Request Not Found"));
                     }
                 })
-                .onFailure(err -> processFailure(ctx, 500, "Failed to approve Organisation Join Request"));
+                .onFailure(ctx::fail);
 
     }
 
@@ -92,33 +91,6 @@ public class OrganizationHandler {
         organizationService.getOrganizationPendingJoinRequests(orgId)
                 .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
                 .onFailure(ctx::fail);
-
-//        organizationService.getOrganizationPendingJoinRequests(orgId)
-//                .onSuccess(requests -> {
-//                    JsonArray jsonArray = new JsonArray();
-//                    List<Future> futures = new ArrayList<>();
-//                    for (OrganizationJoinRequest req : requests) {
-//                        JsonObject requestJson = req.toJson();
-//                        String keycloak_id = requestJson.getString("user_id");
-//
-//                        Future<Void> future = keycloakHandler.getUsernameByKeycloakId(keycloak_id)
-//                                .onSuccess(userdetails -> {
-//                                    requestJson.put("requested_by_username", userdetails.getString("username"));
-//                                    requestJson.put("requested_by_email", userdetails.getString("email"));
-//                                })
-//                                .onFailure(err -> {
-//                                    LOGGER.error("Failed to fetch username for keycloak id: " + keycloak_id);
-//                                })
-//                                .mapEmpty();
-//                        futures.add(future);
-//                        jsonArray.add(requestJson);
-//                    }
-//                    CompositeFuture.all(futures)
-//                            .onSuccess(v -> processSuccess(ctx, jsonArray, 200, "Retrieved Pending Join Requests"))
-//                            .onFailure(err -> processFailure(ctx, 500, "Failed to fetch usernames for pending join requests"));
-//                })
-//                .onFailure(err -> processFailure(ctx, 500, "Failed to fetch pending join requests"));
-
     }
 
     public void joinOrganisationRequest(RoutingContext ctx) {
@@ -206,12 +178,12 @@ public class OrganizationHandler {
         organizationService.deleteOrganizationUser(orgId, userId)
                 .onSuccess(deleted -> {
                     if (deleted) {
-                        processSuccess(ctx, responseObject, 200, "Deleted Organisation User");
+                        ResponseBuilder.sendSuccess(ctx, "Deleted Organisation User");
                     } else {
-                        processFailure(ctx, 400, "Organisation User Not Found");
+                        ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
                     }
                 })
-                .onFailure(err -> processFailure(ctx, 500, "Failed to Delete Organisation User"));
+                .onFailure(ctx::fail);
 
     }
 
@@ -223,14 +195,11 @@ public class OrganizationHandler {
         orgId = UUID.fromString(idParam);
 
         organizationService.getOrganizationUsers(orgId)
-                .onSuccess(requests -> {
-                    JsonArray jsonArray = new JsonArray();
-                    for (OrganizationUser req : requests) {
-                        jsonArray.add(req.toJson());
-                    }
-                    processSuccess(ctx, jsonArray, 200, "Retrieved Organisation Users");
+                .onSuccess(users -> {
+
+                    ResponseBuilder.sendSuccess(ctx, users);
                 })
-                .onFailure(err -> processFailure(ctx, 500, "Failed to fetch organisation users"));
+                .onFailure(ctx::fail);
 
     }
 
@@ -257,12 +226,12 @@ public class OrganizationHandler {
         organizationService.updateUserRole(orgId, userId, role)
                 .onSuccess(updated -> {
                     if (updated) {
-                        processSuccess(ctx, new JsonObject(), 200, "Updated Organisation User Role");
+                        ResponseBuilder.sendSuccess(ctx,"Updated Organisation User Role");
                     } else {
-                        processFailure(ctx, 400, "Organisation User Not Found");
+                        ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
                     }
                 })
-                .onFailure(err -> processFailure(ctx, 500, "Failed to Update Organisation User Role"));
+                .onFailure(ctx::fail);;
 
     }
 
@@ -273,79 +242,18 @@ public class OrganizationHandler {
         ProviderRoleRequest providerRoleRequest = ProviderRoleRequest.fromJson(OrgRequestJson);
 
         organizationService.createProviderRequest(providerRoleRequest)
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, "Created Request"))
                 .onFailure(ctx::fail);
     }
 
     public void updateProviderRequest(RoutingContext ctx) {
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
-
+        UUID reqId = UUID.fromString(OrgRequestJson.getString("req_id"));
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
-        organizationService.updateProviderRequestStatus(UUID.fromString(OrgRequestJson.getString("req_id")),status)
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+        organizationService.updateProviderRequestStatus(reqId,status)
+                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, "Provider role updated"))
                 .onFailure(ctx::fail);
     }
 
-
-    public Future<Void> processFailure(RoutingContext ctx, int statusCode, String msg) {
-
-        if (statusCode == 400) {
-
-            return ctx.response()
-                    .setStatusCode(statusCode)
-                    .putHeader("Content-Type", "application/json")
-                    .end(new JsonObject()
-                            .put("type", "urn:dx:as:MissingInformation")
-                            .put("title", "Not Found")
-                            .put("detail", msg)
-                            .encode());
-        } else if (statusCode == 401) {
-            return ctx.response()
-                    .setStatusCode(statusCode)
-                    .putHeader("Content-Type", "application/json")
-                    .end(new JsonObject()
-                            .put("type", "urn:dx:as:InvalidAuthenticationToken")
-                            .put("title", "Token Authentication Failed")
-                            .put("detail", msg)
-                            .encode());
-        } else {
-            return ctx.response()
-                    .setStatusCode(statusCode)
-                    .putHeader("Content-Type", "application/json")
-                    .end(new JsonObject()
-                            .put("type", "urn:dx:as:InternalServerError")
-                            .put("title", "Internal Server Error")
-                            .put("detail", msg)
-                            .encode());
-        }
-    }
-
-    public Future<Void> processSuccess(RoutingContext ctx, JsonObject results, int statusCode, String msg) {
-
-
-        JsonObject response = new JsonObject()
-                .put("type", "urn:dx:as:Success")
-                .put("title", msg)
-                .put("results", results);
-
-        return ctx.response()
-                .setStatusCode(statusCode)
-                .putHeader("Content-Type", "application/json")
-                .end(response.encode());
-    }
-
-    public Future<Void> processSuccess(RoutingContext ctx, JsonArray results, int statusCode, String msg) {
-
-
-        JsonObject response = new JsonObject()
-                .put("type", "urn:dx:as:Success")
-                .put("title", msg)
-                .put("results", results);
-
-        return ctx.response()
-                .setStatusCode(statusCode)
-                .putHeader("Content-Type", "application/json")
-                .end(response.encode());
-    }
 }

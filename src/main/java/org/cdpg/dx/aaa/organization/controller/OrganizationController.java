@@ -81,12 +81,12 @@ public class OrganizationController implements ApiController {
 
         routerBuilder
                 .operation("post-auth-v1-user-roles")
-                .handler(organizationHandler::createProviderRoleRequest);
+                .handler(organizationHandler::createProviderRequest);
 
         routerBuilder
                 .operation("put-auth-v1-user-roles")
                 .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
-                .handler(organizationHandler::updateProviderRoleRequest);
+                .handler(organizationHandler::updateProviderRequest);
 
 
     }

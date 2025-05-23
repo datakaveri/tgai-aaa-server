@@ -135,10 +135,52 @@ public class KYCServiceImpl implements KYCService {
         try {
             JSONObject jsonObject = XML.toJSONObject(xmlData);
             Map<String, Object> map = jsonObject.toMap();
-            return new JsonObject(map).getJsonObject("Certificate")
-                    .getJsonObject("CertificateData")
-                    .getJsonObject("KycRes")
-                    .getJsonObject("UidData");
+
+            JsonObject root = new JsonObject(map);
+            JsonObject certificate = root.getJsonObject("Certificate");
+            if (certificate == null) {
+                throw new DxValidationException("Missing 'Certificate' field in Aadhaar XML.");
+            }
+
+            JsonObject certificateData = certificate.getJsonObject("CertificateData");
+            if (certificateData == null) {
+                throw new DxValidationException("Missing 'CertificateData' field in Aadhaar XML.");
+            }
+
+            JsonObject kycRes = certificateData.getJsonObject("KycRes");
+            if (kycRes == null) {
+                throw new DxValidationException("Missing 'KycRes' field in Aadhaar XML.");
+            }
+
+            JsonObject uidData = kycRes.getJsonObject("UidData");
+            if (uidData == null) {
+                throw new DxValidationException("Missing 'UidData' field in Aadhaar XML.");
+            }
+
+            // Extract only the required fields
+            JsonObject result = new JsonObject();
+            if (uidData.containsKey("uid")) {
+                result.put("uid", uidData.getString("uid"));
+            } else {
+                throw new DxValidationException("Missing 'uid' field in Aadhaar XML.");
+            }
+
+            if (uidData.containsKey("Poa")) {
+                result.put("Poa", uidData.getJsonObject("Poa"));
+            }
+
+            if (uidData.containsKey("LData")) {
+                result.put("LData", uidData.getJsonObject("LData"));
+            }
+
+            if (uidData.containsKey("Poi")) {
+                result.put("Poi", uidData.getJsonObject("Poi"));
+            }
+
+            return result;
+
+        } catch (DxValidationException ve) {
+            throw ve; // rethrow explicitly known validation exceptions
         } catch (Exception e) {
             LOGGER.error("Error while parsing Aadhaar XML data", e);
             throw new DxValidationException("Invalid Aadhaar XML format");

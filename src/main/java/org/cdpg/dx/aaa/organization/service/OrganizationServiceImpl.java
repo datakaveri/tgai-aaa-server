@@ -297,19 +297,30 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Constants.STATUS, status.getStatus()
         );
 
-        //Doubt
-        return providerRequestDAO.update(conditionMap, updateDataMap).
-                compose(updated -> {
-                    if (!updated) return Future.failedFuture("Unexpected Error");
-                    if (Status.APPROVED.getStatus().equals(status.getStatus())) {
-                        keycloakUserService.assignRealmRoleToUser(
-                                updated.toString(),
-                                DxRole.PROVIDER
-                        );
-
+        return providerRequestDAO.update(conditionMap, updateDataMap)
+                .compose(updated -> {
+                    if (!updated) {
+                        return Future.failedFuture(new DxNotFoundException("Request not found"));
                     }
+                    //Update in KC 
+                    if (Status.GRANTED.getStatus().equals(status.getStatus())) {
+                        return providerRequestDAO.get(requestId)
+                                .compose(providerRequest -> {
+                                    try {
+                                        Boolean result = keycloakUserService.assignRealmRoleToUser(
+                                                providerRequest.userId().toString(),
+                                                DxRole.PROVIDER
+                                        );
+                                        return Future.succeededFuture(result);
+                                    } catch (Exception e) {
+                                        return Future.failedFuture(e);
+                                    }
+                                });
+                    }
+
                     return Future.succeededFuture(true);
-                }).recover(err -> {
+                })
+                .recover(err -> {
                     BaseDxException dxEx = BaseDxException.from(err);
                     if (dxEx instanceof NoRowFoundException) {
                         return Future.failedFuture(
@@ -319,6 +330,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return Future.failedFuture(dxEx);
                 });
     }
+
+
 
     @Override
     public Future<Organization> getOrganizationByName(String orgName) {
