@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS credit_requests (
     user_id UUID NOT NULL REFERENCES organization_users(id),
     user_name VARCHAR NOT NULL,
     amount	DECIMAL,
-    status VARCHAR NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+    status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     requested_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     processed_at TIMESTAMP WITHOUT TIME ZONE
 );
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS compute_role (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES organization_users(id),
     user_name VARCHAR NOT NULL,
-    status VARCHAR NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+    status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     approved_by UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITHOUT TIME ZONE
