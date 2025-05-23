@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS organization_join_requests (
     user_name VARCHAR NOT NULL,
     job_title VARCHAR NOT NULL,
     emp_id VARCHAR NOT NULL,
-    status VARCHAR NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+    status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     requested_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     processed_at TIMESTAMP WITHOUT TIME ZONE
 );
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS organization_create_requests (
     emp_id VARCHAR NOT NULL,
     job_title VARCHAR NOT NULL,
     phone_no VARCHAR NOT NULL,
-    status VARCHAR NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+    status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
