@@ -331,6 +331,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 });
     }
 
+    public Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId) {
+        Map<String, Object> filterMap = Map.of(
+                Constants.STATUS, Status.PENDING.getStatus()
+        );
+        return providerRequestDAO.getAllWithFilters(filterMap);
+    }
+
 
 
     @Override

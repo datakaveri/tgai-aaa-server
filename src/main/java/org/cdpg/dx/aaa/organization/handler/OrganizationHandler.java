@@ -256,4 +256,20 @@ public class OrganizationHandler {
                 .onFailure(ctx::fail);
     }
 
+    public void getProviderRequest(RoutingContext ctx) {
+        User user = ctx.user();
+
+        organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
+                orgUser -> {
+                    if (orgUser == null || orgUser.role()!= Role.ADMIN) {
+                        return Future.failedFuture(new DxNotFoundException("Organisation User Not Found/ User is not an ORG admin"));
+                    }
+                    UUID orgId = orgUser.organizationId();
+                    return organizationService.getAllPendingProviderRoleRequests(orgId);
+                }
+        )
+                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+                .onFailure(ctx::fail);
+    }
+
 }
