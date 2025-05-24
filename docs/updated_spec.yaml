@@ -4826,6 +4826,15 @@ paths:
                     id: idttjmml4yni9
       security:
         - authorization: []
+    get:
+      summary: Get All pending provider role requests
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-user-roles
+      security:
+        - authorization: []
 components:
   schemas:
     RequestToken:

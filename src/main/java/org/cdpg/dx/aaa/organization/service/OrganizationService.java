@@ -72,6 +72,6 @@ public interface OrganizationService {
 
   Future<Boolean> updateProviderRequestStatus(UUID requestId, Status status);
 
-
+  Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId);
 }
 
