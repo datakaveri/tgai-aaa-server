@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.cdpg.dx.database.postgres.models.*;
+import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,16 +109,15 @@ public class PostgresServiceImpl implements PostgresService {
                 LOG.info("Query executed successfully.");
                 return convertToQueryResult(rowSet);
               })
-          .onFailure(
+          .recover(
               err -> {
                 LOG.error("SQL execution error: {}", err.getMessage());
-                err.printStackTrace();
+                return  Future.failedFuture(DxPgExceptionMapper.from(err));
               });
 
     } catch (Exception e) {
       LOG.error("Exception while building Tuple or executing query: {}", e.getMessage());
-      e.printStackTrace();
-      return Future.failedFuture("Error in PostgresServiceImpl: " + e.getMessage());
+      return Future.failedFuture(DxPgExceptionMapper.from(e));
     }
   }
 

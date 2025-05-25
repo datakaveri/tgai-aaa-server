@@ -36,7 +36,7 @@ public record ComputeRole(
         json.getString(Constants.STATUS) != null
           ? json.getString(Constants.STATUS)
           : Status.PENDING.getStatus(),
-        json.containsKey(Constants.APPROVED_BY)
+        json.getString(Constants.APPROVED_BY) != null
           ? UUID.fromString(json.getString(Constants.APPROVED_BY))
           : null,
         parseDateTime(json.getString(Constants.CREATED_AT)),
@@ -52,7 +52,7 @@ public record ComputeRole(
     JsonObject json = new JsonObject();
     if (id != null) json.put(Constants.COMPUTE_ROLE_ID, id.toString());
     json.put(Constants.USER_ID, userId.toString());
-    if (userName != null) json.put(Constants.USER_NAME, userName.toString());
+    if (userName != null) json.put(Constants.USER_NAME, userName);
     if (status != null && !status.isEmpty()) json.put(Constants.STATUS, status);
     if (approvedBy != null) json.put(Constants.APPROVED_BY, approvedBy.toString());
     if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));

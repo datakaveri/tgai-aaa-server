@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class KYCServiceImpl implements KYCService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KYCServiceImpl.class);
@@ -42,7 +43,7 @@ public class KYCServiceImpl implements KYCService {
     }
 
     @Override
-    public Future<JsonObject> getKYCData(String userId, String authCode, String codeVerifier) {
+    public Future<JsonObject> getKYCData(UUID userId, String authCode, String codeVerifier) {
         MultiMap tokenRequestForm = MultiMap.caseInsensitiveMultiMap()
                 .add("grant_type", GRANT_TYPE)
                 .add("client_id", config.getString(CONFIG_CLIENT_ID))
@@ -53,7 +54,7 @@ public class KYCServiceImpl implements KYCService {
 
         return webClient.postAbs(config.getString(CONFIG_TOKEN_URL))
                 .sendForm(tokenRequestForm)
-                .compose(tokenResponse -> handleTokenResponse(tokenResponse.bodyAsJsonObject(), userId, codeVerifier));
+                .compose(tokenResponse -> handleTokenResponse(tokenResponse.bodyAsJsonObject(), userId.toString(), codeVerifier));
     }
 
     private Future<JsonObject> handleTokenResponse(JsonObject tokenResponse, String userId, String codeVerifier) {
@@ -95,10 +96,10 @@ public class KYCServiceImpl implements KYCService {
     }
     //TODO remove code_verifier from cachedData
     @Override
-    public Future<JsonObject> confirmKYCData(String userId, String codeVerifier) {
+    public Future<JsonObject> confirmKYCData(UUID userId, String codeVerifier) {
         Promise<JsonObject> promise = Promise.promise();
 
-        cacheService.retrieve(userId).onComplete(ar -> {
+        cacheService.retrieve(userId.toString()).onComplete(ar -> {
             if (ar.failed()) {
                 String msg = "Cache retrieval failed for userId " + userId + ": " + ar.cause().getMessage();
                 LOGGER.error(msg);
@@ -116,22 +117,32 @@ public class KYCServiceImpl implements KYCService {
 
             boolean isVerified = codeVerifier.equals(cachedData.getString("code_verifier"));
             if (isVerified) {
-                keycloakUserService.setKycVerifiedTrueWithData(userId, cachedData);
-                LOGGER.info("KYC verification successful for userId: {}", userId);
-                promise.complete(cachedData);
+                keycloakUserService.setKycVerifiedTrueWithData(userId, cachedData)
+                    .onComplete(kycResult -> {
+                        if (kycResult.succeeded() && kycResult.result()) {
+                            LOGGER.info("KYC verification successful for userId: {}", userId);
+                            promise.complete(cachedData);
+                        } else {
+                            String msg = "Failed to update KYC status in Keycloak for userId: " + userId;
+                            LOGGER.error(msg);
+                            promise.fail(new DxValidationException(msg));
+                        }
+                    });
             } else {
-                keycloakUserService.setKycVerifiedFalse(userId);
-                String msg = "KYC verification failed due to code mismatch for userId: " + userId;
-                LOGGER.warn(msg);
-                promise.fail(new DxValidationException(msg));
+                keycloakUserService.setKycVerifiedFalse(userId)
+                    .onComplete(kycResult -> {
+                        String msg = "KYC verification failed due to code mismatch for userId: " + userId;
+                        LOGGER.warn(msg);
+                        promise.fail(new DxValidationException(msg));
+                    });
             }
         });
 
         return promise.future();
     }
 
-    @Override
-    public JsonObject parseKYCxml(String xmlData) {
+
+    private JsonObject parseKYCxml(String xmlData) {
         try {
             JSONObject jsonObject = XML.toJSONObject(xmlData);
             Map<String, Object> map = jsonObject.toMap();

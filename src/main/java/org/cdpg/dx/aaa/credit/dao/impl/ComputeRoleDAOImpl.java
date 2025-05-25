@@ -49,7 +49,7 @@ public class ComputeRoleDAOImpl extends AbstractBaseDAO<ComputeRole>implements C
       if(!result.getRows().isEmpty())
       {
         String status = result.getRows().getJsonObject(0).getString(Constants.STATUS);
-        if(status.equals(Status.APPROVED.getStatus()))
+        if(status.equals(Status.GRANTED.getStatus()))
         {
           return Future.succeededFuture(true);
         }

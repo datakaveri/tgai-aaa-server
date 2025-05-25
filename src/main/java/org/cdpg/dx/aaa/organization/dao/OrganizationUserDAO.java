@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface OrganizationUserDAO extends BaseDAO<OrganizationUser> {
 
-    Future<Boolean> deleteUsersByOrgId(UUID orgId, List<UUID> uuids);
+    Future<Boolean> deleteUserByOrgId(UUID orgId, UUID userID);
 
     Future<Boolean> isOrgAdmin(UUID orgid, UUID userid);
 

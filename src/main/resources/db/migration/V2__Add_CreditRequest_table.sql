@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS credit_requests (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES organization_users(id),
+    user_id UUID NOT NULL,
     user_name VARCHAR NOT NULL,
     amount	DECIMAL,
     status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS credit_requests (
 
 CREATE TABLE IF NOT EXISTS credit_transactions (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES organization_users(id),
+    user_id UUID NOT NULL,
     user_name VARCHAR NOT NULL,
     amount DECIMAL NOT NULL,
     transacted_by UUID NOT NULL,
@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS credit_transactions (
 
 CREATE TABLE IF NOT EXISTS user_credits (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES organization_users(id),
+    user_id UUID NOT NULL,
     balance	DECIMAL DEFAULT 0,
     updated_at TIMESTAMP WITHOUT TIME ZONE
 );
 
 CREATE TABLE IF NOT EXISTS compute_role (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES organization_users(id),
+    user_id UUID NOT NULL UNIQUE,
     user_name VARCHAR NOT NULL,
     status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     approved_by UUID,

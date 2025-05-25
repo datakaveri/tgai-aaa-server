@@ -17,6 +17,6 @@ public class DxErrorCodes {
     public static final int UNAUTHORIZED = 12000;
     public static final int FORBIDDEN = 12001;
     public static final int TOKEN_INVALID = 12002;
-
+    public static final int KEYCLOAK_SERVICE_ERROR = 12100;
 
 }

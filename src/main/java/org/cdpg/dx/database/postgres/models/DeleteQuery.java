@@ -3,10 +3,11 @@ package org.cdpg.dx.database.postgres.models;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,11 @@ import org.slf4j.LoggerFactory;
 public class DeleteQuery implements Query {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteQuery.class);
     private  String table;
-    private Condition condition;
+    private  Condition condition;
     private  List<OrderBy> orderBy;
     private  Integer limit; // Optional, so keep as Integer
+
+    private List<Object> queryParams = new ArrayList<>();
 
     public DeleteQuery(){}
     // Constructor (OrderBy & Limit are optional)
@@ -50,20 +53,13 @@ public class DeleteQuery implements Query {
 
     public String getTable() { return table; }
 
-
-    public Condition getCondition() {
-        return condition;
-    }
-
-
-    public List<OrderBy> getOrderBy() { return orderBy; }
-
-
-    public Integer getLimit() { return limit; }
-
     public DeleteQuery setTable(String table) {
         this.table = table;
         return this;
+    }
+
+    public Condition getCondition() {
+        return condition;
     }
 
     public DeleteQuery setCondition(Condition condition) {
@@ -71,10 +67,14 @@ public class DeleteQuery implements Query {
         return this;
     }
 
+    public List<OrderBy> getOrderBy() { return orderBy; }
+
     public DeleteQuery setOrderBy(List<OrderBy> orderBy) {
         this.orderBy = orderBy;
         return this;
     }
+
+    public Integer getLimit() { return limit; }
 
     public DeleteQuery setLimit(Integer limit) {
         this.limit = limit;
@@ -83,12 +83,13 @@ public class DeleteQuery implements Query {
 
     @Override
     public String toSQL() {
-        StringBuilder query = new StringBuilder("DELETE FROM " + table + " WHERE " + getCondition().toSQL());
+        queryParams.clear();
+        StringBuilder query = new StringBuilder("DELETE FROM " + table + " WHERE " + getCondition().toSQL(queryParams));
 
         if (!orderBy.isEmpty()) {
             query.append(" ORDER BY ").append(orderBy.stream()
-                    .map(OrderBy::toSQL)
-                    .collect(Collectors.joining(", ")));
+                .map(OrderBy::toSQL)
+                .collect(Collectors.joining(", ")));
         }
 
 
@@ -101,6 +102,10 @@ public class DeleteQuery implements Query {
 
     @Override
     public List<Object> getQueryParams() {
-        return condition.getQueryParams();
+        List<Object> params = new ArrayList<>();
+        if (condition != null) {
+            params.addAll(condition.getQueryParams());
+        }
+        return params;
     }
 }

@@ -7,9 +7,11 @@ import org.cdpg.dx.aaa.credit.dao.*;
 import org.cdpg.dx.aaa.credit.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.BaseDxException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
+import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.postgresql.core.TransactionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +32,15 @@ public class CreditServiceImpl implements CreditService {
   private final UserCreditDAO userCreditDAO;
   private final CreditTransactionDAO creditTransactionDAO;
   private final ComputeRoleDAO computeRoleDAO;
+  private final KeycloakUserService keycloakUserService;
 
 
-  public CreditServiceImpl(CreditDAOFactory factory) {
+  public CreditServiceImpl(CreditDAOFactory factory, KeycloakUserService keycloakUserService) {
     this.creditRequestDAO = factory.creditRequestDAO();
     this.userCreditDAO = factory.userCreditDAO();
     this.creditTransactionDAO = factory.creditTransactionDAO();
     this.computeRoleDAO = factory.computeRoleDAO();
+    this.keycloakUserService = keycloakUserService;
   }
 
   @Override
@@ -69,7 +73,7 @@ public class CreditServiceImpl implements CreditService {
         if (!updated) return Future.succeededFuture(false);
 
         // Proceed only if status is APPROVED
-        if (status == Status.APPROVED) {
+        if (status == Status.GRANTED) {
           return creditRequestDAO.get(requestId)
             .compose(cr -> {
               UUID userId = cr.userId();
@@ -176,7 +180,7 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<List<ComputeRole>> getAllPendingComputeRequests() {
-    Map<String, Object> filterMap = Map.of(Constants.STATUS, Status.PENDING);
+    Map<String, Object> filterMap = Map.of(Constants.STATUS, Status.PENDING.getStatus());
     return computeRoleDAO.getAllWithFilters(filterMap);
   }
 
@@ -191,7 +195,30 @@ public class CreditServiceImpl implements CreditService {
       APPROVED_BY, approvedBy.toString()
     );
 
-    return computeRoleDAO.update(conditionMap, updateDataMap)
+    return computeRoleDAO.update(conditionMap, updateDataMap).compose(updated ->{
+                if (!updated) {
+                    return Future.failedFuture(new DxNotFoundException("Request not found"));
+                }
+                //Update in KC
+                if (Status.GRANTED.getStatus().equals(status.getStatus())) {
+                    return computeRoleDAO.get(requestId)
+                            .compose(req -> {
+                                // Update role in Keycloak
+                                return keycloakUserService.addRoleToUser(
+                                                req.userId(),
+                                                DxRole.COMPUTE
+                                        )
+                                        .compose(success -> {
+                                            if (!success) {
+                                                return Future.failedFuture("Failed to assign Computer role in Keycloak");
+                                            }
+                                            return Future.succeededFuture(true);
+                                        });
+                            });
+                }
+
+                return Future.succeededFuture(true);
+            })
       .recover(err -> {
         BaseDxException dxEx = BaseDxException.from(err);
         if (dxEx instanceof NoRowFoundException) {

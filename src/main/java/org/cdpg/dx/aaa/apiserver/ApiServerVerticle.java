@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.json.jackson.DatabindCodec;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.cdpg.dx.common.util.BlockingExecutionUtil;
 
 public class ApiServerVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
@@ -66,6 +67,8 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/updated_spec.yaml");
         Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
+        // init SharedWorkerExecutor for this vertical
+        BlockingExecutionUtil.initialize(vertx);
 
         List<ApiController> controllers = ControllerFactory.createControllers(vertx, config());
 

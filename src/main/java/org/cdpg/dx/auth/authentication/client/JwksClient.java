@@ -35,6 +35,7 @@ public class JwksClient {
                 })
                 .recover(err -> {
                     LOGGER.error("Failed to fetch JWKs: {}", err.getMessage());
+                    err.printStackTrace();
                     return Future.failedFuture(err);
                 });
     }

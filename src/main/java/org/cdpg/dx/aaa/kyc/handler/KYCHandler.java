@@ -12,6 +12,8 @@ import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
+import java.util.UUID;
+
 
 public class KYCHandler {
     private static final Logger LOGGER = LogManager.getLogger(KYCHandler.class);
@@ -25,6 +27,7 @@ public class KYCHandler {
     public void verifyKYC(RoutingContext ctx) {
         LOGGER.debug("verifyKYC: >>>>>>>>>>>>>>>>");
         User user = ctx.user();
+        UUID userId = UUID.fromString(user.subject());
 
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
@@ -37,7 +40,7 @@ public class KYCHandler {
             ctx.fail(new DxBadRequestException("Required parameter missing"));
             return;
         }
-        kycService.getKYCData(user.subject(), code, codeVerifier)
+        kycService.getKYCData(userId, code, codeVerifier)
                 .onSuccess(res -> {
                     ResponseBuilder.sendSuccess(ctx, res);
                 })
@@ -48,6 +51,7 @@ public class KYCHandler {
 
     public void confirmKYC(RoutingContext ctx) {
         User user = ctx.user();
+        UUID userId = UUID.fromString(user.subject());
         String codeVerifier = ctx.pathParam("id");
 
         if (codeVerifier == null) {
@@ -55,7 +59,7 @@ public class KYCHandler {
             return;
         }
 
-        kycService.confirmKYCData(user.subject(), codeVerifier)
+        kycService.confirmKYCData(userId, codeVerifier)
                 .onSuccess(res -> {
                     ResponseBuilder.sendSuccess(ctx, res);
                 })

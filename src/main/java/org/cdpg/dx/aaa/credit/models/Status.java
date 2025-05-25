@@ -3,7 +3,7 @@ package org.cdpg.dx.aaa.credit.models;
 public enum Status {
   PENDING("pending"),
   REJECTED("rejected"),
-  APPROVED("granted");
+  GRANTED("granted");
 
   private final String status;
 

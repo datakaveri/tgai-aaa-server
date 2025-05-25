@@ -29,27 +29,23 @@ public class OrganizationUserDAOImpl extends AbstractBaseDAO<OrganizationUser> i
 
  // TODO - relook into this
   @Override
-  public Future<Boolean> deleteUsersByOrgId(UUID orgId, List<UUID> uuids) {
-    if (uuids == null || uuids.isEmpty()) {
+  public Future<Boolean> deleteUserByOrgId(UUID orgId, UUID userID) {
+    if (orgId == null || userID == null) {
       return Future.failedFuture("User IDs list is empty");
     }
 
     Condition conditions = new Condition(
             List.of(
                     new Condition(Constants.ORGANIZATION_ID, Condition.Operator.EQUALS, List.of(orgId.toString())),
-                    new Condition(Constants.USER_ID, Condition.Operator.IN, new ArrayList<>(uuids))
+                    new Condition(Constants.USER_ID, Condition.Operator.EQUALS , List.of(userID.toString()))
             ),
             Condition.LogicalOperator.AND
     );
 
-    DeleteQuery query = new DeleteQuery(Constants.ORG_USER_TABLE,  new Condition(Constants.ORGANIZATION_ID, Condition.Operator.EQUALS, List.of(orgId)), null, null);
+    DeleteQuery query = new DeleteQuery(Constants.ORG_USER_TABLE, conditions, null, null);
 
     return postgresService.delete(query)
-            .map(QueryResult::isRowsAffected)
-            .recover(err -> {
-              LOGGER.error("Failed to delete users {} from organization {}: {}", uuids, orgId, err.getMessage());
-              return Future.succeededFuture(false);
-            });
+            .map(QueryResult::isRowsAffected);
   }
 
   @Override

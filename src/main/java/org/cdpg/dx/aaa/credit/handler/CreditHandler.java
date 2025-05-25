@@ -107,12 +107,12 @@ public class CreditHandler {
   }
 
   public void createComputeRoleRequest(RoutingContext ctx) {
-    JsonObject computeRoleRequestJson = ctx.body().asJsonObject();
 
-    ComputeRole computeRoleRequest = ComputeRole.fromJson(computeRoleRequestJson);
+    User user = ctx.user();
+    String userID = user.subject();
+    String userName = user.principal().getString("name");
 
-    // pass userId and userName from json
-    // approvedBy is null for time being
+    ComputeRole computeRoleRequest = ComputeRole.fromJson(new JsonObject().put("user_id", userID).put("user_name", userName));
 
     creditService.createComputeRoleRequest(computeRoleRequest)
       .onSuccess(requests -> {
@@ -136,27 +136,17 @@ public class CreditHandler {
 
     JsonObject creditRequestJson = ctx.body().asJsonObject();
 
-    JsonObject responseObject = creditRequestJson.copy();
-    responseObject.remove("status");
-
     User user = ctx.user();
     UUID approvedBy = UUID.fromString(user.subject());
     Status status = Status.fromString(creditRequestJson.getString("status"));
-    UUID requestId = UUID.fromString(creditRequestJson.getString("id"));
+    UUID requestId = RequestHelper.getPathParamAsUUID(ctx,"id");
 
 
     creditService.updateComputeRoleStatus( requestId, status, approvedBy)
-      .onSuccess(approved -> {
-        if (approved) {
-
-          processSuccess(ctx, responseObject, 200, "Approved Compute Role Request");
-        } else {
-
-          processFailure(ctx, 400, "Request Not Found");
-        }
-      })
-      .onFailure(err -> processFailure(ctx, 500, "Failed to approve  Compute Role Request"));
-
+            .onSuccess(updated -> {
+              ResponseBuilder.sendSuccess(ctx, "Updated Resquest ");
+            })
+            .onFailure(ctx::fail);
   }
 
   public void hasUserComputeAccess(RoutingContext ctx) {

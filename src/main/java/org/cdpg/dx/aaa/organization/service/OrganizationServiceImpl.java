@@ -1,14 +1,13 @@
 package org.cdpg.dx.aaa.organization.service;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
 import org.cdpg.dx.auth.authorization.model.DxRole;
-import org.cdpg.dx.common.exception.BaseDxException;
-import org.cdpg.dx.common.exception.DxNotFoundException;
-import org.cdpg.dx.common.exception.NoRowFoundException;
+import org.cdpg.dx.common.exception.*;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +25,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationDAO orgDAO;
     private final OrganizationJoinRequestDAO joinRequestDAO;
     private final ProviderRoleRequestDAO providerRequestDAO;
-    private final KeycloakUserService  keycloakUserService;
+    private final KeycloakUserService keycloakUserService;
 
-    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService  keycloakUserService) {
+    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService keycloakUserService) {
         this.createRequestDAO = factory.organizationCreateRequest();
         this.orgUserDAO = factory.organizationUserDAO();
         this.orgDAO = factory.organizationDAO();
@@ -71,58 +70,70 @@ public class OrganizationServiceImpl implements OrganizationService {
                         return createOrganizationFromRequest(requestId);
                     }
                     return Future.succeededFuture(true);
-            }).recover(err -> {
-            BaseDxException dxEx = BaseDxException.from(err);
-            if (dxEx instanceof NoRowFoundException) {
-                return Future.failedFuture(
-                        new DxNotFoundException("No request found with given ID", dxEx)
-                );
-            }
-            return Future.failedFuture(dxEx);
-        });
+                }).recover(dxEx -> {
+                    if (dxEx instanceof NoRowFoundException) {
+                        return Future.failedFuture(
+                                new DxNotFoundException("No request found with given ID", dxEx)
+                        );
+                    }
+                    return Future.failedFuture(dxEx);
+                });
 
     }
 
 
     private Future<Boolean> createOrganizationFromRequest(UUID requestId) {
-      return createRequestDAO.get(requestId)
-        .compose(request -> {
-          Organization org = new Organization(
-                  null,
-              request.name(),
-              request.logoPath(),
-              request.entityType(),
-              request.orgSector(),
-              request.websiteLink(),
-              request.address(),
-              request.certificatePath(),
-              request.pancardPath(),
-              request.relevantDocPath(), null,
-            null
-          );
-          return orgDAO.create(org)
-            .compose(createdOrg ->
-            {
-              OrganizationUser orgUser = new OrganizationUser(
-                null,
-                createdOrg.id(),
-                request.requestedBy(),
-                Role.ADMIN,
-                request.jobTitle(),
-                request.empId(),
-                request.orgManagerphoneNo(),
-                null,
-                null
-              );
+        return createRequestDAO.get(requestId)
+                .compose(request -> {
+                    Organization org = new Organization(
+                            null,
+                            request.name(),
+                            request.logoPath(),
+                            request.entityType(),
+                            request.orgSector(),
+                            request.websiteLink(),
+                            request.address(),
+                            request.certificatePath(),
+                            request.pancardPath(),
+                            request.relevantDocPath(), null,
+                            null
+                    );
+                    return orgDAO.create(org)
+                            .compose(createdOrg ->
+                            {
+                                OrganizationUser orgUser = new OrganizationUser(
+                                        null,
+                                        createdOrg.id(),
+                                        request.requestedBy(),
+                                        request.userName(),
+                                        Role.ADMIN,
+                                        request.jobTitle(),
+                                        request.empId(),
+                                        request.orgManagerphoneNo(),
+                                        null,
+                                        null
+                                );
+                                //TODO need to revert the update status and create organisation request if fails
+                                return Future.all(
+                                        keycloakUserService.addRoleToUser(request.requestedBy(), DxRole.ORG_ADMIN),
+                                        keycloakUserService.setOrganisationDetails(request.requestedBy(), createdOrg.id(), createdOrg.orgName())
+                                ).compose(compositeResult -> {
+                                    boolean roleAssigned = compositeResult.resultAt(0);
+                                    boolean orgDetailsSet = compositeResult.resultAt(1);
 
-              // TODO need to improve this , Setting role orgid to user
-              keycloakUserService.assignRealmRoleToUser(request.requestedBy().toString(), DxRole.ORG_ADMIN);
-              keycloakUserService.setOrganisationDetails(request.requestedBy(), createdOrg.id(), createdOrg.orgName());
+                                    if (!roleAssigned) {
+                                        return Future.failedFuture("Failed to assign ORG_ADMIN role to user");
+                                    }
 
-              return orgUserDAO.create(orgUser).map(user -> true);
+                                    if (!orgDetailsSet) {
+                                        return Future.failedFuture("Failed to set organization details for user");
+                                    }
 
-            });
-        });
+                                    return orgUserDAO.create(orgUser).map(user -> true);
+                                });
+
+                            });
+                });
     }
 
     @Override
@@ -150,7 +161,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<Boolean> deleteOrganization(UUID orgId) {
-      return orgDAO.delete(orgId);
+        return orgDAO.delete(orgId);
     }
 
     @Override
@@ -161,12 +172,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<Boolean> updateOrganizationJoinRequestStatus(UUID requestId, Status status) {
-      Map<String, Object> conditionMap = Map.of(
-        Constants.ORG_JOIN_ID, requestId.toString()
-      );
-      Map<String, Object> updateDataMap = Map.of(
-        Constants.STATUS, status.getStatus()
-      );
+        Map<String, Object> conditionMap = Map.of(
+                Constants.ORG_JOIN_ID, requestId.toString()
+        );
+        Map<String, Object> updateDataMap = Map.of(
+                Constants.STATUS, status.getStatus()
+        );
 
         return joinRequestDAO.update(conditionMap, updateDataMap)
                 .compose(approved -> {
@@ -176,14 +187,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }
                     return Future.succeededFuture(true);
                 }).recover(err -> {
-        BaseDxException dxEx = BaseDxException.from(err);
-        if (dxEx instanceof NoRowFoundException) {
-          return Future.failedFuture(
-            new DxNotFoundException("No request found with given ID", dxEx)
-          );
-        }
-        return Future.failedFuture(dxEx);
-      });
+                    BaseDxException dxEx = BaseDxException.from(err);
+                    if (dxEx instanceof NoRowFoundException) {
+                        return Future.failedFuture(
+                                new DxNotFoundException("No request found with given ID", dxEx)
+                        );
+                    }
+                    return Future.failedFuture(dxEx);
+                });
     }
 
     private Future<Boolean> addUserToOrganizationFromRequest(UUID requestId) {
@@ -198,6 +209,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         null,
                                         orgId,
                                         userId,
+                                        joinRequest.userName(),
                                         Role.USER,
                                         joinRequest.jobTitle(),
                                         joinRequest.empId(),
@@ -207,14 +219,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 );
 
                                 return orgUserDAO.create(newOrgUser)
-                                        .map(createdUser -> {
-                                            // Step 4: Call Keycloak and wrap boolean response in Future
-                                            boolean success = keycloakUserService.setOrganisationDetails(
-                                                    userId,
-                                                    orgId,
-                                                    organization.orgName()
-                                            );
-                                            return success;
+                                        .compose(createdUser ->
+                                                // Call Keycloak to set organization details
+                                                keycloakUserService.setOrganisationDetails(
+                                                        userId,
+                                                        orgId,
+                                                        organization.orgName()
+                                                )
+                                        )
+                                        .compose(success -> {
+                                            if (!success) {
+                                                return Future.failedFuture("Failed to set organization details in Keycloak");
+                                            }
+                                            return Future.succeededFuture(true);
                                         });
                             });
                 });
@@ -222,65 +239,73 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<List<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(UUID orgId) {
-      Map<String, Object> filterMap = Map.of(
-        Constants.STATUS, Status.PENDING.getStatus()
-      );
+        Map<String, Object> filterMap = Map.of(
+                Constants.STATUS, Status.PENDING.getStatus()
+        );
 
-      return joinRequestDAO.getAllWithFilters(filterMap);
+        return joinRequestDAO.getAllWithFilters(filterMap);
     }
 
-  @Override
-  public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
-    Map<String, Object> filterMap = Map.of(Constants.ORGANIZATION_ID, orgId.toString());
-
-    return orgUserDAO.getAllWithFilters(filterMap);
-  }
+    @Override
+    public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
+        Map<String, Object> filterMap = Map.of(Constants.ORGANIZATION_ID, orgId.toString());
+        return orgUserDAO.getAllWithFilters(filterMap);
+    }
 
 
     @Override
     public Future<Boolean> updateUserRole(UUID orgId, UUID userId, Role role) {
 
-      Map<String, Object> conditionMap = Map.of(
-        Constants.ORG_ID, orgId.toString(),
-        Constants.USER_ID, userId.toString()
-      );
+        Map<String, Object> conditionMap = Map.of(
+                Constants.ORG_ID, orgId.toString(),
+                Constants.USER_ID, userId.toString()
+        );
 
 
-      Map<String, Object> updateDataMap = Map.of(
-        Constants.ROLE, role.getRoleName()
-      );
+        Map<String, Object> updateDataMap = Map.of(
+                Constants.ROLE, role.getRoleName()
+        );
 
-      return orgUserDAO.update(conditionMap, updateDataMap)
-        .recover(err -> {
-          BaseDxException dxEx = BaseDxException.from(err);
-          if (dxEx instanceof NoRowFoundException) {
-            return Future.failedFuture(
-              new DxNotFoundException("No matching user found in organization", dxEx)
-            );
-          }
-          return Future.failedFuture(dxEx);
-        });
-    }
-
-  @Override
-  public Future<Boolean> isOrgAdmin(UUID orgid, UUID userid) {
-    return orgUserDAO.isOrgAdmin(orgid,userid);
-  }
-
-  @Override
-    public Future<Boolean> deleteOrganizationUser(UUID orgId, UUID userId) {
-
-    return orgUserDAO.deleteUsersByOrgId(orgId, List.of(userId));
+        return orgUserDAO.update(conditionMap, updateDataMap)
+                .recover(err -> {
+                    BaseDxException dxEx = BaseDxException.from(err);
+                    if (dxEx instanceof NoRowFoundException) {
+                        return Future.failedFuture(
+                                new DxNotFoundException("No matching user found in organization", dxEx)
+                        );
+                    }
+                    return Future.failedFuture(dxEx);
+                });
     }
 
     @Override
-    public Future<Boolean> deleteOrganizationUsers(UUID orgId, List<UUID> userIds) {
-        return orgUserDAO.deleteUsersByOrgId(orgId, userIds);
+    public Future<Boolean> isOrgAdmin(UUID orgid, UUID userid) {
+        return orgUserDAO.isOrgAdmin(orgid, userid);
     }
+
+    @Override
+    public Future<Boolean> deleteOrganizationUser(UUID orgId, UUID userId) {
+        return orgUserDAO.deleteUserByOrgId(orgId, userId);
+    }
+
 
     @Override
     public Future<OrganizationUser> getOrganizationUserInfo(UUID userId) {
-        return orgUserDAO.get(userId);
+        Map<String, Object> filterMap = Map.of(Constants.USER_ID, userId.toString());
+        return orgUserDAO.getAllWithFilters(filterMap).compose(orgUserList -> {
+            if (orgUserList.isEmpty()) {
+                return Future.failedFuture(new DxNotFoundException("No user found !"));
+            } else if (orgUserList.size() == 1) {
+                return Future.succeededFuture(orgUserList.get(0));
+            } else {
+                LOGGER.error("multiple org users found");
+                return Future.failedFuture(new DxPgException("Some thing went wrong"));
+            }
+        }).recover(
+                err -> {
+                    // Log or transform the error if needed
+                    return Future.failedFuture(new DxPgException("Some thing went wrong", err));
+                });
     }
 
     @Override
@@ -306,15 +331,17 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return providerRequestDAO.get(requestId)
                                 .compose(providerRequest -> {
-                                    try {
-                                        Boolean result = keycloakUserService.assignRealmRoleToUser(
-                                                providerRequest.userId().toString(),
-                                                DxRole.PROVIDER
-                                        );
-                                        return Future.succeededFuture(result);
-                                    } catch (Exception e) {
-                                        return Future.failedFuture(e);
-                                    }
+                                    // Update role in Keycloak
+                                    return keycloakUserService.addRoleToUser(
+                                                    providerRequest.userId(),
+                                                    DxRole.PROVIDER
+                                            )
+                                            .compose(success -> {
+                                                if (!success) {
+                                                    return Future.failedFuture("Failed to assign PROVIDER role in Keycloak");
+                                                }
+                                                return Future.succeededFuture(true);
+                                            });
                                 });
                     }
 
@@ -339,7 +366,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-
     @Override
     public Future<Organization> getOrganizationByName(String orgName) {
 
@@ -348,15 +374,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         return orgDAO.getAllWithFilters(filterMap).compose(orgList -> {
             if (orgList.isEmpty()) {
                 return Future.failedFuture("Organization not found with name: " + orgName);
-            } else if (orgList.size() > 1) {
-                return Future.succeededFuture(orgList.getFirst());
+            } else if (orgList.size() == 1) {
+                return Future.succeededFuture(orgList.get(0));
             } else {
                 return Future.failedFuture("Multiple organizations found with name: " + orgName);
             }
         }).recover(
-        err -> {
-            // Log or transform the error if needed
-            return Future.failedFuture("Failed to fetch organization: " + err.getMessage());
-        });
+                err -> {
+                    // Log or transform the error if needed
+                    return Future.failedFuture("Failed to fetch organization: " + err.getMessage());
+                });
     }
 }

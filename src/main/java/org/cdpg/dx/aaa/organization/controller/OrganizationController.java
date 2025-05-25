@@ -22,7 +22,7 @@ public class OrganizationController implements ApiController {
     public void register(RouterBuilder routerBuilder) {
 
         routerBuilder
-                .operation("get-auth-v1-getAllOrgReq")
+                .operation("get-auth-v1-organisations-request")
                 .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
                 .handler(organizationHandler::getOrganisationRequest);
 
@@ -36,7 +36,7 @@ public class OrganizationController implements ApiController {
                 .handler(organizationHandler::approveOrganisationRequest);
 
         routerBuilder
-                .operation("post-auth-v1-joinOrg")
+                .operation("post-auth-v1-organisations-join-requests")
                 .handler(organizationHandler::joinOrganisationRequest);
 
         routerBuilder
@@ -45,7 +45,7 @@ public class OrganizationController implements ApiController {
                 .handler(organizationHandler::getJoinOrganisationRequests);
 
         routerBuilder
-                .operation("post-auth-v1-approve")
+                .operation("put-auth-v1-organisations-join-requests")
                 .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
                 .handler(organizationHandler::approveJoinOrganisationRequests);
 
@@ -65,7 +65,7 @@ public class OrganizationController implements ApiController {
 
         //Organization User
         routerBuilder
-                .operation("get-auth-v1-organisations-users-id")
+                .operation("get-auth-v1-org-users")
                 .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
                 .handler(organizationHandler::getOrganisationUsers);
 

@@ -1,10 +1,13 @@
 package org.cdpg.dx.database.postgres.models;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @DataObject(generateConverter = true)
 public class SelectQuery implements Query {
@@ -83,9 +86,17 @@ public class SelectQuery implements Query {
         return this;
     }
 
+    public String getTableAlias() {
+        return tableAlias;
+    }
+
     public SelectQuery setTableAlias(String tableAlias) {
         this.tableAlias = tableAlias;
         return this;
+    }
+
+    public List<String> getColumns() {
+        return columns;
     }
 
     public SelectQuery setColumns(List<String> columns) {
@@ -93,9 +104,17 @@ public class SelectQuery implements Query {
         return this;
     }
 
+    public Condition getCondition() {
+        return condition;
+    }
+
     public SelectQuery setCondition(Condition condition) {
         this.condition = condition;
         return this;
+    }
+
+    public List<String> getGroupBy() {
+        return groupBy;
     }
 
     public SelectQuery setGroupBy(List<String> groupBy) {
@@ -103,9 +122,17 @@ public class SelectQuery implements Query {
         return this;
     }
 
+    public List<OrderBy> getOrderBy() {
+        return orderBy;
+    }
+
     public SelectQuery setOrderBy(List<OrderBy> orderBy) {
         this.orderBy = orderBy;
         return this;
+    }
+
+    public Integer getLimit() {
+        return limit;
     }
 
     public SelectQuery setLimit(Integer limit) {
@@ -113,60 +140,23 @@ public class SelectQuery implements Query {
         return this;
     }
 
+    public Integer getOffset() {
+        return offset;
+    }
+
     public SelectQuery setOffset(Integer offset) {
         this.offset = offset;
         return this;
+    }
+
+    public List<Join> getJoins() {
+        return joins;
     }
 
     public SelectQuery setJoins(List<Join> joins) {
         this.joins = joins;
         return this;
     }
-
-    public SelectQuery setQueryParams(List<Object> queryParams) {
-        this.queryParams = queryParams;
-        return this;
-    }
-
-    public String getTableAlias() {
-        return tableAlias;
-    }
-
-
-    public List<String> getColumns() {
-        return columns;
-    }
-
-
-    public Condition getCondition() {
-        return condition;
-    }
-
-
-    public List<String> getGroupBy() {
-        return groupBy;
-    }
-
-
-    public List<OrderBy> getOrderBy() {
-        return orderBy;
-    }
-
-
-    public Integer getLimit() {
-        return limit;
-    }
-
-
-    public Integer getOffset() {
-        return offset;
-    }
-
-
-    public List<Join> getJoins() {
-        return joins;
-    }
-
 
     private List<Object> queryParams = new ArrayList<>();
 
@@ -178,8 +168,8 @@ public class SelectQuery implements Query {
 
         // Table with alias
         String baseTable = tableAlias != null && !tableAlias.isEmpty()
-                ? table + " " + tableAlias
-                : table;
+            ? table + " " + tableAlias
+            : table;
         query.append(baseTable);
 
         // Adding joins
@@ -188,8 +178,7 @@ public class SelectQuery implements Query {
                 query.append(" ").append(join.toSQL());
             }
         }
-        System.out.println("hereeee 1 : " + condition);
-        
+
         // Adding condition (WHERE clause)
         if (condition != null) {
             query.append(" WHERE ").append(condition.toSQL(queryParams));
@@ -215,7 +204,6 @@ public class SelectQuery implements Query {
         if (offset != null) {
             query.append(" OFFSET ").append(offset);
         }
-        System.out.println("hereeeeee : " + query);
 
         return query.toString();
     }
@@ -227,5 +215,21 @@ public class SelectQuery implements Query {
             params.addAll(condition.getQueryParams());
         }
         return params;
+    }
+
+    @Override
+    public String toString() {
+        return "SelectQuery{" +
+            "table='" + table + '\'' +
+            ", tableAlias='" + tableAlias + '\'' +
+            ", columns=" + columns +
+            ", condition=" + condition +
+            ", groupBy=" + groupBy +
+            ", orderBy=" + orderBy +
+            ", limit=" + limit +
+            ", offset=" + offset +
+            ", joins=" + joins +
+            ", queryParams=" + queryParams +
+            '}';
     }
 }

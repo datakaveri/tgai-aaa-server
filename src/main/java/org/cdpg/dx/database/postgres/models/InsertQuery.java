@@ -35,43 +35,47 @@ public class InsertQuery implements Query {
 
     // Getters & Setters (Required for DataObject)
     public String getTable() { return table; }
+    public InsertQuery setTable(String table) { this.table = table;
+        return this;
+    }
 
     public List<String> getColumns() { return columns; }
+    public InsertQuery setColumns(List<String> columns) { this.columns = columns;
+        return this;
+    }
 
     public List<Object> getValues() { return values; }
-
-    public InsertQuery setTable(String table) {
-        this.table = table;
+    public InsertQuery setValues(List<Object> values) { this.values = values;
         return this;
     }
 
-    public InsertQuery setColumns(List<String> columns) {
-        this.columns = columns;
-        return this;
-    }
-
-    public InsertQuery setValues(List<Object> values) {
-        this.values = values;
-        return this;
-    }
 
     @Override
-public String toSQL() {
-  String placeholders =
-    java.util.stream.IntStream.range(0, columns.size())
-      .mapToObj(i -> "$"+(i+1))
-      .collect(Collectors.joining(", "));
+    public String toSQL() {
+        String placeholders =
+            java.util.stream.IntStream.range(0, columns.size())
+                .mapToObj(i -> "$"+(i+1))
+                .collect(Collectors.joining(", "));
 
-  String finalQuery = "INSERT INTO " + table +
-    " (" + String.join(", ", columns) + ") " +
-    "VALUES (" + placeholders + ") RETURNING *"; // ADD THIS
-  System.out.println("Final Query: " + finalQuery);
-  return finalQuery;
-}
+        String finalQuery = "INSERT INTO " + table +
+            " (" + String.join(", ", columns) + ") " +
+            "VALUES (" + placeholders + ") RETURNING *"; // ADD THIS
+        System.out.println("Final Query: " + finalQuery);
+        return finalQuery;
+    }
 
 
     @Override
     public List<Object> getQueryParams() {
         return values;
+    }
+
+    @Override
+    public String toString() {
+        return "InsertQuery{" +
+            "table='" + table + '\'' +
+            ", columns=" + columns +
+            ", values=" + values +
+            '}';
     }
 }

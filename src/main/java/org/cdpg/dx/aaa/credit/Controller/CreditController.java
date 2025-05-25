@@ -43,7 +43,7 @@ public class CreditController implements ApiController {
 
     routerBuilder
       .operation("post-auth-v1-compute-role-request")
-      .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
+      //.handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
       .handler(creditHandler::createComputeRoleRequest);
 
 

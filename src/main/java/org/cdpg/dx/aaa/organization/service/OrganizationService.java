@@ -50,8 +50,6 @@ public interface OrganizationService {
   //delete from orgUser Table
   Future<Boolean> deleteOrganizationUser(UUID orgId,UUID userId);
 
-  //delete from orgUser Table
-  Future<Boolean> deleteOrganizationUsers(UUID orgId,List<UUID> userId);
 
   Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId);
 

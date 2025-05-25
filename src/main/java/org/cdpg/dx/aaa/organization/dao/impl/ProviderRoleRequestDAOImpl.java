@@ -17,7 +17,7 @@ public class ProviderRoleRequestDAOImpl extends AbstractBaseDAO<ProviderRoleRequ
     private static final Logger LOGGER = LogManager.getLogger(ProviderRoleRequestDAOImpl.class);
 
     public ProviderRoleRequestDAOImpl(PostgresService postgresService) {
-        super(postgresService, "provider_requests", "userId", ProviderRoleRequest::fromJson);
+        super(postgresService, "provider_requests", "id", ProviderRoleRequest::fromJson);
     }
 
 }

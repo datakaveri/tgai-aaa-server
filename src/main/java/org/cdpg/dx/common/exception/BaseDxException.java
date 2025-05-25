@@ -12,7 +12,14 @@ public class BaseDxException extends ServiceException {
 
   public BaseDxException(int failureCode, String message, Throwable cause) {
     super(failureCode, message);
-    initCause(cause);
+    // Avoid illegal overwrite
+    if (cause != this) {
+      try {
+        this.initCause(cause);
+      } catch (IllegalStateException e) {
+        // Cause already set, do nothing
+      }
+    }
   }
 
   public BaseDxException(String message) {
@@ -32,7 +39,7 @@ public class BaseDxException extends ServiceException {
   }
 
   private static BaseDxException fromServiceException(ServiceException se) {
-    System.out.println("line 35::  "+ se.failureCode());
+
     return switch (se.failureCode()) {
       case PG_NO_ROW_ERROR -> new NoRowFoundException(se.getMessage(), se);
       case PG_INVALID_COL_ERROR -> new InvalidColumnNameException(se.getMessage(), se);
@@ -40,7 +47,7 @@ public class BaseDxException extends ServiceException {
           new UniqueConstraintViolationException(se.getMessage(), se);
       case PG_ERROR -> new DxPgException(se.getMessage(), se);
       // You can add other subclasses here as needed
-      default -> new BaseDxException(DEFAULT_CODE, se.getMessage());
+      default -> new BaseDxException(DEFAULT_CODE, se.getMessage(), se);
     };
   }
 }

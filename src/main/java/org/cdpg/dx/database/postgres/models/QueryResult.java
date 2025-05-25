@@ -64,4 +64,14 @@ public class QueryResult {
   public void setRowsAffected(boolean rowsAffected) {
     this.rowsAffected = rowsAffected;
   }
+
+  @Override
+  public String toString() {
+    return "QueryResult{" +
+        "rows=" + rows +
+        ", totalCount=" + totalCount +
+        ", hasMore=" + hasMore +
+        ", rowsAffected=" + rowsAffected +
+        '}';
+  }
 }

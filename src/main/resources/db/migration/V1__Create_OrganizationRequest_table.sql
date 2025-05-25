@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS organization_users (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
     organization_id UUID NOT NULL REFERENCES organizations(id),
     user_id UUID NOT NULL UNIQUE,
+    user_name VARCHAR NOT NULL,
     job_title VARCHAR NOT NULL,
     emp_id VARCHAR NOT NULL,
     phone_no VARCHAR,

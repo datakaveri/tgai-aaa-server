@@ -78,14 +78,13 @@ public class Join {
         return joinType;
     }
 
-
-    public String getTable() {
-        return table;
-    }
-
     public Join setJoinType(JoinType joinType) {
         this.joinType = joinType;
         return this;
+    }
+
+    public String getTable() {
+        return table;
     }
 
     public Join setTable(String table) {
@@ -93,9 +92,17 @@ public class Join {
         return this;
     }
 
+    public String getTableAlias() {
+        return tableAlias;
+    }
+
     public Join setTableAlias(String tableAlias) {
         this.tableAlias = tableAlias;
         return this;
+    }
+
+    public String getOnColumn() {
+        return onColumn;
     }
 
     public Join setOnColumn(String onColumn) {
@@ -103,30 +110,19 @@ public class Join {
         return this;
     }
 
+    public String getJoinColumn() {
+        return joinColumn;
+    }
+
     public Join setJoinColumn(String joinColumn) {
         this.joinColumn = joinColumn;
         return this;
     }
 
-    public String getTableAlias() {
-        return tableAlias;
-    }
-
-
-    public String getOnColumn() {
-        return onColumn;
-    }
-
-
-    public String getJoinColumn() {
-        return joinColumn;
-    }
-
-
     public String toSQL() {
         String tableWithAlias = (tableAlias != null && !tableAlias.isEmpty())
-                ? table + " AS " + tableAlias
-                : table;
+            ? table + " AS " + tableAlias
+            : table;
         String lhs = (tableAlias != null && !tableAlias.isEmpty()) ? tableAlias + "." + joinColumn : table + "." + joinColumn;
         return joinType.getJoinType() + " " + tableWithAlias + " ON " + lhs + " = " + onColumn;
     }
