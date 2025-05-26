@@ -27,6 +27,8 @@ public class ApiConstants {
     public static final String COUNT_HEADER = "Count";
     public static final String HEADER_PUBLIC_KEY = "publicKey";
     public static final String HEADER_RESPONSE_FILE_FORMAT = "format";
+    public static final String AUTHORIZATION_KEY = "Authorization";
+    public static final String USER = "user";
 
     /** Accept Headers and CORS */
     public static final String MIME_APPLICATION_JSON = "application/json";

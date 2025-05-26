@@ -14,7 +14,6 @@ servers:
   - url: 'https://authvertx.iudx.io'
     description: Development
 paths:
-
   /auth/v1/organisations/requests:
     get:
       summary: Get all organisation creation requests
@@ -348,7 +347,7 @@ paths:
                   x-stoplight:
                     id: pz5gx6wsffeut
       security:
-        - authorization: [ ]
+        - authorization: []
   '/auth/v1/organisations/{id}/join_requests':
     parameters:
       - name: id
@@ -367,7 +366,7 @@ paths:
           description: OK
       operationId: get-auth-v1-organisations-join-requests
       security:
-        - authorization: [ ]
+        - authorization: []
     post:
       summary: Create Request to Join an Organisation
       tags:
@@ -517,8 +516,8 @@ paths:
                     id: u3n9nnqgrnbot
                   type: string
       security:
-        - authorization: [ ]
-  /auth/v1/organisations/{id}/join_requests/{req_id}:
+        - authorization: []
+  '/auth/v1/organisations/{id}/join_requests/{req_id}':
     parameters:
       - name: id
         in: path
@@ -548,7 +547,9 @@ paths:
               properties:
                 status:
                   type: string
-                  enum: [ granted, rejected ]
+                  enum:
+                    - granted
+                    - rejected
                 remarks:
                   type: string
       responses:
@@ -556,12 +557,12 @@ paths:
           description: Status updated successfully
         '400':
           description: Invalid request or status
-        '404':
-          description: Join request not found
         '401':
           description: Unauthorized
+        '404':
+          description: Join request not found
       security:
-        - authorization: [ ]
+        - authorization: []
   /auth/v1/organisations:
     get:
       summary: List All Organisations
@@ -672,7 +673,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   '/auth/v1/organisations/{id}':
     parameters:
       - schema:
@@ -689,7 +690,7 @@ paths:
           description: OK
       operationId: delete-auth-v1-organisations-id
       security:
-        - authorization: [ ]
+        - authorization: []
     put:
       summary: Update Organisation by ID
       tags:
@@ -720,8 +721,8 @@ paths:
                   x-stoplight:
                     id: aicq0bnwnqk88
       security:
-        - authorization: [ ]
-  /auth/v1/organisations/{id}/users:
+        - authorization: []
+  '/auth/v1/organisations/{id}/users':
     parameters:
       - name: id
         in: path
@@ -811,7 +812,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}
               examples:
                 Example 1:
                   value:
@@ -827,9 +828,19 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
-  /auth/v1/organisations/{id}/users/{user_id}:
+        - authorization: []
+  '/auth/v1/organisations/{id}/users/{user_id}':
     parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: user_id
+        in: path
+        required: true
       - name: id
         in: path
         required: true
@@ -853,7 +864,7 @@ paths:
           description: OK
       operationId: delete-auth-v1-organisations-users-id
       security:
-        - authorization: [ ]
+        - authorization: []
     put:
       summary: Update Organization User Role
       tags:
@@ -863,7 +874,7 @@ paths:
           description: OK
       operationId: put-auth-v1-organization-users-role
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -874,6 +885,15 @@ paths:
                   type: string
                   x-stoplight:
                     id: 35dhxezcb35eq
+    get:
+      summary: (Org Admin) Get User Information
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-organisations-id-users-user_id
+      security:
+        - authorization: []
   /auth/v1/credit/request:
     get:
       summary: Get all credit requests by status
@@ -884,7 +904,7 @@ paths:
           description: OK
       operationId: get-auth-v1-credit
       security:
-        - authorization: [ ]
+        - authorization: []
       parameters:
         - schema:
             type: string
@@ -901,7 +921,7 @@ paths:
           description: OK
       operationId: post-auth-v1-credit-request
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -921,7 +941,7 @@ paths:
           description: OK
       operationId: put-auth-v1-credit-request
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -946,7 +966,7 @@ paths:
           description: OK
       operationId: get-auth-v1-user-credit
       security:
-        - authorization: [ ]
+        - authorization: []
     put:
       summary: Deduct User Credit (COS ADMIN)
       tags:
@@ -956,7 +976,7 @@ paths:
           description: OK
       operationId: put-auth-v1-user-credit
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -987,7 +1007,7 @@ paths:
           description: OK
       operationId: get-auth-v1-user-credit-id
       security:
-        - authorization: [ ]
+        - authorization: []
   /auth/v1/compute/requests:
     get:
       summary: Get All Pending ComputeRole Requests
@@ -1000,7 +1020,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}
       operationId: get-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -1009,7 +1029,7 @@ paths:
           name: Authorization
           description: Keycloak issued Token
       security:
-        - authorization: [ ]
+        - authorization: []
     post:
       summary: Create Compute Role Request
       tags:
@@ -1025,8 +1045,8 @@ paths:
           name: Authorization
           description: Keycloak issued Token
       security:
-        - authorization: [ ]
-  /auth/v1/compute/requests/{id}:
+        - authorization: []
+  '/auth/v1/compute/requests/{id}':
     parameters:
       - name: id
         in: path
@@ -1046,7 +1066,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}
       operationId: put-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -1063,7 +1083,7 @@ paths:
                 status:
                   type: string
       security:
-        - authorization: [ ]
+        - authorization: []
   /auth/v1/kyc/verify:
     post:
       summary: Verify KYC
@@ -1091,8 +1111,8 @@ paths:
                 code_verifier:
                   type: string
       security:
-        - authorization: [ ]
-  /auth/v1/kyc/confirm/{id}:
+        - authorization: []
+  '/auth/v1/kyc/confirm/{id}':
     get:
       summary: Confirm KYC verification
       tags:
@@ -1102,7 +1122,7 @@ paths:
           description: OK
       operationId: get-auth-v1-kyc-confirm
       security:
-        - authorization: [ ]
+        - authorization: []
       parameters:
         - schema:
             type: string
@@ -1112,22 +1132,22 @@ paths:
   /auth/v1/organization/user/provider_role/requests:
     get:
       summary: Get All pending provider role requests
-      tags: [ ]
+      tags: []
       responses:
         '200':
           description: OK
       operationId: get-auth-v1-user-roles
       security:
-        - authorization: [ ]
+        - authorization: []
     post:
       summary: Create a Provider Role Request
-      tags: [ ]
+      tags: []
       responses:
         '200':
           description: OK
       operationId: post-auth-v1-user-roles
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -1138,7 +1158,7 @@ paths:
                   type: string
                   x-stoplight:
                     id: l9svqkwc3ik2j
-  /auth/v1/organization/user/provider_role/requests/{id}:
+  '/auth/v1/organization/user/provider_role/requests/{id}':
     parameters:
       - name: id
         in: path
@@ -1149,7 +1169,7 @@ paths:
           format: uuid
     put:
       summary: Update a Provider Role Request
-      tags: [ ]
+      tags: []
       responses:
         '200':
           description: OK
@@ -1165,16 +1185,39 @@ paths:
                   x-stoplight:
                     id: idttjmml4yni9
       security:
-        - authorization: [ ]
-
-
+        - authorization: []
+  /auth/v1/user:
+    get:
+      summary: (User) Get User Information
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-user
+      security:
+        - authorization: []
+  '/auth/v1/admin/user/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: (COS Admin) Get User Information
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-user-id-admin
+      security:
+        - authorization: []
 components:
   securitySchemes:
     authorization:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: "Keycloak issued Bearer token"
-
+      description: Keycloak issued Bearer token
 security:
   - authorization: []

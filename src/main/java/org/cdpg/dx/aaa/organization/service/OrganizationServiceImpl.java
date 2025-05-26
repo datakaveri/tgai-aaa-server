@@ -385,4 +385,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return Future.failedFuture("Failed to fetch organization: " + err.getMessage());
                 });
     }
+
+    public Future<Boolean> hasPendingProviderRole(UUID userId, UUID orgId){
+        Map<String, Object> filterMap = Map.of(
+                Constants.STATUS, Status.PENDING.getStatus(), Constants.USER_ID, userId.toString(), Constants.ORGANIZATION_ID, orgId.toString()
+        );
+
+        return providerRequestDAO.getAllWithFilters(filterMap)
+                .map(list -> !list.isEmpty());
+    }
 }

@@ -251,5 +251,13 @@ public class CreditServiceImpl implements CreditService {
 
     return promise.future();
   }
+
+  public Future<Boolean> hasPendingComputeRequest(UUID userId){
+      Map<String, Object> filterMap = Map.of(
+              Constants.STATUS, Status.PENDING.getStatus(), Constants.USER_ID, userId.toString()
+      );
+      return computeRoleDAO.getAllWithFilters(filterMap)
+              .map(list -> !list.isEmpty());
+  }
 }
 
