@@ -2,10 +2,12 @@ package org.cdpg.dx.aaa.organization.service;
 
 
 import io.vertx.core.Future;
+import io.vertx.ext.web.RoutingContext;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.models.Role;
 import org.cdpg.dx.aaa.organization.models.Status;
 import io.vertx.core.json.JsonObject;
+import org.cdpg.dx.keyclock.model.DxUser;
 
 import java.util.List;
 import java.util.UUID;
@@ -59,8 +61,6 @@ public interface OrganizationService {
 
   Future<OrganizationUser> getOrganizationUserInfo(UUID userId);
 
-
-
   // to check - info about the users
  // Future<OrganizationUser> getOrganizationUserById(UUID userId);
 
@@ -71,5 +71,7 @@ public interface OrganizationService {
   Future<Boolean> updateProviderRequestStatus(UUID requestId, Status status);
 
   Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId);
+
+  Future<Boolean> hasPendingProviderRole(UUID userId, UUID orgId);
 }
 
