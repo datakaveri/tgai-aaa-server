@@ -64,7 +64,8 @@ public class OrganizationHandler {
 
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
-        UUID requestId = RequestHelper.getPathParamAsUUID(ctx, "req_id");
+        UUID requestId = RequestHelper.getPathParamAsUUID(ctx, "id");
+
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
 
@@ -100,7 +101,7 @@ public class OrganizationHandler {
         OrgRequestJson.put("user_name", userName);
         OrgRequestJson.put("organization_id", orgId.toString());
 
-
+        System.out.println("OrgRequestJson: " + OrgRequestJson.encodePrettily());
 
         organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
 

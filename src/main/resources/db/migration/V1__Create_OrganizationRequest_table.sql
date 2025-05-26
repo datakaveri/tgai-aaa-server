@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS organization_join_requests (
     emp_id VARCHAR NOT NULL,
     status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     requested_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    processed_at TIMESTAMP WITHOUT TIME ZONE
+    processed_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS organization_users (

@@ -28,13 +28,13 @@ public class ControllerFactory {
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
     ApiController organizationController = OrganizationControllerFactory.create(pgService, keycloakUserService);
 ;
-    ApiController crediApiController =  CreditControllerFactory.create(pgService, keycloakUserService);
+    ApiController creditApiController =  CreditControllerFactory.create(pgService, keycloakUserService);
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
 
     //TODO create other controllers
 
-    return List.of(organizationController, crediApiController, kycController);
+    return List.of(organizationController, creditApiController, kycController);
   }
 }

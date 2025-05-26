@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS credit_requests (
     amount	DECIMAL,
     status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     requested_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    processed_at TIMESTAMP WITHOUT TIME ZONE
+    processed_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS credit_transactions (
@@ -16,14 +16,14 @@ CREATE TABLE IF NOT EXISTS credit_transactions (
     transacted_by UUID NOT NULL,
     transaction_status VARCHAR NOT NULL CHECK (transaction_status IN ('success', 'failure')),
     transaction_type VARCHAR NOT NULL CHECK (transaction_type IN ('credit','debit')),
-    created_at TIMESTAMP WITHOUT TIME ZONE
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_credits (
     id UUID DEFAULT public.gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL,
     balance	DECIMAL DEFAULT 0,
-    updated_at TIMESTAMP WITHOUT TIME ZONE
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS compute_role (
@@ -33,5 +33,5 @@ CREATE TABLE IF NOT EXISTS compute_role (
     status VARCHAR NOT NULL CHECK (status IN ('pending', 'granted', 'rejected')),
     approved_by UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITHOUT TIME ZONE
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
