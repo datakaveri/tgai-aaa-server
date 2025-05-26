@@ -13,6 +13,12 @@
       "databaseUserName": "test-user",
       "databasePassword": "test-password"
     },
+    "emailOptions": {
+    "host": "smtp.mail.gov.in",
+    "port": "465",
+    "username": "support-tgdex-itc@telangana.gov.in",
+    "password": "K1&dX7@oS3"
+    },
     "commonOptions":{
       "cosDomain":"asdasd",
       "cosAdminUserId": "asdas"

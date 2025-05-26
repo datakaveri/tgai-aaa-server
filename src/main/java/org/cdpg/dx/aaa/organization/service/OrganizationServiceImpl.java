@@ -3,6 +3,9 @@ package org.cdpg.dx.aaa.organization.service;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import jakarta.validation.constraints.Email;
+import org.cdpg.dx.aaa.email.models.EmailRequest;
+import org.cdpg.dx.aaa.email.service.EmailService;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
@@ -12,6 +15,7 @@ import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map;
@@ -26,20 +30,43 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationJoinRequestDAO joinRequestDAO;
     private final ProviderRoleRequestDAO providerRequestDAO;
     private final KeycloakUserService keycloakUserService;
+    private final EmailService emailService;
 
-    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService keycloakUserService) {
+    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService keycloakUserService, EmailService emailService) {
         this.createRequestDAO = factory.organizationCreateRequest();
         this.orgUserDAO = factory.organizationUserDAO();
         this.orgDAO = factory.organizationDAO();
         this.joinRequestDAO = factory.organizationJoinRequestDAO();
         this.providerRequestDAO = factory.providerRoleRequestDAO();
         this.keycloakUserService = keycloakUserService;
+        this.emailService = emailService;
     }
 
-    @Override
-    public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
-        return createRequestDAO.create(request);
-    }
+//    @Override
+//    public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
+//        return createRequestDAO.create(request);
+//    }
+
+  @Override
+  public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
+    return createRequestDAO.create(request)
+      .compose(savedRequest -> {
+
+        JsonObject json = new JsonObject();
+        json.put("id",null);
+        json.put("subject" ,"subject");
+        json.put("body", "body");
+        json.put("to", request.requestedBy());
+        json.put("from", "<EMAIL>");
+        json.put("createdAt", Instant.now().toString());
+
+        EmailRequest emailPayload = new EmailRequest(json);
+
+        return emailService.sendEmail(emailPayload)
+          .onFailure(err -> LOGGER.error("Failed to send email", err))
+          .map(v -> savedRequest);
+      });
+  }
 
     @Override
     public Future<List<OrganizationCreateRequest>> getAllPendingOrganizationCreateRequests() {
@@ -327,7 +354,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (!updated) {
                         return Future.failedFuture(new DxNotFoundException("Request not found"));
                     }
-                    //Update in KC 
+                    //Update in KC
                     if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return providerRequestDAO.get(requestId)
                                 .compose(providerRequest -> {

@@ -88,7 +88,7 @@ public class PostgresServiceImpl implements PostgresService {
                   || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
             try {
               // Parse and
-              // qconvert to LocalDateTime
+              // convert to LocalDateTime
               LocalDateTime time = LocalDateTime.parse(paramStr);
               tuple.addValue(time);
               continue;

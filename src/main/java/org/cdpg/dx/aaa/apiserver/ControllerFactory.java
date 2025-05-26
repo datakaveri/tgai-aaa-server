@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.factory.CreditControllerFactory;
+import org.cdpg.dx.aaa.email.service.EmailService;
 import org.cdpg.dx.aaa.kyc.controller.KYCController;
 import org.cdpg.dx.aaa.kyc.factory.KYCFactory;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
@@ -24,10 +25,11 @@ public class ControllerFactory {
 
   public static List<ApiController> createControllers(Vertx vertx, JsonObject config) {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
+    EmailService emailService = EmailService.createProxy(vertx, EMAIL_SERVICE_ADDRESS);
+
 
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
-    ApiController organizationController = OrganizationControllerFactory.create(pgService, keycloakUserService);
-;
+    ApiController organizationController = OrganizationControllerFactory.create(pgService, emailService,keycloakUserService);
     ApiController creditApiController =  CreditControllerFactory.create(pgService, keycloakUserService);
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
