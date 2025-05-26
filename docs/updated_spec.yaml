@@ -891,7 +891,7 @@ paths:
           in: query
           name: status
           description: Status of Credit Request
-          required: true
+          required: false
     post:
       summary: Create Credit Request
       tags:
@@ -909,7 +909,8 @@ paths:
               type: object
               properties:
                 amount:
-                  type: string
+                  type: number
+                  format: double
                   x-stoplight:
                     id: 37g76x7a4vgf8
     put:
@@ -964,7 +965,8 @@ paths:
               type: object
               properties:
                 amount:
-                  type: string
+                  type: number
+                  format: double
                   x-stoplight:
                     id: 62wmfshusogai
                 user_id:

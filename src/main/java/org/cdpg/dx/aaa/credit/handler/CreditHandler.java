@@ -35,7 +35,7 @@ public class CreditHandler {
     User user = ctx.user();
     creditRequestJson.put("user_id", user.subject());
 
-    String userName = user.principal().getString("user_name");
+    String userName = user.principal().getString("name");
     creditRequestJson.put("user_name", userName);
 
     creditRequest = CreditRequest.fromJson(creditRequestJson);
@@ -76,13 +76,13 @@ public class CreditHandler {
       .onSuccess(approved -> {
         if (approved) {
 
-          processSuccess(ctx, responseObject, 200, "Approved  Compute Role Compute Role Request");
+          processSuccess(ctx, responseObject, 200, "Credit Successful!");
         } else {
 
           processFailure(ctx, 400, "Request Not Found");
         }
       })
-      .onFailure(err -> processFailure(ctx, 500, "Failed to approve Compute Role Request"));
+      .onFailure(err -> processFailure(ctx, 500, "Credit Failure!"));
 
   }
 

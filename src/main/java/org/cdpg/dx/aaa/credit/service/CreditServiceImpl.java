@@ -3,6 +3,7 @@ package org.cdpg.dx.aaa.credit.service;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import org.cdpg.dx.aaa.credit.dao.*;
 import org.cdpg.dx.aaa.credit.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
@@ -26,7 +27,7 @@ import static org.cdpg.dx.aaa.credit.util.Constants.*;
 
 public class CreditServiceImpl implements CreditService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(OrganizationServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CreditServiceImpl.class);
 
   private final CreditRequestDAO creditRequestDAO;
   private final UserCreditDAO userCreditDAO;
@@ -60,58 +61,12 @@ public class CreditServiceImpl implements CreditService {
   // ***************************************************************************************
   @Override
   public Future<Boolean> updateCreditRequestStatus(UUID requestId, Status status, UUID transactedBy) {
-    Map<String, Object> conditionMap = Map.of(
-      CREDIT_REQUEST_ID, requestId.toString()
-    );
-
-    Map<String, Object> updateDataMap = Map.of(
-      STATUS, status.getStatus()
-    );
-
-    return creditRequestDAO.update(conditionMap, updateDataMap)
+    LOG.info("Updating credit request status for requestId: {} to: {}", requestId, status);
+    return creditRequestDAO.update(Map.of(CREDIT_REQUEST_ID, requestId.toString()), Map.of(STATUS, status.getStatus()))
       .compose(updated -> {
         if (!updated) return Future.succeededFuture(false);
-
-        // Proceed only if status is APPROVED
-        if (status == Status.GRANTED) {
-          return creditRequestDAO.get(requestId)
-            .compose(cr -> {
-              UUID userId = cr.userId();
-              String userName = cr.userName();
-              double amount = cr.amount();
-
-              return getBalance(userId)
-                .compose(balance -> {
-                  double newBalance = balance + amount;
-
-                  Map<String, Object> balanceUpdateCondition = Map.of(
-                    USER_ID, userId.toString()
-                  );
-                  Map<String, Object> balanceUpdateData = Map.of(
-                    BALANCE, newBalance
-                  );
-
-                  return userCreditDAO.update(balanceUpdateCondition, balanceUpdateData)
-                    .compose(updateResult -> {
-                      CreditTransaction creditTransaction = new CreditTransaction(
-                        null,
-                        userId,
-                        userName,
-                        amount,
-                        transactedBy,
-                        TransactionStatus.SUCCESS.getStatus(),
-                        TransactionType.CREDIT.getType(),
-                        null
-                      );
-
-                      return creditTransactionDAO.create(creditTransaction);
-                    })
-                    .map(true);
-                });
-            });
-        } else {
-          return Future.succeededFuture(true);
-        }
+        if (status != Status.GRANTED) return Future.succeededFuture(true);
+        return processCreditGrant(requestId, transactedBy);
       })
       .recover(err -> {
         BaseDxException dxEx = BaseDxException.from(err);
@@ -121,6 +76,60 @@ public class CreditServiceImpl implements CreditService {
         return Future.failedFuture(dxEx);
       });
   }
+
+  private Future<Boolean> processCreditGrant(UUID requestId, UUID transactedBy) {
+    return creditRequestDAO.get(requestId).compose(cr -> {
+      UUID userId = cr.userId();
+      String userName = cr.userName();
+      double amount = cr.amount();
+
+      return userCreditDAO.get(userId)
+        .recover(err -> {
+          if (err.getMessage() != null && err.getMessage().toLowerCase().contains("no rows")) {
+            LOG.info("No entry in user_credits for userId: {}, creating with 0 balance", userId);
+            UserCredit newCredit = new UserCredit(null, userId, 0.0, null);
+            return userCreditDAO.create(newCredit).map(newCredit);
+          } else {
+            return Future.failedFuture(err); // genuine failure
+          }
+        })
+        .compose(ignored -> getBalance(userId))
+        .compose(balance -> {
+          double newBalance = balance + amount;
+          LOG.info("Current balance: {}, New balance after crediting {}: {}", balance, amount, newBalance);
+
+          Map<String, Object> updateMap = Map.of(BALANCE,newBalance);
+          Map<String, Object> conditionMap = Map.of(USER_ID, userId.toString());
+
+          return userCreditDAO.update(conditionMap, updateMap).compose(updated -> {
+            if (!updated) {
+              return Future.failedFuture("Failed to update balance.");
+            }
+            LOG.info("Updated balance for userId: {} to {}", userId, newBalance);
+            return Future.succeededFuture();
+          });
+        })
+        .compose(v -> createCreditTransaction(userId, userName, amount, transactedBy))
+        .map(v -> true);
+    });
+  }
+
+
+
+  private Future<Boolean> createCreditTransaction(UUID userId, String userName, double amount, UUID transactedBy) {
+    CreditTransaction creditTransaction = new CreditTransaction(
+      null,
+      userId,
+      userName,
+      amount,
+      transactedBy,
+      TransactionStatus.SUCCESS.getStatus(),
+      TransactionType.CREDIT.getType(),
+      null
+    );
+    return creditTransactionDAO.create(creditTransaction).map(true);
+  }
+
 
   //**************************************************************************************
 
@@ -142,7 +151,7 @@ public class CreditServiceImpl implements CreditService {
         } else {
           double updatedBalance = balance - amount;
 
-          Map<String, Object> conditionMap = Map.of(USER_ID, userId);
+          Map<String, Object> conditionMap = Map.of(USER_ID, userId.toString());
           Map<String, Object> updatedMap = Map.of(BALANCE, updatedBalance);
 
           return userCreditDAO.update(conditionMap, updatedMap)
@@ -237,19 +246,20 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<Double> getBalance(UUID userId) {
-    Promise<Double> promise = Promise.promise();
-
-    userCreditDAO.get(userId).onSuccess(result -> {
-      if (result!=null) {
+    LOG.info("Fetching balance for userId: {}", userId);
+    return userCreditDAO.get(userId)
+      .map(result -> {
         JsonObject userCredit = result.toJson();
         Double balance = userCredit.getDouble("balance");
-        promise.complete(balance);
-      } else {
-        promise.complete(0.0); // or fail if no record is found
-      }
-    }).onFailure(promise::fail);
-
-    return promise.future();
+        return balance != null ? balance : 0.0;
+      })
+      .recover(err -> {
+        // Check if it's a "no rows" error
+        if (err.getMessage() != null && err.getMessage().toLowerCase().contains("no rows")) {
+          return Future.succeededFuture(0.0);
+        }
+        return Future.failedFuture(err);
+      });
   }
 }
 
