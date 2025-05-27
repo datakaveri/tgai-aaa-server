@@ -14,10 +14,10 @@
       "databasePassword": "test-password"
     },
     "emailOptions": {
-    "host": "smtp.mail.gov.in",
-    "port": "465",
-    "username": "support-tgdex-itc@telangana.gov.in",
-    "password": "K1&dX7@oS3"
+    "host": "host_name",
+    "port": "4657",
+    "username": "user_name",
+    "password": "password"
     },
     "commonOptions":{
       "cosDomain":"asdasd",
