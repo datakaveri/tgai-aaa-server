@@ -887,7 +887,8 @@ paths:
                     id: 35dhxezcb35eq
     get:
       summary: (Org Admin) Get User Information
-      tags: []
+      tags:
+        - Role APIs
       responses:
         '200':
           description: OK
@@ -911,7 +912,7 @@ paths:
           in: query
           name: status
           description: Status of Credit Request
-          required: false
+          required: true
     post:
       summary: Create Credit Request
       tags:
@@ -929,8 +930,7 @@ paths:
               type: object
               properties:
                 amount:
-                  type: number
-                  format: double
+                  type: string
                   x-stoplight:
                     id: 37g76x7a4vgf8
     put:
@@ -985,8 +985,7 @@ paths:
               type: object
               properties:
                 amount:
-                  type: number
-                  format: double
+                  type: string
                   x-stoplight:
                     id: 62wmfshusogai
                 user_id:
@@ -1134,7 +1133,8 @@ paths:
   /auth/v1/organization/user/provider_role/requests:
     get:
       summary: Get All pending provider role requests
-      tags: []
+      tags:
+        - Organisation APIs
       responses:
         '200':
           description: OK
@@ -1143,7 +1143,8 @@ paths:
         - authorization: []
     post:
       summary: Create a Provider Role Request
-      tags: []
+      tags:
+        - Organisation APIs
       responses:
         '200':
           description: OK
@@ -1171,7 +1172,8 @@ paths:
           format: uuid
     put:
       summary: Update a Provider Role Request
-      tags: []
+      tags:
+        - Organisation APIs
       responses:
         '200':
           description: OK
@@ -1191,7 +1193,8 @@ paths:
   /auth/v1/user:
     get:
       summary: (User) Get User Information
-      tags: []
+      tags:
+        - Role APIs
       responses:
         '200':
           description: OK
@@ -1207,11 +1210,22 @@ paths:
         required: true
     get:
       summary: (COS Admin) Get User Information
-      tags: []
+      tags:
+        - Role APIs
       responses:
         '200':
           description: OK
       operationId: get-auth-v1-user-id-admin
+      security:
+        - authorization: []
+  /auth/v1/admin/user:
+    get:
+      summary: (COS Admin) Get All Users Info
+      tags: [Role APIs]
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-admin-user
       security:
         - authorization: []
 components:

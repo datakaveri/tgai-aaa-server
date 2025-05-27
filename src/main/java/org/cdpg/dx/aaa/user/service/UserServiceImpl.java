@@ -30,8 +30,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Future<DxUser> getUserInfo(DxUser dxUser) {
-        Future<Boolean> pendingProvider = organizationService
-                .hasPendingProviderRole(dxUser.sub(), UUID.fromString(dxUser.organisationId()));
+
+        Future<Boolean> pendingProvider = Future.succeededFuture(false);;
+        if(dxUser.organisationId()!=null){
+            pendingProvider = organizationService
+                    .hasPendingProviderRole(dxUser.sub(), UUID.fromString(dxUser.organisationId()));
+        }
         Future<Boolean> pendingCompute = creditService.hasPendingComputeRequest(dxUser.sub());
 
         return Future.all(pendingProvider, pendingCompute)

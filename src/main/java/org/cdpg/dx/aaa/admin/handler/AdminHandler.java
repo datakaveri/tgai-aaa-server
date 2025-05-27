@@ -35,6 +35,7 @@ public class AdminHandler {
 
     public void getDxUserInfo(RoutingContext ctx) {
         DxUser dxUser = RoutingContextHelper.fromPrincipal(ctx);
+        System.out.println("dxUser: " + dxUser.toJson());
         userService.getUserInfo(dxUser)
                 .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
                 .onFailure(ctx::fail);
@@ -43,11 +44,32 @@ public class AdminHandler {
     public void getDxUserFromKeycloak(RoutingContext ctx) {
         UUID userId = RequestHelper.getPathParamAsUUID(ctx, "id");
 
-        keycloakUserService.getUserById(userId)
+        userService.getUserInfoByID(userId)
                 .compose(userService::getUserInfo)
                 .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
                 .onFailure(err -> {
                     LOGGER.error("Failed to get DxUser info: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
+    }
+
+
+    public void getAllDxUsersKeycloak(RoutingContext ctx) {
+        keycloakUserService.getUsers(1, 1)
+                .compose(users -> {
+                    JsonArray usersArray = new JsonArray();
+                    for (DxUser user : users) {
+                        return userService.getUserInfo(user)
+                                .map(dxUser -> {
+                                    usersArray.add(dxUser.toJson());
+                                    return usersArray;
+                                });
+                    }
+                    return Future.succeededFuture(usersArray);
+                })
+                .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
+                .onFailure(err -> {
+                    LOGGER.error("Failed to get all DxUsers: {}", err.getMessage(), err);
                     ctx.fail(err);
                 });
     }
