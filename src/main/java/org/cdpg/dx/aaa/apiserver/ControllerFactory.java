@@ -9,10 +9,14 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.factory.CreditControllerFactory;
+import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.kyc.controller.KYCController;
 import org.cdpg.dx.aaa.kyc.factory.KYCFactory;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
 import org.cdpg.dx.aaa.organization.factory.OrganizationControllerFactory;
+import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.aaa.user.service.UserServiceImpl;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.cdpg.dx.keyclock.service.KeycloakUserServiceImpl;
@@ -26,12 +30,18 @@ public class ControllerFactory {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
 
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
-    ApiController organizationController = OrganizationControllerFactory.create(pgService, keycloakUserService);
+
+
+    CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService);
+    OrganizationService  organizationService = OrganizationControllerFactory.createService(pgService, keycloakUserService);
+
+    UserService userService = new UserServiceImpl(keycloakUserService, organizationService, creditService);
 ;
-    ApiController creditApiController =  CreditControllerFactory.create(pgService, keycloakUserService);
+    ApiController creditApiController =  CreditControllerFactory.create(creditService);
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
+    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService);
 
     //TODO create other controllers
 

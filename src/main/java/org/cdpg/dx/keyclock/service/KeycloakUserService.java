@@ -3,7 +3,7 @@ package org.cdpg.dx.keyclock.service;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.auth.authorization.model.DxRole;
-import org.cdpg.dx.keyclock.model.DxUser;
+import org.cdpg.dx.common.model.DxUser;
 
 import java.util.List;
 import java.util.Map;

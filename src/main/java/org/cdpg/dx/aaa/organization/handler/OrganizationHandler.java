@@ -2,7 +2,6 @@ package org.cdpg.dx.aaa.organization.handler;
 
 
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
@@ -10,12 +9,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
-import org.cdpg.dx.aaa.organization.util.RoutingContextHelper;
-import org.cdpg.dx.keyclock.model.DxUser;
 
 import java.util.UUID;
 
@@ -24,10 +22,12 @@ public class OrganizationHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(OrganizationHandler.class);
     private final OrganizationService organizationService;
+    private final UserService userService;
 
 
-    public OrganizationHandler(OrganizationService organizationService) {
+    public OrganizationHandler(OrganizationService organizationService, UserService userService) {
         this.organizationService = organizationService;
+        this.userService = userService;
     }
 
     public void updateOrganisationById(RoutingContext ctx) {
@@ -173,6 +173,19 @@ public class OrganizationHandler {
                     } else {
                         ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
                     }
+                })
+                .onFailure(ctx::fail);
+
+    }
+
+    public void getOrganisationUserInfo(RoutingContext ctx) {
+        UUID  orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+        UUID userId = RequestHelper.getPathParamAsUUID(ctx, "user_id");
+
+        // TODO check this belogns to the org
+
+        userService.getUserInfoByID(userId).onSuccess(users -> {
+                    ResponseBuilder.sendSuccess(ctx, users);
                 })
                 .onFailure(ctx::fail);
 

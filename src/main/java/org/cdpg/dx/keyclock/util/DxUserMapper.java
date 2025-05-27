@@ -1,13 +1,10 @@
 package org.cdpg.dx.keyclock.util;
 
 import org.cdpg.dx.keyclock.config.KeycloakConstants;
-import org.cdpg.dx.keyclock.model.DxUser;
+import org.cdpg.dx.common.model.DxUser;
 import org.keycloak.representations.idm.UserRepresentation;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class DxUserMapper {
     public static DxUser fromUserRepresentation(UserRepresentation user) {
@@ -23,7 +20,8 @@ public class DxUserMapper {
                 user.getUsername(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail()
+                user.getEmail(),
+                new ArrayList<>()
         );
     }
 

@@ -8,7 +8,7 @@ import org.cdpg.dx.common.exception.KeycloakServiceException;
 import org.cdpg.dx.common.util.BlockingExecutionUtil;
 import org.cdpg.dx.keyclock.client.KeycloakClientProvider;
 import org.cdpg.dx.keyclock.config.KeycloakConstants;
-import org.cdpg.dx.keyclock.model.DxUser;
+import org.cdpg.dx.common.model.DxUser;
 import org.cdpg.dx.keyclock.util.DxUserMapper;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;

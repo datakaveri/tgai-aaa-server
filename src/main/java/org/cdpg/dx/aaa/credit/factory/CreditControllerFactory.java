@@ -16,12 +16,19 @@ public class CreditControllerFactory {
 
   private CreditControllerFactory() {}
 
-  public static CreditController create(PostgresService pgService, KeycloakUserService keycloakUserService) {
+  public static CreditController create(CreditService creditService) {
 
-    CreditDAOFactory creditDAOFactory = new CreditDAOFactory(pgService);
-    CreditService creditService = new CreditServiceImpl(creditDAOFactory,keycloakUserService);
+
     CreditHandler creditHandler = new CreditHandler(creditService);
 
     return new CreditController(creditHandler);
   }
+
+  public static CreditService createService(PostgresService pgService, KeycloakUserService keycloakUserService) {
+    CreditDAOFactory creditDAOFactory = new CreditDAOFactory(pgService);
+    return new CreditServiceImpl(creditDAOFactory,keycloakUserService);
+
+  }
+
+
 }

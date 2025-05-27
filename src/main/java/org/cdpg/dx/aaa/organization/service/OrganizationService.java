@@ -2,12 +2,9 @@ package org.cdpg.dx.aaa.organization.service;
 
 
 import io.vertx.core.Future;
-import io.vertx.ext.web.RoutingContext;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.models.Role;
 import org.cdpg.dx.aaa.organization.models.Status;
-import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.keyclock.model.DxUser;
 
 import java.util.List;
 import java.util.UUID;

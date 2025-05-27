@@ -1,4 +1,4 @@
-package org.cdpg.dx.keyclock.model;
+package org.cdpg.dx.common.model;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -17,7 +17,8 @@ public record DxUser(
         String preferredUsername,
         String givenName,
         String familyName,
-        String email
+        String email,
+        List<String> pendingRoles // <-- added field
 ) {
     public JsonObject toJson() {
         return new JsonObject()
@@ -31,6 +32,24 @@ public record DxUser(
                 .put("preferredUsername", preferredUsername)
                 .put("givenName", givenName)
                 .put("familyName", familyName)
-                .put("email", email);
+                .put("email", email)
+                .put("pending_roles", pendingRoles != null ? new JsonArray(pendingRoles) : new JsonArray());
+    }
+
+    public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles) {
+        return new DxUser(
+                user.roles(),
+                user.organisationId(),
+                user.organisationName(),
+                user.sub(),
+                user.emailVerified(),
+                user.kycVerified(),
+                user.name(),
+                user.preferredUsername(),
+                user.givenName(),
+                user.familyName(),
+                user.email(),
+                pendingRoles
+        );
     }
 }

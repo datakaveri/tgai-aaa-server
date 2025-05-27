@@ -65,7 +65,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         prettyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 
-        Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/updated_spec.yaml");
+        Future<RouterBuilder> routerFuture = RouterBuilder.create(vertx, "docs/openapi.yaml");
         Future<JWTAuth> authFuture = JwtAuthProvider.init(vertx, config());
         // init SharedWorkerExecutor for this vertical
         BlockingExecutionUtil.initialize(vertx);

@@ -3,11 +3,13 @@ package org.cdpg.dx.aaa.organization.factory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.controller.OrganizationController;
 import org.cdpg.dx.aaa.organization.dao.OrganizationDAOFactory;
 import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
+import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
@@ -18,11 +20,17 @@ public class OrganizationControllerFactory {
 
     private OrganizationControllerFactory() {}
 
-    public static OrganizationController create(PostgresService pgService, KeycloakUserService keycloakUserService) {
+    public static OrganizationController create(OrganizationService organizationService, UserService userService) {
+
+
+        OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService, userService);
+        return new OrganizationController(organizationHandler);
+    }
+
+    public static OrganizationService createService(PostgresService pgService, KeycloakUserService keycloakUserService) {
 
         OrganizationDAOFactory organizationDAOFactory = new OrganizationDAOFactory(pgService);
-        OrganizationService organizationService = new OrganizationServiceImpl(organizationDAOFactory, keycloakUserService);
-        OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService);
-        return new OrganizationController(organizationHandler);
+        return new  OrganizationServiceImpl(organizationDAOFactory, keycloakUserService);
+
     }
 }

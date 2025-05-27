@@ -68,6 +68,10 @@ public class OrganizationController implements ApiController {
                 .operation("get-auth-v1-org-users")
                 .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
                 .handler(organizationHandler::getOrganisationUsers);
+        routerBuilder
+                .operation("get-auth-v1-organisations-id-users-user_id")
+                .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
+                .handler(organizationHandler::getOrganisationUserInfo);
 
         routerBuilder
                 .operation("delete-auth-v1-organisations-users-id")
