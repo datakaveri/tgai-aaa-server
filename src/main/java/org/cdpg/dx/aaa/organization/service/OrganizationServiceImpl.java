@@ -30,43 +30,41 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationJoinRequestDAO joinRequestDAO;
     private final ProviderRoleRequestDAO providerRequestDAO;
     private final KeycloakUserService keycloakUserService;
-    private final EmailService emailService;
 
-    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService keycloakUserService, EmailService emailService) {
+    public OrganizationServiceImpl(OrganizationDAOFactory factory, KeycloakUserService keycloakUserService) {
         this.createRequestDAO = factory.organizationCreateRequest();
         this.orgUserDAO = factory.organizationUserDAO();
         this.orgDAO = factory.organizationDAO();
         this.joinRequestDAO = factory.organizationJoinRequestDAO();
         this.providerRequestDAO = factory.providerRoleRequestDAO();
         this.keycloakUserService = keycloakUserService;
-        this.emailService = emailService;
     }
 
-//    @Override
-//    public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
-//        return createRequestDAO.create(request);
-//    }
+    @Override
+    public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
+        return createRequestDAO.create(request);
+    }
 
-  @Override
-  public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
-    return createRequestDAO.create(request)
-      .compose(savedRequest -> {
-
-        JsonObject json = new JsonObject();
-        json.put("id",null);
-        json.put("subject" ,"subject");
-        json.put("body", "body");
-        json.put("to", request.requestedBy());
-        json.put("from", "<EMAIL>");
-        json.put("createdAt", Instant.now().toString());
-
-        EmailRequest emailPayload = new EmailRequest(json);
-
-        return emailService.sendEmail(emailPayload)
-          .onFailure(err -> LOGGER.error("Failed to send email", err))
-          .map(v -> savedRequest);
-      });
-  }
+//  @Override
+//  public Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest request) {
+//    return createRequestDAO.create(request)
+//      .compose(savedRequest -> {
+//
+//        JsonObject json = new JsonObject();
+//        json.put("id",null);
+//        json.put("subject" ,"subject");
+//        json.put("body", "body");
+//        json.put("to", request.requestedBy());
+//        json.put("from", "<EMAIL>");
+//        json.put("createdAt", Instant.now().toString());
+//
+//        EmailRequest emailPayload = new EmailRequest(json);
+//
+//        return emailService.sendEmail(emailPayload)
+//          .onFailure(err -> LOGGER.error("Failed to send email", err))
+//          .map(v -> savedRequest);
+//      });
+//  }
 
     @Override
     public Future<List<OrganizationCreateRequest>> getAllPendingOrganizationCreateRequests() {

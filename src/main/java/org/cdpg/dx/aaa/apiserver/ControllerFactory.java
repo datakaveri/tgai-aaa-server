@@ -29,7 +29,7 @@ public class ControllerFactory {
 
 
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
-    ApiController organizationController = OrganizationControllerFactory.create(pgService, emailService,keycloakUserService);
+    ApiController organizationController = OrganizationControllerFactory.create(pgService,keycloakUserService);
     ApiController creditApiController =  CreditControllerFactory.create(pgService, keycloakUserService);
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);

@@ -19,10 +19,10 @@ public class OrganizationControllerFactory {
 
     private OrganizationControllerFactory() {}
 
-    public static OrganizationController create(PostgresService pgService, EmailService emailService, KeycloakUserService keycloakUserService) {
+    public static OrganizationController create(PostgresService pgService, KeycloakUserService keycloakUserService) {
 
         OrganizationDAOFactory organizationDAOFactory = new OrganizationDAOFactory(pgService);
-        OrganizationService organizationService = new OrganizationServiceImpl(organizationDAOFactory, keycloakUserService,emailService);
+        OrganizationService organizationService = new OrganizationServiceImpl(organizationDAOFactory, keycloakUserService);
         OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService);
         return new OrganizationController(organizationHandler);
     }

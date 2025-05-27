@@ -17,14 +17,21 @@ public class EmailServiceImpl implements EmailService {
   @Override
   public Future<EmailRequest> sendEmail(EmailRequest emailRequest) {
     JsonObject emailJson = emailRequest.toJson();
-    MailMessage message = new MailMessage()
-      .setFrom(emailJson.getString("from"))
-      .setTo(emailJson.getString("to"))
-      .setSubject(emailJson.getString("subject"))
-      .setText(emailJson.getString("text"));
+    MailMessage message = new MailMessage();
+
+    message.setFrom(emailJson.getString("from"));
+    message.setTo(emailJson.getString("to"));
+    message.setSubject(emailJson.getString("subject"));
+    message.setText(emailJson.getString("text"));
 
     return mailClient.sendMail(message)
-      .map(mailResult -> emailRequest); // return the same object for confirmation
+      .onSuccess(mailResult -> {
+        System.out.println("Mail sent with messageId: " + mailResult.getMessageID());
+      })
+      .onFailure(err -> {
+        System.err.println("Failed to send mail: " + err.getMessage());
+      })
+      .map(mailResult -> emailRequest);
   }
 
 }

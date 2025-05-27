@@ -2,18 +2,14 @@ package org.cdpg.dx.aaa.email.models;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import org.cdpg.dx.aaa.email.models.EmailRequestConverter;
 
 @DataObject(generateConverter = true)
 public class EmailRequest {
-  private UUID id;
   private String from;
   private String to;
   private String subject;
   private String text;
-  private LocalDateTime createdAt;
 
   public EmailRequest() {
     // default constructor
@@ -43,19 +39,19 @@ public class EmailRequest {
   public String getText() { return text; }
   public void setText(String text) { this.text = text; }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
-  }
-
-  public UUID getId() {
-    return id;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
+//  public String getCreatedAt() {
+//    return createdAt;
+//  }
+//
+//  public void setId(String id) {
+//    this.id = id;
+//  }
+//
+//  public String getId() {
+//    return id;
+//  }
+//
+//  public void setCreatedAt(String createdAt) {
+//    this.createdAt = createdAt;
+//  }
 }
