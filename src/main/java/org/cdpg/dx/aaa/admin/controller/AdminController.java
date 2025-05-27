@@ -28,5 +28,10 @@ public class AdminController implements ApiController {
                 .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
                 .handler(adminHandler::getDxUserFromKeycloak);
 
+        routerBuilder
+                .operation("get-auth-v1-admin-user")
+                .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
+                .handler(adminHandler::getAllDxUsersKeycloak);
+
     }
 }

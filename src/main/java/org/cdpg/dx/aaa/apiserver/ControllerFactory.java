@@ -8,6 +8,8 @@ import java.util.List;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.admin.controller.AdminController;
+import org.cdpg.dx.aaa.admin.handler.AdminHandler;
 import org.cdpg.dx.aaa.credit.factory.CreditControllerFactory;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.kyc.controller.KYCController;
@@ -43,8 +45,11 @@ public class ControllerFactory {
     ApiController kycController = new KYCController(kycHandler);
     ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService);
 
+      AdminHandler adminHandler = new AdminHandler(userService, keycloakUserService, creditService, organizationService);
+      ApiController adminController = new AdminController(adminHandler);
+
     //TODO create other controllers
 
-    return List.of(organizationController, creditApiController, kycController);
+    return List.of(organizationController, creditApiController, kycController, adminController);
   }
 }
