@@ -29,7 +29,7 @@ public class UserCreditDAOImpl extends AbstractBaseDAO<UserCredit>implements Use
   private static final Logger LOGGER = LogManager.getLogger(UserCreditDAOImpl.class);
 
   public UserCreditDAOImpl(PostgresService postgresService) {
-    super(postgresService,USER_CREDIT_TABLE, USER_CREDIT_ID, UserCredit::fromJson);
+    super(postgresService,USER_CREDIT_TABLE, USER_ID, UserCredit::fromJson);
   }
 
 }
