@@ -54,6 +54,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
                 UserRepresentation user = usersResource().get(userId.toString()).toRepresentation();
                 return DxUserMapper.fromUserRepresentation(user);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new KeycloakServiceException("Failed to retrieve user with ID: " + userId, e);
             }
         });

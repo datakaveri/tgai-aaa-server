@@ -9,11 +9,13 @@ import io.vertx.ext.web.RoutingContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.auth.authentication.exception.AuthenticationException;
 import org.cdpg.dx.common.HttpStatusCode;
 import org.cdpg.dx.common.exception.BaseDxException;
@@ -99,12 +101,14 @@ public class RoutingContextHelper {
         event.data().put(RESPONSE_SIZE, responseSize);
     }
 
-//    public static Optional<List<AuditLog>> getAuditingLog(RoutingContext routingContext) {
-//        return Optional.ofNullable(routingContext.get(AUDITING_LOG));
-//    }
-//    public static void setAuditingLog(RoutingContext routingContext, List<AuditLog> auditingLog) {
-//        routingContext.put(AUDITING_LOG, auditingLog);
-//    }
+    public static Optional<List<AuditLog>> getAuditingLog(RoutingContext routingContext) {
+        return Optional.ofNullable(routingContext.get(AUDITING_LOG));
+    }
+    public static void setAuditingLog(RoutingContext routingContext, AuditLog auditingLog) {
+        List<AuditLog> logs = getAuditingLog(routingContext).get();
+        logs.add(auditingLog);
+        routingContext.put(AUDITING_LOG, logs);
+    }
 
     public static DxUser fromPrincipal(RoutingContext ctx) {
         JsonObject principal = ctx.user().principal();

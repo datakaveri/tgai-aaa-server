@@ -154,7 +154,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     private void configureCorsHandler(RouterBuilder routerBuilder) {
         routerBuilder.rootHandler(
-                CorsHandler.create().allowedHeaders(ALLOWED_HEADERS).allowedMethods(ALLOWED_METHODS));
+                CorsHandler.create("*").allowedHeaders(ALLOWED_HEADERS).allowedMethods(ALLOWED_METHODS));
     }
 
     private void putCommonResponseHeaders() {

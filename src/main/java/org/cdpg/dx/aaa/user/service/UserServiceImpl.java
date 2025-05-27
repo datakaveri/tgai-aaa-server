@@ -31,11 +31,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public Future<DxUser> getUserInfo(DxUser dxUser) {
 
-        Future<Boolean> pendingProvider = Future.succeededFuture(false);;
-        if(dxUser.organisationId()!=null){
-            pendingProvider = organizationService
-                    .hasPendingProviderRole(dxUser.sub(), UUID.fromString(dxUser.organisationId()));
+        Future<Boolean> pendingProvider = Future.succeededFuture(false);
+
+        UUID orgId = null;
+        try {
+            orgId = UUID.fromString(dxUser.organisationId());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Handle invalid UUID
+            LOGGER.error("Invalid UUID for organisationId: {}", dxUser.organisationId());
+
         }
+
+        if(orgId!=null){
+            pendingProvider = organizationService
+                    .hasPendingProviderRole(dxUser.sub(), orgId);
+        }
+
         Future<Boolean> pendingCompute = creditService.hasPendingComputeRequest(dxUser.sub());
 
         return Future.all(pendingProvider, pendingCompute)
