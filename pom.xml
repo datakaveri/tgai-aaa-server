@@ -186,7 +186,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-mail-client</artifactId>
-        <version>5.0.0</version>
+        <version>4.5.1</version>
       </dependency>
       <!--  -->
         <dependency>

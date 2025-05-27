@@ -18,9 +18,9 @@ import static org.cdpg.dx.common.config.ServiceProxyAddressConstants.EMAIL_SERVI
 
 @ExtendWith(VertxExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EmailServiceTest {
+class EmailVerticleTest {
 
-  public String TEST_EMAIL = "srishti.mittal413@gmail.com";
+  public String TEST_EMAIL = "sample_email@gmail.com";
 
   @BeforeEach
   void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
