@@ -1,5 +1,6 @@
 package org.cdpg.dx.aaa.admin.handler;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -15,6 +16,8 @@ import org.cdpg.dx.common.util.RoutingContextHelper;
 import org.cdpg.dx.common.model.DxUser;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class AdminHandler {
@@ -55,17 +58,20 @@ public class AdminHandler {
 
 
     public void getAllDxUsersKeycloak(RoutingContext ctx) {
-        keycloakUserService.getUsers(1, 1)
+        keycloakUserService.getUsers(0, 1000)
                 .compose(users -> {
-                    JsonArray usersArray = new JsonArray();
+                    List<Future> futures = new ArrayList<>();
                     for (DxUser user : users) {
-                        return userService.getUserInfo(user)
-                                .map(dxUser -> {
-                                    usersArray.add(dxUser.toJson());
-                                    return usersArray;
-                                });
+                        futures.add(userService.getUserInfo(user).map(DxUser::toJson));
                     }
-                    return Future.succeededFuture(usersArray);
+                    return CompositeFuture.all(futures)
+                            .map(cf -> {
+                                JsonArray array = new JsonArray();
+                                for (int i = 0; i < cf.size(); i++) {
+                                    array.add(cf.resultAt(i));
+                                }
+                                return array;
+                            });
                 })
                 .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
                 .onFailure(err -> {

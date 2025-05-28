@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.auth.authentication.exception.AuthenticationException;
 import org.cdpg.dx.common.HttpStatusCode;
@@ -129,7 +130,7 @@ public class RoutingContextHelper {
         return new DxUser(
                 roles,
                 principal.getString("organisation_id", null),
-                principal.getString("organisation_id", null), // assuming this is correct and intentional
+                principal.getString("organisation_name", null), // assuming this is correct and intentional
                 userId,
                 principal.getBoolean("email_verified", false),
                 principal.getBoolean("kyc_verified", false),
@@ -138,7 +139,8 @@ public class RoutingContextHelper {
                 principal.getString("given_name"),
                 principal.getString("family_name"),
                 principal.getString("email"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                new JsonObject()
         );
 
     }

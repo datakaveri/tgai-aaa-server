@@ -2,6 +2,7 @@ package org.cdpg.dx.common.model;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,8 @@ public record DxUser(
         String givenName,
         String familyName,
         String email,
-        List<String> pendingRoles // <-- added field
+        List<String> pendingRoles,
+        JsonObject organisation// <-- added field
 ) {
     public JsonObject toJson() {
         return new JsonObject()
@@ -33,10 +35,11 @@ public record DxUser(
                 .put("givenName", givenName)
                 .put("familyName", familyName)
                 .put("email", email)
-                .put("pending_roles", pendingRoles != null ? new JsonArray(pendingRoles) : new JsonArray());
+                .put("pending_roles", pendingRoles != null ? new JsonArray(pendingRoles) : new JsonArray())
+                .put("organisation", organisation != null ? organisation : new JsonObject());
     }
 
-    public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles) {
+    public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation) {
         return new DxUser(
                 user.roles(),
                 user.organisationId(),
@@ -49,7 +52,8 @@ public record DxUser(
                 user.givenName(),
                 user.familyName(),
                 user.email(),
-                pendingRoles
+                pendingRoles,
+                organisation
         );
     }
 }
