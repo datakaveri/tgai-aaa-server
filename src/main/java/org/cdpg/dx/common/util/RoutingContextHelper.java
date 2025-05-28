@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.auth.authentication.exception.AuthenticationException;
 import org.cdpg.dx.common.HttpStatusCode;
@@ -138,7 +139,8 @@ public class RoutingContextHelper {
                 principal.getString("given_name"),
                 principal.getString("family_name"),
                 principal.getString("email"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                new JsonObject()
         );
 
     }
