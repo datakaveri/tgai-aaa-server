@@ -129,7 +129,7 @@ public class RoutingContextHelper {
         return new DxUser(
                 roles,
                 principal.getString("organisation_id", null),
-                principal.getString("organisation_id", null), // assuming this is correct and intentional
+                principal.getString("organisation_name", null), // assuming this is correct and intentional
                 userId,
                 principal.getBoolean("email_verified", false),
                 principal.getBoolean("kyc_verified", false),
