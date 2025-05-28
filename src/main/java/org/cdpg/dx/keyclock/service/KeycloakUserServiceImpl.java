@@ -33,6 +33,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
 
     private UsersResource usersResource() {
         return keycloak.realm(realm).users();
+
     }
 
     @Override
@@ -40,7 +41,11 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
                 List<UserRepresentation> reps = usersResource().list(page * size, size);
-                return reps.stream().map(DxUserMapper::fromUserRepresentation).collect(Collectors.toList());
+                return reps.stream()
+                        .map(user -> {
+                            List<RoleRepresentation> roles = usersResource().get(user.getId()).roles().realmLevel().listEffective();
+                            return DxUserMapper.fromUserRepresentation(user, roles);
+                        }).collect(Collectors.toList());
             } catch (Exception e) {
                 throw new KeycloakServiceException("Failed to retrieve users from Keycloak", e);
             }
@@ -52,7 +57,8 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
                 UserRepresentation user = usersResource().get(userId.toString()).toRepresentation();
-                return DxUserMapper.fromUserRepresentation(user);
+                List<RoleRepresentation> roles = usersResource().get(userId.toString()).roles().realmLevel().listEffective();
+                return DxUserMapper.fromUserRepresentation(user, roles);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new KeycloakServiceException("Failed to retrieve user with ID: " + userId, e);
