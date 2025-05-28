@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.service.CreditService;
+import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.common.model.DxUser;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
@@ -32,6 +33,7 @@ public class UserServiceImpl implements UserService {
     public Future<DxUser> getUserInfo(DxUser dxUser) {
 
         Future<Boolean> pendingProvider = Future.succeededFuture(false);
+        Future<List<OrganizationJoinRequest>> joinRequests = Future.succeededFuture(null);
 
         UUID orgId = null;
         try {
@@ -45,16 +47,22 @@ public class UserServiceImpl implements UserService {
         if(orgId!=null){
             pendingProvider = organizationService
                     .hasPendingProviderRole(dxUser.sub(), orgId);
+            System.out.println("here");
+            joinRequests = organizationService.getOrganizationJoinRequestsByUser(dxUser.sub());
         }
 
         Future<Boolean> pendingCompute = creditService.hasPendingComputeRequest(dxUser.sub());
 
-        return Future.all(pendingProvider, pendingCompute)
+        return Future.all(pendingProvider, pendingCompute, joinRequests)
                 .map(cf -> {
                     List<String> pendingRoles = new ArrayList<>();
                     if (cf.resultAt(0)) pendingRoles.add("provider");
                     if (cf.resultAt(1)) pendingRoles.add("compute");
-                    return DxUser.withPendingRoles(dxUser, pendingRoles);
+                    List<OrganizationJoinRequest> joinReqList = cf.resultAt(2);
+                    OrganizationJoinRequest lastJoinReq = (joinReqList != null && !joinReqList.isEmpty())
+                            ? joinReqList.get(joinReqList.size() - 1)
+                            : null;
+                    return DxUser.withPendingRoles(dxUser, pendingRoles, lastJoinReq!=null ? lastJoinReq.toJson() : new JsonObject());
                 });
     }
     @Override

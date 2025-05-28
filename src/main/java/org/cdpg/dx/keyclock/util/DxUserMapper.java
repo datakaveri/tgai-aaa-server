@@ -1,5 +1,6 @@
 package org.cdpg.dx.keyclock.util;
 
+import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.keyclock.config.KeycloakConstants;
 import org.cdpg.dx.common.model.DxUser;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -25,7 +26,8 @@ public class DxUserMapper {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-                new ArrayList<>()
+                new ArrayList<>(),
+                new JsonObject()
         );
     }
 
