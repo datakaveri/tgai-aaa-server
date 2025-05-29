@@ -681,11 +681,6 @@ paths:
         name: id
         in: path
         required: true
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
     delete:
       summary: Delete organisation by ID
       tags:
