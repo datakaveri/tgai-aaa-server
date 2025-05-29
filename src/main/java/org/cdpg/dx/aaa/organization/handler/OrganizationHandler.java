@@ -9,12 +9,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -299,16 +301,22 @@ public class OrganizationHandler {
             return;
         }
 
-        organizationService.getOrganizationUserInfo(UUID.fromString(userId)).compose(
-                orgUser -> {
-                    if (orgUser == null || orgUser.role()!= Role.ADMIN) {
-                        return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
-                    }
-                    UUID orgId = orgUser.organizationId();
-                    return organizationService.getAllPendingProviderRoleRequests(orgId);
-                }
-        )
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+        organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
+                        orgUser -> {
+                            if (orgUser == null || orgUser.role() != Role.ADMIN) {
+                                return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
+                            }
+                            UUID orgId = orgUser.organizationId();
+                            return organizationService.getAllPendingProviderRoleRequests(orgId);
+                        }
+                ).compose(requests -> {
+                    List<Future<JsonObject>> enrichedFutures = requests.stream().map(req ->
+                            organizationService.getOrganizationUserInfo(req.userId())
+                                    .map(userInfo -> ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, userInfo))
+                    ).toList();
+                    return Future.all(enrichedFutures);
+                })
+                .onSuccess(enrichedRequests -> ResponseBuilder.sendSuccess(ctx, enrichedRequests))
                 .onFailure(ctx::fail);
     }
 
