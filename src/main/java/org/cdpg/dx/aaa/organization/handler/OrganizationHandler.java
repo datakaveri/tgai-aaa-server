@@ -66,7 +66,7 @@ public class OrganizationHandler {
 
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
-        UUID requestId = RequestHelper.getPathParamAsUUID(ctx, "id");
+        UUID requestId = RequestHelper.getPathParamAsUUID(ctx, "req_id");
 
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
@@ -239,7 +239,24 @@ public class OrganizationHandler {
 
         User user = ctx.user();
         LOGGER.debug("User: {}", user);
+        if (user == null || user.subject() == null || user.principal() == null) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        String userId = user.subject();
         String orgID = user.principal().getString("organisation_id");
+
+        if (userId == null || userId.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        if (orgID == null || orgID.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User is not part any organisation"));
+            return;
+        }
+
         JsonObject req = new JsonObject().
                 put("user_id", user.subject()).
                 put("organization_id", orgID);
@@ -263,8 +280,26 @@ public class OrganizationHandler {
 
     public void getProviderRequest(RoutingContext ctx) {
         User user = ctx.user();
+        LOGGER.debug("User: {}", user);
+        if (user == null || user.subject() == null || user.principal() == null) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
 
-        organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
+        String userId = user.subject();
+        String orgID = user.principal().getString("organisation_id");
+
+        if (userId == null || userId.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        if (orgID == null || orgID.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User is not part any organisation"));
+            return;
+        }
+
+        organizationService.getOrganizationUserInfo(UUID.fromString(userId)).compose(
                 orgUser -> {
                     if (orgUser == null || orgUser.role()!= Role.ADMIN) {
                         return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
