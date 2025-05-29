@@ -314,7 +314,13 @@ public class OrganizationHandler {
                             organizationService.getOrganizationUserInfo(req.userId())
                                     .map(userInfo -> ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, userInfo))
                     ).toList();
-                    return Future.all(enrichedFutures);
+                    return Future.all(enrichedFutures).map(cf -> {
+                        List<JsonObject> resultList = new java.util.ArrayList<>();
+                        for (int i = 0; i < cf.size(); i++) {
+                            resultList.add(cf.resultAt(i));
+                        }
+                        return resultList;
+                    });
                 })
                 .onSuccess(enrichedRequests -> ResponseBuilder.sendSuccess(ctx, enrichedRequests))
                 .onFailure(ctx::fail);
