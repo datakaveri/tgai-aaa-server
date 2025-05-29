@@ -24,9 +24,6 @@ public class ResponseBuilder {
         new DxResponse<>(status.getUrn(), status.getDescription(), detail, result);
     ctx.response()
         .setStatusCode(status.getValue())
-            .putHeader("Access-Control-Allow-Origin", "*")
-            .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
-            .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
         .putHeader("Content-Type", "application/json")
         .end(JsonObject.mapFrom(response).encode());
   }
