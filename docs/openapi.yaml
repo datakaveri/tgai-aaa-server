@@ -681,6 +681,11 @@ paths:
         name: id
         in: path
         required: true
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
     delete:
       summary: Delete organisation by ID
       tags:
@@ -720,6 +725,15 @@ paths:
                   type: string
                   x-stoplight:
                     id: aicq0bnwnqk88
+      security:
+        - authorization: []
+    get:
+      summary: Get Organisation By ID
+      tags: [Organisation APIs]
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-organisations-id
       security:
         - authorization: []
   '/auth/v1/organisations/{id}/users':
@@ -1221,7 +1235,8 @@ paths:
   /auth/v1/admin/user:
     get:
       summary: (COS Admin) Get All Users Info
-      tags: [Role APIs]
+      tags:
+        - Role APIs
       responses:
         '200':
           description: OK

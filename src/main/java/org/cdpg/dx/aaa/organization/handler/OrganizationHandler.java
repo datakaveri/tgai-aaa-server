@@ -326,4 +326,18 @@ public class OrganizationHandler {
                 .onFailure(ctx::fail);
     }
 
+    public void getOrganizationById(RoutingContext ctx) {
+        UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+
+        organizationService.getOrganizationById(orgId)
+                .onSuccess(org -> ResponseBuilder.sendSuccess(ctx, org.toJson()))
+                .onFailure(err -> {
+                    if (err instanceof DxNotFoundException) {
+                        ctx.fail(new DxNotFoundException("Organization not found with id: " + orgId));
+                    } else {
+                        ctx.fail(err);
+                    }
+                });
+    }
+
 }
