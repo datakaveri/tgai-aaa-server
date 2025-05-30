@@ -9,12 +9,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
+import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -66,7 +68,7 @@ public class OrganizationHandler {
 
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
-        UUID requestId = RequestHelper.getPathParamAsUUID(ctx, "id");
+        UUID requestId = RequestHelper.getPathParamAsUUID(ctx, "req_id");
 
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
@@ -239,7 +241,24 @@ public class OrganizationHandler {
 
         User user = ctx.user();
         LOGGER.debug("User: {}", user);
+        if (user == null || user.subject() == null || user.principal() == null) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        String userId = user.subject();
         String orgID = user.principal().getString("organisation_id");
+
+        if (userId == null || userId.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        if (orgID == null || orgID.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User is not part any organisation"));
+            return;
+        }
+
         JsonObject req = new JsonObject().
                 put("user_id", user.subject()).
                 put("organization_id", orgID);
@@ -263,18 +282,62 @@ public class OrganizationHandler {
 
     public void getProviderRequest(RoutingContext ctx) {
         User user = ctx.user();
+        LOGGER.debug("User: {}", user);
+        if (user == null || user.subject() == null || user.principal() == null) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        String userId = user.subject();
+        String orgID = user.principal().getString("organisation_id");
+
+        if (userId == null || userId.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User not found"));
+            return;
+        }
+
+        if (orgID == null || orgID.isEmpty()) {
+            ctx.fail(new DxForbiddenException("User is not part any organisation"));
+            return;
+        }
 
         organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
-                orgUser -> {
-                    if (orgUser == null || orgUser.role()!= Role.ADMIN) {
-                        return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
-                    }
-                    UUID orgId = orgUser.organizationId();
-                    return organizationService.getAllPendingProviderRoleRequests(orgId);
-                }
-        )
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+                        orgUser -> {
+                            if (orgUser == null || orgUser.role() != Role.ADMIN) {
+                                return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
+                            }
+                            UUID orgId = orgUser.organizationId();
+                            return organizationService.getAllPendingProviderRoleRequests(orgId);
+                        }
+                ).compose(requests -> {
+                    List<Future<JsonObject>> enrichedFutures = requests.stream().map(req ->
+                            organizationService.getOrganizationUserInfo(req.userId())
+                                    .map(userInfo -> ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, userInfo))
+                    ).toList();
+                    return Future.all(enrichedFutures).map(cf -> {
+                        List<JsonObject> resultList = new java.util.ArrayList<>();
+                        for (int i = 0; i < cf.size(); i++) {
+                            resultList.add(cf.resultAt(i));
+                        }
+                        return resultList;
+                    });
+                })
+                .onSuccess(enrichedRequests -> ResponseBuilder.sendSuccess(ctx, enrichedRequests))
                 .onFailure(ctx::fail);
+    }
+
+    public void getOrganizationById(RoutingContext ctx) {
+        UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+
+        organizationService.getOrganizationById(orgId)
+                .onSuccess(org -> ResponseBuilder.sendSuccess(ctx, org.toJson()))
+                .onFailure(err -> {
+                    if (err instanceof DxNotFoundException) {
+                        ctx.fail(new DxNotFoundException("Organization not found with id: " + orgId));
+                    } else {
+                        ctx.fail(err);
+                    }
+                });
     }
 
 }

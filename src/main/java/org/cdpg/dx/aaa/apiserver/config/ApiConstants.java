@@ -28,6 +28,8 @@ public class ApiConstants {
     public static final String HEADER_PUBLIC_KEY = "publicKey";
     public static final String HEADER_RESPONSE_FILE_FORMAT = "format";
     public static final String AUTHORIZATION_KEY = "Authorization";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String X_REQUESTED_WITH = "X-Requested-With";
     public static final String USER = "user";
 
     /** Accept Headers and CORS */
@@ -40,12 +42,13 @@ public class ApiConstants {
 
     public static final String ROUTE_DOC = "/apis";
 
-    // request/response params
-    public static final String CONTENT_TYPE = "content-type";
     public static final String APPLICATION_JSON = "application/json";
     public static final Set<String> ALLOWED_HEADERS =
             new HashSet<>(
                     Arrays.asList(
+                            X_REQUESTED_WITH,
+                            CONTENT_TYPE,
+                            AUTHORIZATION_KEY,
                             HEADER_ACCEPT,
                             HEADER_TOKEN,
                             HEADER_CONTENT_LENGTH,
