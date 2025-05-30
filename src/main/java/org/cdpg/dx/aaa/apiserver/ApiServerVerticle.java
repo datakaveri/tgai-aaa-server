@@ -6,6 +6,7 @@ import static org.cdpg.dx.aaa.apiserver.config.ApiConstants.*;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
@@ -95,8 +96,10 @@ public class ApiServerVerticle extends AbstractVerticle {
                         LOGGER.debug("Creating router...");
                         router = routerBuilder.createRouter();
 
+
+
                         LOGGER.debug("Configuring CORS and error handlers...");
-                        configureCorsHandler(routerBuilder);
+                        configureCorsHandler(router);
                         putCommonResponseHeaders();
                         configureFailureHandler(router);
                         configureErrorHandlers(router);
@@ -152,9 +155,17 @@ public class ApiServerVerticle extends AbstractVerticle {
                         });
     }
 
-    private void configureCorsHandler(RouterBuilder routerBuilder) {
-        routerBuilder.rootHandler(
-                CorsHandler.create("*").allowedHeaders(ALLOWED_HEADERS).allowedMethods(ALLOWED_METHODS));
+    private void configureCorsHandler(Router router) {
+        router.route().handler(CorsHandler.create("*")
+                .allowedMethod(HttpMethod.GET)
+                .allowedMethod(HttpMethod.POST)
+                .allowedMethod(HttpMethod.OPTIONS)
+                .allowedMethod(HttpMethod.PUT)
+                .allowedMethod(HttpMethod.DELETE)
+                .allowedHeader("Content-Type")
+                .allowedHeader("Authorization")
+                .allowCredentials(true)
+        );
     }
 
     private void putCommonResponseHeaders() {
