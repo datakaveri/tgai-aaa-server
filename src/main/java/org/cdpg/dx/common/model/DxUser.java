@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +21,8 @@ public record DxUser(
         String familyName,
         String email,
         List<String> pendingRoles,
-        JsonObject organisation// <-- added field
+        JsonObject organisation,
+        List<JsonObject> organisation_create_requests// <-- added field
 ) {
     public JsonObject toJson() {
         return new JsonObject()
@@ -36,10 +38,11 @@ public record DxUser(
                 .put("familyName", familyName)
                 .put("email", email)
                 .put("pending_roles", pendingRoles != null ? new JsonArray(pendingRoles) : new JsonArray())
-                .put("organisation", organisation != null ? organisation : new JsonObject());
+                .put("organisation", organisation != null ? organisation : new JsonObject())
+                .put("organisation_create_requests", organisation_create_requests != null ? organisation_create_requests : new ArrayList<JsonObject>());
     }
 
-    public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation) {
+    public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation, List<JsonObject> organisation_create_requests) {
         return new DxUser(
                 user.roles(),
                 user.organisationId(),
@@ -53,7 +56,8 @@ public record DxUser(
                 user.familyName(),
                 user.email(),
                 pendingRoles,
-                organisation
+                organisation,
+                organisation_create_requests
         );
     }
 }
