@@ -1,5 +1,7 @@
 package org.cdpg.dx.common.util;
 
+import org.cdpg.dx.common.exception.DxValidationException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -37,4 +39,16 @@ public class DateTimeHelper {
         if (value == null || value.isBlank()) return null;
         return LocalDateTime.parse(value, FORMATTER);
     }
+
+  public static  LocalDateTime parseRequiredDateTime(String value,String name) {
+      if (value == null || value.isBlank())
+        throw new DxValidationException("required timestamp missing for"+name);
+      try {
+        return LocalDateTime.parse(value, FORMATTER);
+      }
+      catch(Exception e)
+      {
+        throw new DxValidationException("Parsing of LocalDateTime unsuccessful!");
+      }
+  }
 }

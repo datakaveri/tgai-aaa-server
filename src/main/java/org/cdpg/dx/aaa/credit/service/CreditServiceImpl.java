@@ -10,6 +10,7 @@ import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.aaa.organization.util.Constants;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.BaseDxException;
+import org.cdpg.dx.common.exception.DxConflictException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.exception.NoRowFoundException;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
@@ -141,11 +142,7 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<Boolean> deductCredits(CreditTransaction creditTransaction) {
-    System.out.println("Before reqAt");
     LocalDateTime reqAt = creditTransaction.requestedAt();
-    System.out.println("Requested At: " + creditTransaction.requestedAt());
-
-    System.out.println("After reqAt");
 
     UUID userId = creditTransaction.userId();
 
@@ -156,16 +153,12 @@ public class CreditServiceImpl implements CreditService {
     Double amount = creditTransaction.amount();
 
     // Check for duplicate request using requestedAt
-    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt);
-    System.out.println("After filter");
+    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt.toString());
     return creditTransactionDAO.getAllWithFilters(filter).compose(existingTransactions -> {
       if (existingTransactions != null && !existingTransactions.isEmpty()) {
         // Duplicate request — already handled
-        return Future.succeededFuture(true);
+        return Future.failedFuture(new DxConflictException("Credit Transaction not valid"));
       }
-
-      System.out.println("After 165");
-
 
       // Proceed with balance check and deduction
       return getBalance(userId).compose(balance -> {

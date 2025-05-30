@@ -10,8 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
-import static org.cdpg.dx.common.util.DateTimeHelper.parseDateTime;
+import static org.cdpg.dx.common.util.DateTimeHelper.*;
 import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
 
 public record CreditTransaction(
@@ -39,7 +38,7 @@ public record CreditTransaction(
         json.getString(Constants.TRANSACTION_STATUS),
         json.getString(Constants.TRANSACTION_TYPE),
         parseDateTime(json.getString(Constants.CREATED_AT)),
-        parseDateTime(json.getString(Constants.REQUESTED_AT))
+        parseRequiredDateTime(json.getString(Constants.REQUESTED_AT),Constants.REQUESTED_AT)
         );
     } catch (IllegalArgumentException e) {
       throw new DxValidationException("Missing or invalid field: " + e.getMessage());
