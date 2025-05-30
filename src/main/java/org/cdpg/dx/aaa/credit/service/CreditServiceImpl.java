@@ -55,7 +55,7 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<List<CreditRequest>> getAllPendingCreditRequests() {
-    Map<String,Object> conditionMap = Map.of(Constants.STATUS, Status.PENDING);
+    Map<String,Object> conditionMap = Map.of(Constants.STATUS, Status.PENDING.getStatus());
 
     return creditRequestDAO.getAllWithFilters(conditionMap);
   }
