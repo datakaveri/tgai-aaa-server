@@ -9,6 +9,7 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
@@ -34,7 +35,7 @@ public class PostgresServiceImpl implements PostgresService {
         LOG.info("Column name: {}, value: {}", row.getColumnName(i), row.getValue(i));
         String column = row.getColumnName(i);
         value = row.getValue(i);
-        if (value == null
+          if (value == null
             || value instanceof String
             || value instanceof Number
             || value instanceof Boolean
@@ -84,11 +85,10 @@ public class PostgresServiceImpl implements PostgresService {
           String paramStr = (String) param;
 
           // Check if it's an ISO timestamp string
-          if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
-                  || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
+          if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$")
+            || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
+            || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
             try {
-              // Parse and
-              // qconvert to LocalDateTime
               LocalDateTime time = LocalDateTime.parse(paramStr);
               tuple.addValue(time);
               continue;

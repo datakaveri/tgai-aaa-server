@@ -15,6 +15,7 @@ import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class CreditHandler {
@@ -94,14 +95,18 @@ public class CreditHandler {
     UUID transactedBy = UUID.fromString(user.subject());
     creditDeductionJson.put("transacted_by", transactedBy.toString());
 
+    JsonObject responseObject = creditDeductionJson.copy();
+
     // pass userId and userName from json
-
     CreditTransaction creditTransaction = CreditTransaction.fromJson(creditDeductionJson);
-
     creditService.deductCredits(creditTransaction)
       .onSuccess(requests -> {
-        ResponseBuilder.sendSuccess(ctx, requests);
-
+//        ResponseBuilder.sendSuccess(ctx, requests);
+        if(requests)
+        {processSuccess(ctx, responseObject, 200, "Debit Successful!");}
+        else {
+          processFailure(ctx, 400, "Request Not Found");
+        }
       })
       .onFailure(ctx::fail);
   }
