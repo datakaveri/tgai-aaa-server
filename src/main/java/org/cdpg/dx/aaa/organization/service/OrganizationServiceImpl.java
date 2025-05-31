@@ -416,4 +416,27 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return merged;
                 });
     }
+
+    public Future<List<OrganizationCreateRequest>> getOrganizationCreateRequestsByUserId(UUID userId){
+
+        Map<String, Object> pendingFilter = Map.of(
+                Constants.REQUESTED_BY, userId.toString(),
+                Constants.STATUS, Status.PENDING.getStatus()
+        );
+        Map<String, Object> grantedFilter = Map.of(
+                Constants.REQUESTED_BY, userId.toString(),
+                Constants.STATUS, Status.GRANTED.getStatus()
+        );
+
+        Future<List<OrganizationCreateRequest>> pendingFuture = createRequestDAO.getAllWithFilters(pendingFilter);
+        Future<List<OrganizationCreateRequest>> grantedFuture = createRequestDAO.getAllWithFilters(grantedFilter);
+
+        return Future.all(pendingFuture, grantedFuture)
+                .map(cf -> {
+                    List<OrganizationCreateRequest> merged = new java.util.ArrayList<>();
+                    merged.addAll(cf.resultAt(0));
+                    merged.addAll(cf.resultAt(1));
+                    return merged;
+                });
+    }
 }
