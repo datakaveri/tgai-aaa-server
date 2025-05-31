@@ -188,6 +188,11 @@
             <artifactId>curator-x-discovery</artifactId>
             <version>${curator.version}</version>
         </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-mail-client</artifactId>
+        <version>4.5.1</version>
+      </dependency>
         <!--  -->
         <dependency>
             <groupId>io.vertx</groupId>
