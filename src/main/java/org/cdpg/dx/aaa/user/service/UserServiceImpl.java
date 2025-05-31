@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
         Future<Boolean> pendingProvider = Future.succeededFuture(false);
         Future<List<OrganizationJoinRequest>> joinRequests = Future.succeededFuture(null);
-        Future<List<OrganizationCreateRequest>> createRequests = Future.succeededFuture(null);
+
 
         UUID orgId = null;
         try {
@@ -46,15 +46,14 @@ public class UserServiceImpl implements UserService {
 
         }
 
-        if(orgId!=null){
+        if (orgId != null) {
             pendingProvider = organizationService
                     .hasPendingProviderRole(dxUser.sub(), orgId);
-            System.out.println("here");
             joinRequests = organizationService.getOrganizationJoinRequestsByUser(dxUser.sub());
         }
 
         Future<Boolean> pendingCompute = creditService.hasPendingComputeRequest(dxUser.sub());
-        createRequests = organizationService.getOrganizationCreateRequestsByUserId(dxUser.sub());
+        Future<List<OrganizationCreateRequest>> createRequests = organizationService.getOrganizationCreateRequestsByUserId(dxUser.sub());
 
         return Future.all(pendingProvider, pendingCompute, joinRequests, createRequests)
                 .map(cf -> {
@@ -62,21 +61,35 @@ public class UserServiceImpl implements UserService {
                     if (cf.resultAt(0)) pendingRoles.add("provider");
                     if (cf.resultAt(1)) pendingRoles.add("compute");
                     List<OrganizationJoinRequest> joinReqList = cf.resultAt(2);
-                    OrganizationJoinRequest lastJoinReq = (joinReqList != null && !joinReqList.isEmpty())
-                            ? joinReqList.get(joinReqList.size() - 1)
-                            : null;
-                    List<OrganizationCreateRequest> createReqList = cf.resultAt(3);
-                    List<JsonObject> createReqJsons = new ArrayList<>();
-                    if (createReqList != null) {
-                        for (OrganizationCreateRequest req : createReqList) {
-                            createReqJsons.add(req.toJson());
-                        }
-                    }
-                    return DxUser.withPendingRoles(dxUser, pendingRoles, lastJoinReq!=null ? lastJoinReq.toJson() : new JsonObject(), createReqJsons);
+
+                    //TODO will consider no only one request will be available need to upda for multiple requests
+
+                    List<OrganizationCreateRequest> createOrgReqList = cf.resultAt(3);
+                    JsonObject orgJson = getOrgEntry(createOrgReqList, joinReqList);
+
+
+                    return DxUser.withPendingRoles(dxUser, pendingRoles, orgJson);
                 });
     }
+
+    private static JsonObject getOrgEntry(List<OrganizationCreateRequest> lastOrgCreateReq, List<OrganizationJoinRequest> joinReqList) {
+
+        JsonObject orgJson = new JsonObject();
+        if (lastOrgCreateReq != null && !lastOrgCreateReq.isEmpty()) {
+            orgJson = lastOrgCreateReq.getFirst().toJson();
+
+            orgJson.put("request_type", "organisation_create");
+        } else if (joinReqList != null && !joinReqList.isEmpty()) {
+
+            orgJson = joinReqList.getFirst().toJson();
+            orgJson.put("request_type", "organisation_join");
+        }
+        LOGGER.debug(orgJson.encodePrettily());
+        return orgJson;
+    }
+
     @Override
-    public Future<DxUser> getUserInfoByID(UUID userId){
+    public Future<DxUser> getUserInfoByID(UUID userId) {
         return keycloakUserService.getUserById(userId)
                 .compose(this::getUserInfo);
     }
