@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
     public Future<DxUser> getUserInfo(DxUser dxUser) {
 
         Future<Boolean> pendingProvider = Future.succeededFuture(false);
-        Future<List<OrganizationJoinRequest>> joinRequests = Future.succeededFuture(null);
+
 
 
         UUID orgId = null;
@@ -49,10 +49,12 @@ public class UserServiceImpl implements UserService {
         if (orgId != null) {
             pendingProvider = organizationService
                     .hasPendingProviderRole(dxUser.sub(), orgId);
-            joinRequests = organizationService.getOrganizationJoinRequestsByUser(dxUser.sub());
         }
 
         Future<Boolean> pendingCompute = creditService.hasPendingComputeRequest(dxUser.sub());
+
+        Future<List<OrganizationJoinRequest>> joinRequests = organizationService.getOrganizationJoinRequestsByUser(dxUser.sub());
+
         Future<List<OrganizationCreateRequest>> createRequests = organizationService.getOrganizationCreateRequestsByUserId(dxUser.sub());
 
         return Future.all(pendingProvider, pendingCompute, joinRequests, createRequests)
