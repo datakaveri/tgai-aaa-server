@@ -967,17 +967,7 @@ paths:
                   type: string
                   x-stoplight:
                     id: d2cd0vtwz5hv1
-  /auth/v1/user/credit:
-    get:
-      summary: Get User Credit Balance
-      tags:
-        - Credit APIs
-      responses:
-        '200':
-          description: OK
-      operationId: get-auth-v1-user-credit
-      security:
-        - authorization: []
+  /auth/v1/admin/user/credit/deduct:
     put:
       summary: Deduct User Credit (COS ADMIN)
       tags:
