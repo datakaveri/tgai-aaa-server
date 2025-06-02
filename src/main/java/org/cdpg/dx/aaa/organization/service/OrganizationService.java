@@ -20,6 +20,8 @@ public interface OrganizationService {
 
   Future<List<OrganizationCreateRequest>> getAllPendingOrganizationCreateRequests();
 
+  Future<List<OrganizationCreateRequest>> getAllOrganizationCreateRequests();
+
   Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest organizationCreateRequest);
 
   // status enum , adding a new org entry and updating orgCreateRequest
