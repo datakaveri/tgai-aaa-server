@@ -18,18 +18,18 @@
       "cosAdminUserId": "asdas"
     },
     "keycloakOptions":{
-      "keycloakRealm": "myrealm",
-      "keycloakUrl": "http://localhost:8080/",
+      "keycloakRealm": "tgdex-pilot",
+      "keycloakUrl": "https://staging.keycloak.update.iudx.io/auth",
       "keycloakAdminClientId": "admin-cli",
       "keycloakAdminClientSecret": "",
       "keycloakAdminPoolSize": "10",
       "keycloakJwtLeeway": 90,
-      "keycloakCertUrl": "http://localhost:8080/realms/myrealm/protocol/openid-connect/certs",
-      "iss": "http://localhost:8080/realms/myrealm",
+      "keycloakCertUrl": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot/protocol/openid-connect/certs",
+      "iss": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot",
       "jwtIgnoreExpiry": true,
       "jwksRefreshIntervalMs": 21600000,
-      "adminUsername": "admin",
-      "adminPassword": "admin"
+      "adminUsername": "iudx-admin",
+      "adminPassword": "WdLCfm+BOICEu2b3"
     },
     "jwtKeystoreOptions":{
       "keystorePath": "configs/keystore.jks",

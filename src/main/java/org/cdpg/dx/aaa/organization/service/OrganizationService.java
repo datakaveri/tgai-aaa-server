@@ -16,6 +16,8 @@ public interface OrganizationService {
   // ************ ORGANIZATION CREATE REQUEST *********
   Future<OrganizationCreateRequest> getOrganizationCreateRequests(UUID requestId);
 
+  Future<List<OrganizationCreateRequest>> getOrganizationCreateRequestsByUserId(UUID userId);
+
   Future<List<OrganizationCreateRequest>> getAllPendingOrganizationCreateRequests();
 
   Future<OrganizationCreateRequest> createOrganizationRequest(OrganizationCreateRequest organizationCreateRequest);

@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public record DxUser(
         String familyName,
         String email,
         List<String> pendingRoles,
-        JsonObject organisation// <-- added field
+        JsonObject organisation
 ) {
     public JsonObject toJson() {
         return new JsonObject()

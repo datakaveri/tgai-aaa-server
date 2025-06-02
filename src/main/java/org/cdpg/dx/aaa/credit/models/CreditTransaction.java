@@ -14,32 +14,34 @@ import static org.cdpg.dx.common.util.DateTimeHelper.*;
 import static org.cdpg.dx.common.util.ValidationUtils.requireNonNull;
 
 public record CreditTransaction(
-  UUID id,
-  UUID userId,
-  Double amount,
-  UUID transactedBy,
-  String transactionStatus,
-  String transactionType,
-  LocalDateTime createdAt,
-  LocalDateTime requestedAt
+        UUID id,
+        UUID userId,
+        Double amount,
+        UUID transactedBy,
+        String transactionStatus,
+        String transactionType,
+        LocalDateTime createdAt,
+        LocalDateTime requestedAt,
+        Double updatedBalance  // ✅ New field
 ) implements BaseEntity<CreditTransaction> {
 
   public static CreditTransaction fromJson(JsonObject json) {
     try {
       return new CreditTransaction(
-        json.containsKey(Constants.CREDIT_TRANSACTION_ID)
-          ? UUID.fromString(json.getString(Constants.CREDIT_TRANSACTION_ID))
-          : null,
-        UUID.fromString(requireNonNull(json.getString(Constants.USER_ID), Constants.USER_ID)),
-        json.getDouble(Constants.AMOUNT),
-        json.containsKey(Constants.TRANSACTED_BY)
-          ? UUID.fromString(json.getString(Constants.TRANSACTED_BY))
-          : null,
-        json.getString(Constants.TRANSACTION_STATUS),
-        json.getString(Constants.TRANSACTION_TYPE),
-        parseDateTime(json.getString(Constants.CREATED_AT)),
-        parseRequiredDateTime(json.getString(Constants.REQUESTED_AT),Constants.REQUESTED_AT)
-        );
+              json.containsKey(Constants.CREDIT_TRANSACTION_ID)
+                      ? UUID.fromString(json.getString(Constants.CREDIT_TRANSACTION_ID))
+                      : null,
+              UUID.fromString(requireNonNull(json.getString(Constants.USER_ID), Constants.USER_ID)),
+              json.getDouble(Constants.AMOUNT),
+              json.containsKey(Constants.TRANSACTED_BY)
+                      ? UUID.fromString(json.getString(Constants.TRANSACTED_BY))
+                      : null,
+              json.getString(Constants.TRANSACTION_STATUS),
+              json.getString(Constants.TRANSACTION_TYPE),
+              parseDateTime(json.getString(Constants.CREATED_AT)),
+              parseRequiredDateTime(json.getString(Constants.REQUESTED_AT), Constants.REQUESTED_AT),
+              json.getDouble(Constants.UPDATED_BALANCE) // ✅ From JSON
+      );
     } catch (IllegalArgumentException e) {
       throw new DxValidationException("Missing or invalid field: " + e.getMessage());
     }
@@ -50,7 +52,6 @@ public record CreditTransaction(
     JsonObject json = new JsonObject();
     if (id != null) json.put(Constants.CREDIT_TRANSACTION_ID, id.toString());
     if (userId != null) json.put(Constants.USER_ID, userId.toString());
-
     if (amount != null) json.put(Constants.AMOUNT, amount);
     if (transactedBy != null) json.put(Constants.TRANSACTED_BY, transactedBy.toString());
     if (transactionStatus != null && !transactionStatus.isEmpty())
@@ -61,6 +62,8 @@ public record CreditTransaction(
       json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (requestedAt != null)
       json.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
+    if (updatedBalance != null)
+      json.put(Constants.UPDATED_BALANCE, updatedBalance); // ✅ To JSON
     return json;
   }
 
@@ -79,6 +82,8 @@ public record CreditTransaction(
       map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (requestedAt != null)
       map.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
+    if (updatedBalance != null)
+      map.put(Constants.UPDATED_BALANCE, updatedBalance); // ✅ Non-empty map
     return map;
   }
 

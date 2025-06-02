@@ -12,10 +12,10 @@ import org.cdpg.dx.aaa.credit.models.CreditRequest;
 import org.cdpg.dx.aaa.credit.models.CreditTransaction;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
+import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class CreditHandler {
@@ -74,16 +74,10 @@ public class CreditHandler {
 
 
     creditService.updateCreditRequestStatus( requestId, status, transactedBy)
-      .onSuccess(approved -> {
-        if (approved) {
+      .onSuccess(transaction -> {
+          ResponseBuilder.sendSuccess(ctx,  transaction);
 
-          processSuccess(ctx, responseObject, 200, "Credit Successful!");
-        } else {
-
-          processFailure(ctx, 400, "Request Not Found");
-        }
-      })
-      .onFailure(err -> processFailure(ctx, 500, "Credit Failure!"));
+      }).onFailure(ctx::fail);
 
   }
 
@@ -100,13 +94,8 @@ public class CreditHandler {
     // pass userId and userName from json
     CreditTransaction creditTransaction = CreditTransaction.fromJson(creditDeductionJson);
     creditService.deductCredits(creditTransaction)
-      .onSuccess(requests -> {
-//        ResponseBuilder.sendSuccess(ctx, requests);
-        if(requests)
-        {processSuccess(ctx, responseObject, 200, "Debit Successful!");}
-        else {
-          processFailure(ctx, 400, "Request Not Found");
-        }
+      .onSuccess(res -> {
+        ResponseBuilder.sendSuccess(ctx, res);
       })
       .onFailure(ctx::fail);
   }
@@ -122,16 +111,15 @@ public class CreditHandler {
     creditService.createComputeRoleRequest(computeRoleRequest)
       .onSuccess(requests -> {
         ResponseBuilder.sendSuccess(ctx, requests);
-
       })
       .onFailure(ctx::fail);
   }
 
-  public void getAllPendingComputeRequests(RoutingContext ctx) {
+  public void getAllComputeRequests(RoutingContext ctx) {
 
-    creditService.getAllPendingComputeRequests()
-      .onSuccess(orgs -> {
-        ResponseBuilder.sendSuccess(ctx, orgs);
+    creditService.getAllComputeRequests()
+      .onSuccess(reqs -> {
+        ResponseBuilder.sendSuccess(ctx, reqs);
       })
       .onFailure(ctx::fail);
 
@@ -167,66 +155,6 @@ public class CreditHandler {
       .onFailure(ctx::fail);
   }
 
-  public Future<Void> processFailure(RoutingContext ctx, int statusCode, String msg) {
-
-    if (statusCode == 400) {
-
-      return ctx.response()
-        .setStatusCode(statusCode)
-        .putHeader("Content-Type", "application/json")
-        .end(new JsonObject()
-          .put("type", "urn:dx:as:MissingInformation")
-          .put("title", "Not Found")
-          .put("detail", msg)
-          .encode());
-    } else if (statusCode == 401) {
-      return ctx.response()
-        .setStatusCode(statusCode)
-        .putHeader("Content-Type", "application/json")
-        .end(new JsonObject()
-          .put("type", "urn:dx:as:InvalidAuthenticationToken")
-          .put("title", "Token Authentication Failed")
-          .put("detail", msg)
-          .encode());
-    } else {
-      return ctx.response()
-        .setStatusCode(statusCode)
-        .putHeader("Content-Type", "application/json")
-        .end(new JsonObject()
-          .put("type", "urn:dx:as:InternalServerError")
-          .put("title", "Internal Server Error")
-          .put("detail", msg)
-          .encode());
-    }
-  }
-
-  public Future<Void> processSuccess(RoutingContext ctx, JsonObject results, int statusCode, String msg) {
-
-
-    JsonObject response = new JsonObject()
-      .put("type", "urn:dx:as:Success")
-      .put("title", msg)
-      .put("results", results);
-
-    return ctx.response()
-      .setStatusCode(statusCode)
-      .putHeader("Content-Type", "application/json")
-      .end(response.encode());
-  }
-
-  public Future<Void> processSuccess(RoutingContext ctx, JsonArray results, int statusCode, String msg) {
-
-
-    JsonObject response = new JsonObject()
-      .put("type", "urn:dx:as:Success")
-      .put("title", msg)
-      .put("results", results);
-
-    return ctx.response()
-      .setStatusCode(statusCode)
-      .putHeader("Content-Type", "application/json")
-      .end(response.encode());
-  }
 }
 
 

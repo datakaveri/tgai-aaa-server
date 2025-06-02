@@ -42,5 +42,6 @@ public class Constants {
   public static final String COMPUTE_ROLE_TABLE="compute_role";
   public static final String COMPUTE_ROLE_ID="id";
   public static final String APPROVED_BY="approved_by";
+  public static final String UPDATED_BALANCE="updated_balance";
 
 }
