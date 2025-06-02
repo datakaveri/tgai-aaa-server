@@ -34,7 +34,7 @@ public class ControllerFactory {
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
 
 
-    CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService);
+    CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService, config);
     OrganizationService  organizationService = OrganizationControllerFactory.createService(pgService, keycloakUserService);
 
     UserService userService = new UserServiceImpl(keycloakUserService, organizationService, creditService);
