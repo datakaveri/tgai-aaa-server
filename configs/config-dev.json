@@ -15,7 +15,8 @@
     },
     "commonOptions":{
       "cosDomain":"asdasd",
-      "cosAdminUserId": "asdas"
+      "cosAdminUserId": "asdas",
+      "initialCreditBalance": 1000
     },
     "keycloakOptions":{
       "keycloakRealm": "tgdex-pilot",
