@@ -50,6 +50,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public Future<List<OrganizationCreateRequest>> getAllOrganizationCreateRequests() {
+        return createRequestDAO.getAll();
+    }
+
+    @Override
     public Future<OrganizationCreateRequest> getOrganizationCreateRequests(UUID requestId) {
         return createRequestDAO.get(requestId);
     }

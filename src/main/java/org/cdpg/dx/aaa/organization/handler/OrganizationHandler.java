@@ -134,7 +134,7 @@ public class OrganizationHandler {
 
     public void getOrganisationRequest(RoutingContext ctx) {
 
-        organizationService.getAllPendingOrganizationCreateRequests()
+        organizationService.getAllOrganizationCreateRequests()
                 .onSuccess(requests -> {
                     ResponseBuilder.sendSuccess(ctx, requests);
 
