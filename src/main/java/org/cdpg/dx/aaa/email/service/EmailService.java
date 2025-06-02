@@ -13,4 +13,4 @@ public interface EmailService {
     return new EmailServiceVertxEBProxy(vertx, address);
   }
 
-  Future<EmailRequest> sendEmail(EmailRequest emailRequest);}
+  Future<EmailRequest> sendEmail(EmailRequest emailRequest,String body);}
