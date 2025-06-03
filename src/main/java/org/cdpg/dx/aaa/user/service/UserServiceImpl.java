@@ -78,12 +78,12 @@ public class UserServiceImpl implements UserService {
 
         JsonObject orgJson = new JsonObject();
         if (lastOrgCreateReq != null && !lastOrgCreateReq.isEmpty()) {
-            orgJson = lastOrgCreateReq.getFirst().toJson();
+            orgJson = lastOrgCreateReq.getFirst().toJsonForUsers();
 
             orgJson.put("request_type", "organisation_create");
         } else if (joinReqList != null && !joinReqList.isEmpty()) {
 
-            orgJson = joinReqList.getFirst().toJson();
+            orgJson = joinReqList.getFirst().toJsonForUsers();
             orgJson.put("request_type", "organisation_join");
         }
         LOGGER.debug(orgJson.encodePrettily());

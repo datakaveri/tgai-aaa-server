@@ -95,6 +95,32 @@ public record OrganizationCreateRequest(
     return json;
   }
 
+  public JsonObject toJsonForUsers() {
+    JsonObject json = new JsonObject();
+
+    if (id != null) json.put(Constants.ORG_CREATE_ID, id.toString());
+    json.put("requestedBy", requestedBy.toString());
+    json.put("name", name);
+    if (logoPath != null && !logoPath.isEmpty()) json.put("logoPath", logoPath);
+    json.put("entityType", entityType);
+    json.put("orgSector", orgSector);
+    json.put("websiteLink", websiteLink);
+    json.put("address", address);
+    json.put("certificatePath", certificatePath);
+    json.put("pancardPath", pancardPath);
+    if (relevantDocPath != null && !relevantDocPath.isEmpty()) json.put("relevantDocPath", relevantDocPath);
+    json.put("status", status);
+    json.put("userName", userName);
+    json.put("empId", empId);
+    json.put("jobTitle", jobTitle);
+    json.put("orgManagerphoneNo", orgManagerphoneNo);
+    if (orgDocuments != null && !orgDocuments.isEmpty()) json.put("orgDocuments", orgDocuments);
+    if (createdAt != null) json.put("createdAt", createdAt.format(FORMATTER));
+    if (updatedAt != null) json.put("updatedAt", updatedAt.format(FORMATTER));
+
+    return json;
+  }
+
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();
 
