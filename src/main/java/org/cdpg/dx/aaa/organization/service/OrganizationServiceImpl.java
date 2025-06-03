@@ -100,8 +100,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                             request.address(),
                             request.certificatePath(),
                             request.pancardPath(),
-                            request.relevantDocPath(), null,
-                            null
+                            request.relevantDocPath(),
+                            request.orgDocuments(),
+                      null,
+                      null
                     );
                     return orgDAO.create(org)
                             .compose(createdOrg ->
@@ -332,7 +334,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (!updated) {
                         return Future.failedFuture(new DxNotFoundException("Request not found"));
                     }
-                    //Update in KC 
+                    //Update in KC
                     if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return providerRequestDAO.get(requestId)
                                 .compose(providerRequest -> {

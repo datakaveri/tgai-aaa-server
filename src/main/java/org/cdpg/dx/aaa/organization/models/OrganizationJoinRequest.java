@@ -64,6 +64,22 @@ public record OrganizationJoinRequest(
     return json;
   }
 
+  public JsonObject toJsonForUsers() {
+    JsonObject json = new JsonObject();
+
+    if (id != null) json.put(Constants.ORG_JOIN_ID, id.toString());
+    json.put("organisationId", organizationId.toString());
+    json.put("userId", userId.toString());
+    json.put("userName", userName.toString());
+    json.put("status", status);
+    json.put("jobTitle", jobTitle);
+    json.put("empId", empId);
+    if (requestedAt != null) json.put("requestedAt", requestedAt.format(FORMATTER));
+    if (processedAt != null) json.put("processedAt", processedAt.format(FORMATTER));
+
+    return json;
+  }
+
   @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();

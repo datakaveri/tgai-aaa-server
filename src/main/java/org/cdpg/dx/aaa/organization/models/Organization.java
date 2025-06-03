@@ -26,6 +26,7 @@ public record Organization(
         String certificatePath,
         String pancardPath,
         String relevantDocPath,
+        String orgDocuments,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 )  implements BaseEntity<Organization> {
@@ -44,6 +45,7 @@ public record Organization(
               requireNonNull(orgDetails.getString(Constants.CERTIFICATE), Constants.CERTIFICATE),
               requireNonNull(orgDetails.getString(Constants.PANCARD), Constants.PANCARD),
               orgDetails.getString(Constants.RELEVANT_DOC),
+              orgDetails.getString(Constants.ORG_DOCUMENTS),
               parseDateTime(orgDetails.getString(Constants.CREATED_AT)),
               parseDateTime(orgDetails.getString(Constants.UPDATED_AT))
       );
@@ -68,6 +70,7 @@ public record Organization(
     json.put(Constants.CERTIFICATE, certificatePath);
     json.put(Constants.PANCARD, pancardPath);
     if (relevantDocPath != null && !relevantDocPath.isEmpty()) json.put(Constants.RELEVANT_DOC, relevantDocPath);
+    if (orgDocuments != null && !orgDocuments.isEmpty()) json.put(Constants.ORG_DOCUMENTS, orgDocuments);
     if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 
@@ -87,6 +90,7 @@ public record Organization(
     if (!certificatePath.isEmpty()) map.put(Constants.CERTIFICATE, certificatePath);
     if (!pancardPath.isEmpty()) map.put(Constants.PANCARD, pancardPath);
     if (relevantDocPath != null && !relevantDocPath.isEmpty()) map.put(Constants.RELEVANT_DOC, relevantDocPath);
+    if (orgDocuments != null && !orgDocuments.isEmpty()) map.put(Constants.ORG_DOCUMENTS, orgDocuments);
     if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 
