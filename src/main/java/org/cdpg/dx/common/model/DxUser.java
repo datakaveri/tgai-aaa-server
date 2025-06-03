@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,9 +22,14 @@ public record DxUser(
         String familyName,
         String email,
         List<String> pendingRoles,
-        JsonObject organisation
+        JsonObject organisation,
+        LocalDateTime createdAt // newly added field
 ) {
     public JsonObject toJson() {
+        String isoCreatedAt = createdAt != null
+                ? createdAt.toString()
+                : null;
+
         return new JsonObject()
                 .put("roles", roles != null ? new JsonArray(roles) : new JsonArray())
                 .put("organisationId", organisationId)
@@ -37,7 +43,8 @@ public record DxUser(
                 .put("familyName", familyName)
                 .put("email", email)
                 .put("pending_roles", pendingRoles != null ? new JsonArray(pendingRoles) : new JsonArray())
-                .put("organisation", organisation != null ? organisation : new JsonObject());
+                .put("organisation", organisation != null ? organisation : new JsonObject())
+                .put("createdAt", isoCreatedAt);
     }
 
     public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation) {
@@ -54,7 +61,9 @@ public record DxUser(
                 user.familyName(),
                 user.email(),
                 pendingRoles,
-                organisation
+                organisation,
+                user.createdAt() // retain createdAt
         );
     }
 }
+
