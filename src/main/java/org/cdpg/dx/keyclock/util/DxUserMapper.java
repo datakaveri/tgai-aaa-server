@@ -8,11 +8,20 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 
 public class DxUserMapper {
     public static DxUser fromUserRepresentation(UserRepresentation user, List<RoleRepresentation> roles) {
         Map<String, List<String>> attrs = Optional.ofNullable(user.getAttributes()).orElse(Map.of());
         List<String> roleNames = roles.stream().map(RoleRepresentation::getName).collect(Collectors.toList());
+
+        Long createdTs = user.getCreatedTimestamp();
+        LocalDateTime createdAt = createdTs != null
+                ? Instant.ofEpochMilli(createdTs).atZone(ZoneOffset.UTC).toLocalDateTime()
+                : null;
 
         return new DxUser(
                 roleNames,
@@ -27,9 +36,12 @@ public class DxUserMapper {
                 user.getLastName(),
                 user.getEmail(),
                 new ArrayList<>(),
-                new JsonObject()
+                new JsonObject(),
+                createdAt,
+                getAttr(attrs, "aadhaar_kyc_data").isBlank() ? new JsonObject() : new JsonObject(getAttr(attrs, "aadhaar_kyc_data"))
         );
     }
+
 
     private static String getAttr(Map<String, List<String>> attrs, String key) {
         return attrs.getOrDefault(key, List.of("")).get(0);
