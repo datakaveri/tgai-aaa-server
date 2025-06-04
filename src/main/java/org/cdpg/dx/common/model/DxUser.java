@@ -23,7 +23,8 @@ public record DxUser(
         String email,
         List<String> pendingRoles,
         JsonObject organisation,
-        LocalDateTime createdAt // newly added field
+        LocalDateTime createdAt,
+        JsonObject kycData// newly added field
 ) {
     public JsonObject toJson() {
         String isoCreatedAt = createdAt != null
@@ -44,7 +45,8 @@ public record DxUser(
                 .put("email", email)
                 .put("pending_roles", pendingRoles != null ? new JsonArray(pendingRoles) : new JsonArray())
                 .put("organisation", organisation != null ? organisation : new JsonObject())
-                .put("createdAt", isoCreatedAt);
+                .put("createdAt", isoCreatedAt)
+                .put("kycInformation", kycData);
     }
 
     public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation) {
@@ -62,7 +64,8 @@ public record DxUser(
                 user.email(),
                 pendingRoles,
                 organisation,
-                user.createdAt() // retain createdAt
+                user.createdAt(),
+                user.kycData()// retain createdAt
         );
     }
 }

@@ -17,6 +17,8 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.apache.logging.log4j.Logger;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,7 +169,17 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     public Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put(KeycloakConstants.KYC_VERIFIED, "true");
-        attributes.put(KeycloakConstants.AADHAAR_KYC_DATA, kycData.encode());
+        JsonObject aadhaarJson = new JsonObject();
+        if (kycData != null && kycData.containsKey("Poi")) {
+            JsonObject poi = kycData.getJsonObject("Poi");
+            if (poi != null && poi.containsKey("name")) {
+                aadhaarJson.put("kycVerifiedUserName", poi.getString("name"));
+                aadhaarJson.put("kycAuthenticationMethod", "DigiLocker");
+                aadhaarJson.put("kycVerifiedDate", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
+                aadhaarJson.put("kycStatus", "Active");
+            }
+        }
+        attributes.put(KeycloakConstants.AADHAAR_KYC_DATA, aadhaarJson.encode());
         return updateUserAttributes(userId, attributes);
     }
 
