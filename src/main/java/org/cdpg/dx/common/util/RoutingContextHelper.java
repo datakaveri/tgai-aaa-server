@@ -141,7 +141,8 @@ public class RoutingContextHelper {
                 principal.getString("email"),
                 new ArrayList<>(),
                 new JsonObject(),
-                null
+                null,
+                new JsonObject()
         );
 
     }

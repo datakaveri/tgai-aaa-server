@@ -64,7 +64,8 @@ public record DxUser(
                 user.email(),
                 pendingRoles,
                 organisation,
-                user.createdAt() // retain createdAt
+                user.createdAt(),
+                user.kycData()// retain createdAt
         );
     }
 }
