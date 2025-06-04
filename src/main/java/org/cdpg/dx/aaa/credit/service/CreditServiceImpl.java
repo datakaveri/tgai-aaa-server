@@ -108,9 +108,8 @@ public class CreditServiceImpl implements CreditService {
                         });
               });
     }).recover(err -> {
-      BaseDxException dxEx = BaseDxException.from(err);
-
-      if (dxEx instanceof NoRowFoundException) {
+        BaseDxException dxEx = BaseDxException.from(err);
+       if (dxEx instanceof BaseDxException) {
         LOGGER.warn("No user_credit entry found for requestId: {}, attempting to create...", requestId);
 
         return creditRequestDAO.get(requestId).compose(cr -> {
@@ -128,7 +127,6 @@ public class CreditServiceImpl implements CreditService {
                   .compose(v -> processCreditGrant(requestId, transactedBy)); // retry credit grant after creation
         });
       }
-
       return Future.failedFuture(dxEx);
     });
   }
