@@ -4,6 +4,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,11 +38,15 @@ public class AdminHandler {
     }
 
     public void getDxUserInfo(RoutingContext ctx) {
-        DxUser dxUser = RoutingContextHelper.fromPrincipal(ctx);
-        System.out.println("dxUser: " + dxUser.toJson());
-        userService.getUserInfo(dxUser)
+        User user = ctx.user();
+
+        userService.getUserInfoByID(UUID.fromString(user.subject()))
+                .compose(userService::getUserInfo)
                 .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
-                .onFailure(ctx::fail);
+                .onFailure(err -> {
+                    LOGGER.error("Failed to get DxUser info: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
     }
 
     public void getDxUserFromKeycloak(RoutingContext ctx) {

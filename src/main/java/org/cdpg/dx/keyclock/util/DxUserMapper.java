@@ -37,7 +37,8 @@ public class DxUserMapper {
                 user.getEmail(),
                 new ArrayList<>(),
                 new JsonObject(),
-                createdAt  // <--- set here
+                createdAt,
+                new JsonObject(getAttr(attrs, "aadhaar_kyc_data"))
         );
     }
 
