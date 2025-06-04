@@ -39,6 +39,7 @@ public class AdminHandler {
 
     public void getDxUserInfo(RoutingContext ctx) {
         User user = ctx.user();
+        System.out.println("User ID: " + user.subject());
 
         userService.getUserInfoByID(UUID.fromString(user.subject()))
                 .compose(userService::getUserInfo)
