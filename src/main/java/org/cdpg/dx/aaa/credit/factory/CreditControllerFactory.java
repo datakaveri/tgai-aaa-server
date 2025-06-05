@@ -1,5 +1,6 @@
 package org.cdpg.dx.aaa.credit.factory;
 
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,9 +25,9 @@ public class CreditControllerFactory {
     return new CreditController(creditHandler);
   }
 
-  public static CreditService createService(PostgresService pgService, KeycloakUserService keycloakUserService) {
+  public static CreditService createService(PostgresService pgService, KeycloakUserService keycloakUserService, JsonObject config) {
     CreditDAOFactory creditDAOFactory = new CreditDAOFactory(pgService);
-    return new CreditServiceImpl(creditDAOFactory,keycloakUserService);
+    return new CreditServiceImpl(creditDAOFactory,keycloakUserService, config);
 
   }
 
