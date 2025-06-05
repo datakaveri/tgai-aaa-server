@@ -246,8 +246,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<List<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(UUID orgId) {
+        //TODO need to create another funtion for this
         Map<String, Object> filterMap = Map.of(
-                Constants.STATUS, Status.PENDING.getStatus()
+                Constants.ORGANIZATION_ID, orgId.toString()
         );
 
         return joinRequestDAO.getAllWithFilters(filterMap);
@@ -366,8 +367,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId) {
+        //TODO need to create another one
         Map<String, Object> filterMap = Map.of(
-                Constants.STATUS, Status.PENDING.getStatus()
+                Constants.ORGANIZATION_ID, orgId.toString()
         );
         return providerRequestDAO.getAllWithFilters(filterMap);
     }
