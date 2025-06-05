@@ -29,42 +29,104 @@ paths:
                 properties:
                   type:
                     type: string
-                    x-stoplight:
-                      id: 7q9mp74ovs00p
                   title:
                     type: string
-                    x-stoplight:
-                      id: 84dpnj7j7fgec
-                  results:
+                  result:
                     type: array
-                    x-stoplight:
-                      id: iqqhihoum18ll
                     items:
-                      x-stoplight:
-                        id: 9k3xftqxgfqfr
                       type: object
                       properties:
-                        org_id:
+                        id:
                           type: string
-                          x-stoplight:
-                            id: ad2kwiqt3gf0x
-                        user_id:
+                        requestedBy:
                           type: string
-                          x-stoplight:
-                            id: cxikbckn7c02v
+                        name:
+                          type: string
+                        logoPath:
+                          type: string
+                        entityType:
+                          type: string
+                        orgSector:
+                          type: string
+                        websiteLink:
+                          type: string
+                        address:
+                          type: string
+                        certificatePath:
+                          type: string
+                        pancardPath:
+                          type: string
+                        relevantDocPath:
+                          type: 'null'
                         status:
                           type: string
-                          x-stoplight:
-                            id: b0msag250xk42
+                        userName:
+                          type: string
+                        empId:
+                          type: string
+                        jobTitle:
+                          type: string
+                        orgManagerphoneNo:
+                          type: string
+                        orgDocuments:
+                          type: 'null'
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        tableName:
+                          type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 41290efb-057b-4296-872c-a764f6ff5615
+                        requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        name: Quant Sandbox
+                        logoPath: /logos/ai.png
+                        entityType: Private
+                        orgSector: Technology
+                        websiteLink: 'https://ai.example.com'
+                        address: '123 Quant Labs, Bangalore, India'
+                        certificatePath: /documents/certificate.pdf
+                        pancardPath: /documents/pancard.pdf
+                        relevantDocPath: null
+                        status: pending
+                        userName: test test
+                        empId: EMP12345
+                        jobTitle: Manager
+                        orgManagerphoneNo: +91-9876543210
+                        orgDocuments: null
+                        createdAt: '2025-06-03T16:01:59.532782'
+                        updatedAt: '2025-06-03T16:01:59.532782'
+                        tableName: organization_create_requests
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:Success'
-                    title: Organisation Joining Requests
-                    results:
-                      - org_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                        user_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                        status: Pending
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 41290efb-057b-4296-872c-a764f6ff5615
+                        requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        name: Quant Sandbox
+                        logoPath: /logos/ai.png
+                        entityType: Private
+                        orgSector: Technology
+                        websiteLink: 'https://ai.example.com'
+                        address: '123 Quant Labs, Bangalore, India'
+                        certificatePath: /documents/certificate.pdf
+                        pancardPath: /documents/pancard.pdf
+                        relevantDocPath: null
+                        status: pending
+                        userName: test test
+                        empId: EMP12345
+                        jobTitle: Manager
+                        orgManagerphoneNo: +91-9876543210
+                        orgDocuments: null
+                        createdAt: '2025-06-03T16:01:59.532782'
+                        updatedAt: '2025-06-03T16:01:59.532782'
+                        tableName: organization_create_requests
         '401':
           description: Unauthorized
           content:
@@ -94,6 +156,16 @@ paths:
                     type: 'urn:dx:as:InvalidAuthenticationToken'
                     title: Token authentication failed
                     detail: Inactive Token
+                Example 2:
+                  value:
+                    type: 'urn:dx:aaa:notAuthorized'
+                    title: Not Authorized
+                    detail: Unauthorized
+                Example 3:
+                  value:
+                    type: 'urn:dx:aaa:notAuthorized'
+                    title: Not Authorized
+                    detail: Missing Bearer token
         '404':
           description: Not Found
           content:
@@ -130,7 +202,6 @@ paths:
         - schema:
             type: string
           in: query
-          name: org_id
       security:
         - authorization: []
     parameters: []
@@ -141,6 +212,157 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      requestedBy:
+                        type: string
+                      name:
+                        type: string
+                      logoPath:
+                        type: string
+                      entityType:
+                        type: string
+                      orgSector:
+                        type: string
+                      websiteLink:
+                        type: string
+                      address:
+                        type: string
+                      certificatePath:
+                        type: string
+                      pancardPath:
+                        type: string
+                      relevantDocPath:
+                        type: 'null'
+                      status:
+                        type: string
+                      userName:
+                        type: string
+                      empId:
+                        type: string
+                      jobTitle:
+                        type: string
+                      orgManagerphoneNo:
+                        type: string
+                      orgDocuments:
+                        type: 'null'
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      tableName:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: 4202493c-7c64-49b0-8f61-2000ca3d147c
+                      requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                      name: Quants Sandbox
+                      logoPath: /logos/ai.png
+                      entityType: Private
+                      orgSector: Technology
+                      websiteLink: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificatePath: /documents/certificate.pdf
+                      pancardPath: /documents/pancard.pdf
+                      relevantDocPath: null
+                      status: pending
+                      userName: test test
+                      empId: EMP12345
+                      jobTitle: Manager
+                      orgManagerphoneNo: +91-9876543210
+                      orgDocuments: null
+                      createdAt: '2025-06-03T16:25:25.167724'
+                      updatedAt: '2025-06-03T16:25:25.167724'
+                      tableName: organization_create_requests
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: 4202493c-7c64-49b0-8f61-2000ca3d147c
+                      requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                      name: Quants Sandbox
+                      logoPath: /logos/ai.png
+                      entityType: Private
+                      orgSector: Technology
+                      websiteLink: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificatePath: /documents/certificate.pdf
+                      pancardPath: /documents/pancard.pdf
+                      relevantDocPath: null
+                      status: pending
+                      userName: test test
+                      empId: EMP12345
+                      jobTitle: Manager
+                      orgManagerphoneNo: +91-9876543210
+                      orgDocuments: null
+                      createdAt: '2025-06-03T16:25:25.167724'
+                      updatedAt: '2025-06-03T16:25:25.167724'
+                      tableName: organization_create_requests
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:as:InvalidAuthenticationToken'
+                    title: Token authentication failed
+                    detail: Inactive Token
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:as:InvalidAuthenticationToken'
+                    title: Token authentication failed
+                    detail: Inactive Token
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:conflict'
+                    title: Conflict
+                    detail: 'ERROR: duplicate key value violates unique constraint "organization_create_requests_name_key" (23505)'
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:conflict'
+                    title: Conflict
+                    detail: 'ERROR: duplicate key value violates unique constraint "organization_create_requests_name_key" (23505)'
       operationId: post-auth-v1-organisations-request
       requestBody:
         content:
@@ -207,48 +429,21 @@ paths:
                 properties:
                   type:
                     type: string
-                    x-stoplight:
-                      id: 3xk955kfbcvzv
                   title:
                     type: string
-                    x-stoplight:
-                      id: bjl3657k9lfne
-                  results:
-                    type: object
-                    x-stoplight:
-                      id: 317hv8oa7cp5k
-                    properties:
-                      req_id:
-                        type: string
-                        x-stoplight:
-                          id: 4xfk7muyxvfi1
-                      org_name:
-                        type: string
-                        x-stoplight:
-                          id: dfzpf836dhfeo
-                      user_id:
-                        type: string
-                        x-stoplight:
-                          id: jy1dd1q3w6eot
-                      document_path:
-                        type: string
-                        x-stoplight:
-                          id: 7e2sktgy6am6p
-                      status:
-                        type: string
-                        x-stoplight:
-                          id: wb8lrqfe46k0u
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Updated Sucessfully
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:Success'
-                    title: Organisation Creation Approved
-                    results:
-                      req_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                      org_name: Data Kaveri
-                      user_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                      document_path: /tmp/
-                      status: Approved
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Updated Sucessfully
         '400':
           description: Bad Request
           content:
@@ -271,9 +466,9 @@ paths:
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:InvalidInput'
-                    title: Invalid Request
-                    detail: The Joining Request ID is invalid
+                    type: 'urn:dx:aaa:badRequest'
+                    title: Bad Request
+                    detail: No request found with given ID
         '401':
           description: Unauthorized
           content:
@@ -321,9 +516,9 @@ paths:
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:AlreadyExists'
-                    title: Approval Already exists
-                    detail: The request is already approved
+                    type: 'urn:dx:aaa:conflict'
+                    title: Conflict
+                    detail: 'ERROR: duplicate key value violates unique constraint "organizations_name_key" (23505)'
       operationId: post-auth-v1-approve-create_org
       parameters:
         - schema:
@@ -364,9 +559,81 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        organizationId:
+                          type: string
+                        userId:
+                          type: string
+                        userName:
+                          type: string
+                        status:
+                          type: string
+                        jobTitle:
+                          type: string
+                        empId:
+                          type: string
+                        requestedAt:
+                          type: string
+                        processedAt:
+                          type: string
+                        tableName:
+                          type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 5fc228bb-9a20-4052-968e-427c733d2264
+                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: ac2f3390-c7b0-4d4e-bb72-0bb8d9170309
+                        userName: coder coder
+                        status: pending
+                        jobTitle: Employee
+                        empId: EMP8790
+                        requestedAt: '2025-06-03T16:35:48.404509'
+                        processedAt: '2025-06-03T16:35:48.404509'
+                        tableName: organization_join_requests
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 5fc228bb-9a20-4052-968e-427c733d2264
+                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: ac2f3390-c7b0-4d4e-bb72-0bb8d9170309
+                        userName: coder coder
+                        status: pending
+                        jobTitle: Employee
+                        empId: EMP8790
+                        requestedAt: '2025-06-03T16:35:48.404509'
+                        processedAt: '2025-06-03T16:35:48.404509'
+                        tableName: organization_join_requests
       operationId: get-auth-v1-organisations-join-requests
       security:
+        - {}
         - authorization: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
     post:
       summary: Create Request to Join an Organisation
       tags:
@@ -381,43 +648,21 @@ paths:
                 properties:
                   type:
                     type: string
-                    x-stoplight:
-                      id: 29nep4apwm32a
                   title:
                     type: string
-                    x-stoplight:
-                      id: nzvperaf96ag6
-                  results:
-                    type: object
-                    x-stoplight:
-                      id: n7sdof0ycwr0m
-                    properties:
-                      org_name:
-                        type: string
-                        x-stoplight:
-                          id: vzb0nmd3r0r8m
-                      user_id:
-                        type: string
-                        x-stoplight:
-                          id: 3hodrex14oq7g
-                      status:
-                        type: string
-                        x-stoplight:
-                          id: iy6ve6ip5uu69
-                      req_id:
-                        type: string
-                        x-stoplight:
-                          id: n5icpu9dhpz6h
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Created Join request
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:Success'
-                    title: Request has been created to join the organisation
-                    results:
-                      org_name: Data Kaveri
-                      user_id: string
-                      status: Pending
-                      req_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Created Join request
         '400':
           description: Bad Request
           content:
@@ -468,6 +713,11 @@ paths:
                     type: 'urn:dx:as:InvalidAuthenticationToken'
                     title: Token authentication failed
                     detail: Inactive Token
+                Example 2:
+                  value:
+                    type: 'urn:dx:aaa:notAuthorized'
+                    title: Not Authorized
+                    detail: Unauthorized
         '409':
           description: Conflict
           content:
@@ -477,22 +727,21 @@ paths:
                 properties:
                   type:
                     type: string
-                    x-stoplight:
-                      id: oyd38jyazdo3g
                   title:
                     type: string
-                    x-stoplight:
-                      id: 6wpuh9er6my8z
                   detail:
                     type: string
-                    x-stoplight:
-                      id: ivd2l6mxpmzzc
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:conflict'
+                    title: Conflict
+                    detail: 'ERROR: duplicate key value violates unique constraint "organization_join_requests_user_id_key" (23505)'
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:AlreadyExists'
-                    title: User Already Exists
-                    detail: User has already raised a joining request
+                    type: 'urn:dx:aaa:conflict'
+                    title: Conflict
+                    detail: 'ERROR: duplicate key value violates unique constraint "organization_join_requests_user_id_key" (23505)'
       operationId: post-auth-v1-organisations-join-requests
       parameters:
         - schema:
@@ -515,6 +764,11 @@ paths:
                   x-stoplight:
                     id: u3n9nnqgrnbot
                   type: string
+            examples:
+              Example 1:
+                value:
+                  job_title: Employee
+                  emp_id: EMP8790
       security:
         - authorization: []
   '/auth/v1/organisations/{id}/join_requests/{req_id}':
@@ -547,18 +801,75 @@ paths:
               properties:
                 status:
                   type: string
-                  enum:
-                    - granted
-                    - rejected
-                remarks:
-                  type: string
+              x-examples:
+                Example 1:
+                  status: granted
+            examples:
+              Example 1:
+                value:
+                  status: granted
       responses:
         '200':
           description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Approved Organisation Join Request
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Approved Organisation Join Request
         '400':
           description: Invalid request or status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:badRequest'
+                    title: Bad Request
+                    detail: No request found with given ID
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:notAuthorized'
+                    title: Not Authorized
+                    detail: Unauthorized
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:notAuthorized'
+                    title: Not Authorized
+                    detail: Unauthorized
         '404':
           description: Join request not found
       security:
@@ -578,42 +889,80 @@ paths:
                 properties:
                   type:
                     type: string
-                    x-stoplight:
-                      id: gvwzdaige7g6y
                   title:
                     type: string
-                    x-stoplight:
-                      id: eqamz2eiu5uwt
-                  results:
+                  result:
                     type: array
-                    x-stoplight:
-                      id: aa2va41g7vk1k
                     items:
-                      x-stoplight:
-                        id: zs6hweats6l8t
                       type: object
                       properties:
-                        org_id:
+                        id:
                           type: string
-                          x-stoplight:
-                            id: b7nbqcc1cuh2e
-                        org_name:
+                        orgName:
                           type: string
-                          x-stoplight:
-                            id: zxiimmeicuqj5
-                        document_path:
+                        orgLogo:
                           type: string
-                          x-stoplight:
-                            id: qsfbqirfq5gfn
+                        entityType:
+                          type: string
+                        orgSector:
+                          type: string
+                        websiteLink:
+                          type: string
+                        address:
+                          type: string
+                        certificatePath:
+                          type: string
+                        pancardPath:
+                          type: string
+                        relevantDocPath:
+                          type: 'null'
+                        orgDocuments:
+                          type: 'null'
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        tableName:
+                          type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: e87246e2-5da5-40b0-973c-690d2f48f879
+                        orgName: Quant Sandbox
+                        orgLogo: /logos/ai.png
+                        entityType: Private
+                        orgSector: Technology
+                        websiteLink: 'https://ai.example.com'
+                        address: '123 Quant Labs, Bangalore, India'
+                        certificatePath: /documents/certificate.pdf
+                        pancardPath: /documents/pancard.pdf
+                        relevantDocPath: null
+                        orgDocuments: null
+                        createdAt: '2025-06-03T16:28:24.205541'
+                        updatedAt: '2025-06-03T16:28:24.205541'
+                        tableName: organizations
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:Success'
-                    title: Organisations
-                    results:
-                      - org_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                        org_name: Data Kaveri
-                        document_path: /tmp/
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: e87246e2-5da5-40b0-973c-690d2f48f879
+                        orgName: Quant Sandbox
+                        orgLogo: /logos/ai.png
+                        entityType: Private
+                        orgSector: Technology
+                        websiteLink: 'https://ai.example.com'
+                        address: '123 Quant Labs, Bangalore, India'
+                        certificatePath: /documents/certificate.pdf
+                        pancardPath: /documents/pancard.pdf
+                        relevantDocPath: null
+                        orgDocuments: null
+                        createdAt: '2025-06-03T16:28:24.205541'
+                        updatedAt: '2025-06-03T16:28:24.205541'
+                        tableName: organizations
         '401':
           description: Unauthorized
           content:
@@ -681,6 +1030,7 @@ paths:
         name: id
         in: path
         required: true
+        description: UUID of organization
     delete:
       summary: Delete organisation by ID
       tags:
@@ -698,6 +1048,85 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      orgName:
+                        type: string
+                      orgLogo:
+                        type: string
+                      entityType:
+                        type: string
+                      orgSector:
+                        type: string
+                      websiteLink:
+                        type: string
+                      address:
+                        type: string
+                      certificatePath:
+                        type: string
+                      pancardPath:
+                        type: string
+                      relevantDocPath:
+                        type: 'null'
+                      orgDocuments:
+                        type: 'null'
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      tableName:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: e87246e2-5da5-40b0-973c-690d2f48f879
+                      orgName: Quantum Truely
+                      orgLogo: /logos/ai.png
+                      entityType: Private
+                      orgSector: Technology
+                      websiteLink: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificatePath: /documents/certificate.pdf
+                      pancardPath: /documents/pancard.pdf
+                      relevantDocPath: null
+                      orgDocuments: null
+                      createdAt: '2025-06-03T16:28:24.205541'
+                      updatedAt: '2025-06-03T16:28:24.205541'
+                      tableName: organizations
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: e87246e2-5da5-40b0-973c-690d2f48f879
+                      orgName: Quantum Truely
+                      orgLogo: /logos/ai.png
+                      entityType: Private
+                      orgSector: Technology
+                      websiteLink: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificatePath: /documents/certificate.pdf
+                      pancardPath: /documents/pancard.pdf
+                      relevantDocPath: null
+                      orgDocuments: null
+                      createdAt: '2025-06-03T16:28:24.205541'
+                      updatedAt: '2025-06-03T16:28:24.205541'
+                      tableName: organizations
       operationId: put-auth-v1-organisations-id
       parameters:
         - schema:
@@ -712,25 +1141,100 @@ paths:
             schema:
               type: object
               properties:
-                org_name:
+                name:
                   type: string
-                  x-stoplight:
-                    id: amwnghki9g15y
-                document_path:
-                  type: string
-                  x-stoplight:
-                    id: aicq0bnwnqk88
+              x-examples:
+                Example 1:
+                  name: Quantum Truely
+            examples:
+              Example 1:
+                value:
+                  name: Quantum Truely
       security:
         - authorization: []
     get:
       summary: Get Organisation By ID
-      tags: [Organisation APIs]
+      tags:
+        - Organisation APIs
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      logo_path:
+                        type: string
+                      entity_type:
+                        type: string
+                      org_sector:
+                        type: string
+                      website_link:
+                        type: string
+                      address:
+                        type: string
+                      certificate_path:
+                        type: string
+                      pancard_path:
+                        type: string
+                      created_at:
+                        type: string
+                      updated_at:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: e87246e2-5da5-40b0-973c-690d2f48f879
+                      name: Quant Sandbox
+                      logo_path: /logos/ai.png
+                      entity_type: Private
+                      org_sector: Technology
+                      website_link: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificate_path: /documents/certificate.pdf
+                      pancard_path: /documents/pancard.pdf
+                      created_at: '2025-06-03T16:28:24.205541'
+                      updated_at: '2025-06-03T16:28:24.205541'
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: e87246e2-5da5-40b0-973c-690d2f48f879
+                      name: Quant Sandbox
+                      logo_path: /logos/ai.png
+                      entity_type: Private
+                      org_sector: Technology
+                      website_link: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificate_path: /documents/certificate.pdf
+                      pancard_path: /documents/pancard.pdf
+                      created_at: '2025-06-03T16:28:24.205541'
+                      updated_at: '2025-06-03T16:28:24.205541'
       operationId: get-auth-v1-organisations-id
       security:
         - authorization: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: UUID of organization
   '/auth/v1/organisations/{id}/users':
     parameters:
       - name: id
@@ -754,42 +1258,68 @@ paths:
                 properties:
                   type:
                     type: string
-                    x-stoplight:
-                      id: a7vtx6rs4m0ff
                   title:
                     type: string
-                    x-stoplight:
-                      id: xzscsryvdk9uc
-                  results:
+                  result:
                     type: array
-                    x-stoplight:
-                      id: oledqptz2ehx6
                     items:
-                      x-stoplight:
-                        id: ktffw4vaox9io
                       type: object
                       properties:
-                        org_id:
+                        id:
                           type: string
-                          x-stoplight:
-                            id: a7gu8pg6fxu2h
-                        user_id:
+                        organizationId:
                           type: string
-                          x-stoplight:
-                            id: yhzlt4lwonart
+                        userId:
+                          type: string
+                        userName:
+                          type: string
                         role:
                           type: string
-                          x-stoplight:
-                            id: 4a5vbkzoauznr
+                        jobTitle:
+                          type: string
+                        empId:
+                          type: string
+                        orgManagerPhoneNo:
+                          type: string
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        tableName:
+                          type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 81980801-85b6-4b7d-ae54-5df38a3535bd
+                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        userName: test test
+                        role: ADMIN
+                        jobTitle: Manager
+                        empId: EMP12345
+                        orgManagerPhoneNo: +91-9876543210
+                        createdAt: '2025-06-03T16:28:24.852025'
+                        updatedAt: '2025-06-03T16:28:24.852025'
+                        tableName: organization_users
               examples:
                 Example 1:
                   value:
-                    type: 'urn:dx:as:Success'
-                    title: Organisation Admins
-                    results:
-                      - org_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                        user_id: 5d019ee7-e1d4-4f65-9a14-2e3b656b7296
-                        role: Explorer
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 81980801-85b6-4b7d-ae54-5df38a3535bd
+                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        userName: test test
+                        role: ADMIN
+                        jobTitle: Manager
+                        empId: EMP12345
+                        orgManagerPhoneNo: +91-9876543210
+                        createdAt: '2025-06-03T16:28:24.852025'
+                        updatedAt: '2025-06-03T16:28:24.852025'
+                        tableName: organization_users
         '401':
           description: Unauthorized
           content:
@@ -836,6 +1366,11 @@ paths:
           name: Authorization
           description: Keycloak Issued Token
           required: true
+        - schema:
+            type: string
+          in: query
+          name: 'id '
+          description: UUID of organizations
       security:
         - authorization: []
   '/auth/v1/organisations/{id}/users/{user_id}':
@@ -871,9 +1406,42 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Deleted Organisation User
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Deleted Organisation User
       operationId: delete-auth-v1-organisations-users-id
       security:
         - authorization: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: user_id
+          description: UUID of user
+        - schema:
+            type: string
+          in: query
+          description: UUID of organization
+          name: id
     put:
       summary: Update Organization User Role
       tags:
@@ -881,6 +1449,28 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Updated Organisation User Role
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: Updated Organisation User Role
       operationId: put-auth-v1-organization-users-role
       security:
         - authorization: []
@@ -894,6 +1484,22 @@ paths:
                   type: string
                   x-stoplight:
                     id: 35dhxezcb35eq
+            examples:
+              Example 1:
+                value:
+                  role: MEMBER
+        description: ''
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: 'organization UUID '
+        - schema:
+            type: string
+          in: query
+          name: user_id
+          description: user's UUID
     get:
       summary: (Org Admin) Get User Information
       tags:
@@ -912,6 +1518,63 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        userId:
+                          type: string
+                        userName:
+                          type: string
+                        amount:
+                          type: integer
+                        status:
+                          type: string
+                        requestedAt:
+                          type: string
+                        processedAt:
+                          type: string
+                        tableName:
+                          type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: f1061c0c-21fd-46ad-9cb3-83e479b8635d
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        amount: 10000
+                        status: pending
+                        requestedAt: '2025-06-04T09:47:27.323861'
+                        processedAt: '2025-06-04T09:47:27.323861'
+                        tableName: credit_requests
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: f1061c0c-21fd-46ad-9cb3-83e479b8635d
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        amount: 10000
+                        status: pending
+                        requestedAt: '2025-06-04T09:47:27.323861'
+                        processedAt: '2025-06-04T09:47:27.323861'
+                        tableName: credit_requests
       operationId: get-auth-v1-credit
       security:
         - authorization: []
@@ -919,8 +1582,6 @@ paths:
         - schema:
             type: string
           in: query
-          name: status
-          description: Status of Credit Request
           required: false
     post:
       summary: Create Credit Request
@@ -929,6 +1590,61 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      userName:
+                        type: string
+                      amount:
+                        type: integer
+                      status:
+                        type: string
+                      requestedAt:
+                        type: string
+                      processedAt:
+                        type: string
+                      tableName:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: f1061c0c-21fd-46ad-9cb3-83e479b8635d
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      userName: test test
+                      amount: 10000
+                      status: pending
+                      requestedAt: '2025-06-04T09:47:27.323861'
+                      processedAt: '2025-06-04T09:47:27.323861'
+                      tableName: credit_requests
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: f1061c0c-21fd-46ad-9cb3-83e479b8635d
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      userName: test test
+                      amount: 10000
+                      status: pending
+                      requestedAt: '2025-06-04T09:47:27.323861'
+                      processedAt: '2025-06-04T09:47:27.323861'
+                      tableName: credit_requests
       operationId: post-auth-v1-credit-request
       security:
         - authorization: []
@@ -943,6 +1659,10 @@ paths:
                   format: double
                   x-stoplight:
                     id: 37g76x7a4vgf8
+            examples:
+              Example 1:
+                value:
+                  amount: 2000
     put:
       summary: Update Credit Request Status
       tags:
@@ -950,6 +1670,69 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      amount:
+                        type: integer
+                      transactedBy:
+                        type: string
+                      transactionStatus:
+                        type: string
+                      transactionType:
+                        type: string
+                      createdAt:
+                        type: string
+                      requestedAt:
+                        type: string
+                      updatedBalance:
+                        type: integer
+                      tableName:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: 8e6d2003-88ae-47ee-9779-c21d9c3a4091
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      amount: 10000
+                      transactedBy: a2899137-8458-40a6-9be8-084cfd1890e5
+                      transactionStatus: success
+                      transactionType: credit
+                      createdAt: '2025-06-04T10:45:06.361576'
+                      requestedAt: '2025-06-04T09:47:27.323861'
+                      updatedBalance: 20000
+                      tableName: credit_transactions
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: 8e6d2003-88ae-47ee-9779-c21d9c3a4091
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      amount: 10000
+                      transactedBy: a2899137-8458-40a6-9be8-084cfd1890e5
+                      transactionStatus: success
+                      transactionType: credit
+                      createdAt: '2025-06-04T10:45:06.361576'
+                      requestedAt: '2025-06-04T09:47:27.323861'
+                      updatedBalance: 20000
+                      tableName: credit_transactions
       operationId: put-auth-v1-credit-request
       security:
         - authorization: []
@@ -959,14 +1742,19 @@ paths:
             schema:
               type: object
               properties:
-                req_id:
+                id:
                   type: string
-                  x-stoplight:
-                    id: jbgy3jvpgjyyv
                 status:
                   type: string
-                  x-stoplight:
-                    id: d2cd0vtwz5hv1
+              x-examples:
+                Example 1:
+                  id: 3225340e-78f6-4a75-ac85-91fb39022b3b
+                  status: pending
+            examples:
+              Example 1:
+                value:
+                  id: 3225340e-78f6-4a75-ac85-91fb39022b3b
+                  status: pending
   /auth/v1/admin/user/credit/deduct:
     put:
       summary: Deduct User Credit (COS ADMIN)
@@ -975,6 +1763,53 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      amount:
+                        type: integer
+                      transactedBy:
+                        type: string
+                      transactionStatus:
+                        type: string
+                      transactionType:
+                        type: string
+                      createdAt:
+                        type: string
+                      requestedAt:
+                        type: string
+                      updatedBalance:
+                        type: integer
+                      tableName:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: bbc203ba-b7e2-43aa-9533-da2dee243bc7
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      amount: 50
+                      transactedBy: a2899137-8458-40a6-9be8-084cfd1890e5
+                      transactionStatus: success
+                      transactionType: debit
+                      createdAt: '2025-06-04T10:51:42.343373'
+                      requestedAt: '2025-05-29T19:07:00'
+                      updatedBalance: 19950
+                      tableName: credit_transactions
       operationId: put-auth-v1-user-credit
       security:
         - authorization: []
@@ -995,23 +1830,19 @@ paths:
                     id: 1k9c4h2fbv6g4
                 requested_at:
                   type: string
-  '/auth/v1/user/credit/{id}':
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-    get:
-      summary: Get Other Users Credit Balance (COS ADMIN)
-      tags:
-        - Credit APIs
-      responses:
-        '200':
-          description: OK
-      operationId: get-auth-v1-user-credit-id
-      security:
-        - authorization: []
+            examples:
+              Example 1:
+                value:
+                  amount: 50
+                  user_id: 436cb796-5826-458b-a914-a54721f70997
+                  requested_at: '2025-05-29T19:07:00'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Keycloak issued token
+    parameters: []
   /auth/v1/compute/requests:
     get:
       summary: Get All Pending ComputeRole Requests
@@ -1024,7 +1855,59 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: {}
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        userId:
+                          type: string
+                        userName:
+                          type: string
+                        status:
+                          type: string
+                        approvedBy:
+                          type: 'null'
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                        tableName:
+                          type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 25fcafb9-d65e-454f-9196-8648dcf08854
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        status: pending
+                        approvedBy: null
+                        createdAt: '2025-06-04T10:54:53.301846'
+                        updatedAt: '2025-06-04T10:54:53.301846'
+                        tableName: compute_role
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 25fcafb9-d65e-454f-9196-8648dcf08854
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        status: pending
+                        approvedBy: null
+                        createdAt: '2025-06-04T10:54:53.301846'
+                        updatedAt: '2025-06-04T10:54:53.301846'
+                        tableName: compute_role
       operationId: get-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -1032,6 +1915,9 @@ paths:
           in: header
           name: Authorization
           description: Keycloak issued Token
+        - schema:
+            type: string
+          in: cookie
       security:
         - authorization: []
     post:
@@ -1041,6 +1927,61 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      userName:
+                        type: string
+                      status:
+                        type: string
+                      approvedBy:
+                        type: 'null'
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                      tableName:
+                        type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: 25fcafb9-d65e-454f-9196-8648dcf08854
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      userName: test test
+                      status: pending
+                      approvedBy: null
+                      createdAt: '2025-06-04T10:54:53.301846'
+                      updatedAt: '2025-06-04T10:54:53.301846'
+                      tableName: compute_role
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: 25fcafb9-d65e-454f-9196-8648dcf08854
+                      userId: 436cb796-5826-458b-a914-a54721f70997
+                      userName: test test
+                      status: pending
+                      approvedBy: null
+                      createdAt: '2025-06-04T10:54:53.301846'
+                      updatedAt: '2025-06-04T10:54:53.301846'
+                      tableName: compute_role
       operationId: post-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -1070,7 +2011,24 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: {}
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  detail:
+                    type: string
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: 'Updated Resquest '
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    detail: 'Updated Resquest '
       operationId: put-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -1078,6 +2036,11 @@ paths:
           in: header
           name: Authorization
           description: Keycloak issued Token
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: request id
       requestBody:
         content:
           application/json:
@@ -1086,6 +2049,10 @@ paths:
               properties:
                 status:
                   type: string
+            examples:
+              Example 1:
+                value:
+                  status: granted
       security:
         - authorization: []
   /auth/v1/kyc/verify:
@@ -1151,6 +2118,13 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                Example 1: {}
       operationId: post-auth-v1-user-roles
       security:
         - authorization: []
@@ -1201,6 +2175,146 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                      organisationId:
+                        type: string
+                      organisationName:
+                        type: string
+                      sub:
+                        type: string
+                      emailVerified:
+                        type: boolean
+                      kycVerified:
+                        type: boolean
+                      name:
+                        type: string
+                      preferredUsername:
+                        type: string
+                      givenName:
+                        type: string
+                      familyName:
+                        type: string
+                      email:
+                        type: string
+                      pendingRoles:
+                        type: array
+                        items:
+                          type: object
+                          properties: {}
+                      organisation:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          organisationId:
+                            type: string
+                          userId:
+                            type: string
+                          userName:
+                            type: string
+                          status:
+                            type: string
+                          jobTitle:
+                            type: string
+                          empId:
+                            type: string
+                          requestedAt:
+                            type: string
+                          processedAt:
+                            type: string
+                          request_type:
+                            type: string
+                      createdAt:
+                        type: string
+                      kycData:
+                        type: object
+                        properties: {}
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      roles:
+                        - offline_access
+                        - compute
+                        - consumer
+                        - default-roles-myrealm
+                        - uma_authorization
+                      organisationId: ''
+                      organisationName: ''
+                      sub: 436cb796-5826-458b-a914-a54721f70997
+                      emailVerified: true
+                      kycVerified: false
+                      name: test test
+                      preferredUsername: test
+                      givenName: test
+                      familyName: test
+                      email: testing@gmail.com
+                      pendingRoles: []
+                      organisation:
+                        id: 98e74f31-4e40-4615-85b8-61256f0bc7c4
+                        organisationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        status: granted
+                        jobTitle: Employee
+                        empId: EMP8790
+                        requestedAt: '2025-06-04T06:13:58.917342'
+                        processedAt: '2025-06-04T06:13:58.917342'
+                        request_type: organisation_join
+                      createdAt: '2025-06-04T06:12:48.991'
+                      kycData: {}
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      roles:
+                        - offline_access
+                        - compute
+                        - consumer
+                        - default-roles-myrealm
+                        - uma_authorization
+                      organisationId: ''
+                      organisationName: ''
+                      sub: 436cb796-5826-458b-a914-a54721f70997
+                      emailVerified: true
+                      kycVerified: false
+                      name: test test
+                      preferredUsername: test
+                      givenName: test
+                      familyName: test
+                      email: testing@gmail.com
+                      pendingRoles: []
+                      organisation:
+                        id: 98e74f31-4e40-4615-85b8-61256f0bc7c4
+                        organisationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        status: granted
+                        jobTitle: Employee
+                        empId: EMP8790
+                        requestedAt: '2025-06-04T06:13:58.917342'
+                        processedAt: '2025-06-04T06:13:58.917342'
+                        request_type: organisation_join
+                      createdAt: '2025-06-04T06:12:48.991'
+                      kycData: {}
       operationId: get-auth-v1-user
       security:
         - authorization: []
@@ -1218,9 +2332,88 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                      organisationId:
+                        type: string
+                      organisationName:
+                        type: string
+                      sub:
+                        type: string
+                      emailVerified:
+                        type: boolean
+                      kycVerified:
+                        type: boolean
+                      name:
+                        type: string
+                      preferredUsername:
+                        type: string
+                      givenName:
+                        type: string
+                      familyName:
+                        type: string
+                      email:
+                        type: string
+                      pendingRoles:
+                        type: array
+                        items:
+                          type: object
+                          properties: {}
+                      organisation:
+                        type: object
+                        properties: {}
+                      createdAt:
+                        type: string
+                      kycData:
+                        type: object
+                        properties: {}
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      roles:
+                        - cos_admin
+                        - offline_access
+                        - default-roles-myrealm
+                        - uma_authorization
+                      organisationId: ''
+                      organisationName: ''
+                      sub: a2899137-8458-40a6-9be8-084cfd1890e5
+                      emailVerified: false
+                      kycVerified: false
+                      name: XYZ user
+                      preferredUsername: XYZ
+                      givenName: XYZ
+                      familyName: user
+                      email: XYZ@gmail.com
+                      pendingRoles: []
+                      organisation: {}
+                      createdAt: '2025-05-21T09:33:12.073'
+                      kycData: {}
       operationId: get-auth-v1-user-id-admin
       security:
         - authorization: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: id
+          description: UUID of userId
   /auth/v1/admin/user:
     get:
       summary: (COS Admin) Get All Users Info
@@ -1228,7 +2421,169 @@ paths:
         - Role APIs
       responses:
         '200':
-          description: OK
+          description: children-2-children-0-children-7$0OK
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        organisationId:
+                          type: string
+                        organisationName:
+                          type: string
+                        sub:
+                          type: string
+                        emailVerified:
+                          type: boolean
+                        kycVerified:
+                          type: boolean
+                        name:
+                          type: string
+                        preferredUsername:
+                          type: string
+                        givenName:
+                          type: string
+                        familyName:
+                          type: string
+                        email:
+                          type: string
+                        pending_roles:
+                          type: array
+                          items:
+                            type: object
+                            properties: {}
+                        organisation:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            requestedBy:
+                              type: string
+                            name:
+                              type: string
+                            logoPath:
+                              type: string
+                            entityType:
+                              type: string
+                            orgSector:
+                              type: string
+                            websiteLink:
+                              type: string
+                            address:
+                              type: string
+                            certificatePath:
+                              type: string
+                            pancardPath:
+                              type: string
+                            status:
+                              type: string
+                            userName:
+                              type: string
+                            empId:
+                              type: string
+                            jobTitle:
+                              type: string
+                            orgManagerphoneNo:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            request_type:
+                              type: string
+                        createdAt:
+                          type: 'null'
+                        kycInformation:
+                          type: object
+                          properties: {}
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - organisationId: org-123
+                        organisationName: ''
+                        sub: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        emailVerified: false
+                        kycVerified: true
+                        name: test test
+                        preferredUsername: testuser
+                        givenName: test
+                        familyName: test
+                        email: test@gmail.com
+                        pending_roles: []
+                        organisation:
+                          id: 4202493c-7c64-49b0-8f61-2000ca3d147c
+                          requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                          name: Quants Sandbox
+                          logoPath: /logos/ai.png
+                          entityType: Private
+                          orgSector: Technology
+                          websiteLink: 'https://ai.example.com'
+                          address: '123 Quant Labs, Bangalore, India'
+                          certificatePath: /documents/certificate.pdf
+                          pancardPath: /documents/pancard.pdf
+                          status: pending
+                          userName: test test
+                          empId: EMP12345
+                          jobTitle: Manager
+                          orgManagerphoneNo: +91-9876543210
+                          createdAt: '2025-06-03T16:25:25.167724'
+                          updatedAt: '2025-06-03T16:25:25.167724'
+                          request_type: organisation_create
+                        createdAt: null
+                        kycInformation: {}
+              examples:
+                Example 1:
+                  value:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - organisationId: org-123
+                        organisationName: ''
+                        sub: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        emailVerified: false
+                        kycVerified: true
+                        name: test test
+                        preferredUsername: testuser
+                        givenName: test
+                        familyName: test
+                        email: test@gmail.com
+                        pending_roles: []
+                        organisation:
+                          id: 4202493c-7c64-49b0-8f61-2000ca3d147c
+                          requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                          name: Quants Sandbox
+                          logoPath: /logos/ai.png
+                          entityType: Private
+                          orgSector: Technology
+                          websiteLink: 'https://ai.example.com'
+                          address: '123 Quant Labs, Bangalore, India'
+                          certificatePath: /documents/certificate.pdf
+                          pancardPath: /documents/pancard.pdf
+                          status: pending
+                          userName: test test
+                          empId: EMP12345
+                          jobTitle: Manager
+                          orgManagerphoneNo: +91-9876543210
+                          createdAt: '2025-06-03T16:25:25.167724'
+                          updatedAt: '2025-06-03T16:25:25.167724'
+                          request_type: organisation_create
+                        createdAt: null
+                        kycInformation: {}
+            application/postscript:
+              schema:
+                type: object
+                properties: {}
       operationId: get-auth-v1-admin-user
       security:
         - authorization: []
