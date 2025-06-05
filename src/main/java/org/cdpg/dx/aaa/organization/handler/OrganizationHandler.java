@@ -209,21 +209,11 @@ public class OrganizationHandler {
 
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
-        String OrgidParam = String.valueOf(OrgRequestJson.getString("org_id"));
-        UUID orgId;
-
-        orgId = UUID.fromString(OrgidParam);
-
-        String UseridParam = String.valueOf(OrgRequestJson.getString("user_id"));
-        UUID user_id;
-
-        user_id = UUID.fromString(UseridParam);
-
         Role role;
         role = Role.fromString(OrgRequestJson.getString("role"));
 
-        UUID userId = UUID.fromString(OrgRequestJson.getString("user_id"));
-
+        UUID  orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+        UUID userId = RequestHelper.getPathParamAsUUID(ctx, "user_id");
 
         organizationService.updateUserRole(orgId, userId, role)
                 .onSuccess(updated -> {

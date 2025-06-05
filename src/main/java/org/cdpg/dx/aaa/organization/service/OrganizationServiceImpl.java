@@ -265,7 +265,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Future<Boolean> updateUserRole(UUID orgId, UUID userId, Role role) {
 
         Map<String, Object> conditionMap = Map.of(
-                Constants.ORG_ID, orgId.toString(),
+                Constants.ORGANIZATION_ID, orgId.toString(),
                 Constants.USER_ID, userId.toString()
         );
 
