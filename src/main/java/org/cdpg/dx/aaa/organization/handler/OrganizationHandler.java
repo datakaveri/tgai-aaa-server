@@ -2,11 +2,13 @@ package org.cdpg.dx.aaa.organization.handler;
 
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.email.util.EmailHelper;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
@@ -16,8 +18,10 @@ import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+
 
 
 public class OrganizationHandler {
@@ -25,11 +29,13 @@ public class OrganizationHandler {
     private static final Logger LOGGER = LogManager.getLogger(OrganizationHandler.class);
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final EmailHelper emailHelper;
 
 
-    public OrganizationHandler(OrganizationService organizationService, UserService userService) {
+    public OrganizationHandler(OrganizationService organizationService, UserService userService,EmailHelper emailHelper) {
         this.organizationService = organizationService;
         this.userService = userService;
+        this.emailHelper = emailHelper;
     }
 
     public void updateOrganisationById(RoutingContext ctx) {
@@ -143,26 +149,38 @@ public class OrganizationHandler {
 
     }
 
-    public void createOrganisationRequest(RoutingContext ctx) {
-        JsonObject OrgRequestJson = ctx.body().asJsonObject();
+  public void createOrganisationRequest(RoutingContext ctx) {
+    JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
+    User user = ctx.user();
+    OrgRequestJson.put("requested_by", user.subject());
+    OrgRequestJson.put("user_name", user.principal().getString("name"));
 
-        User user = ctx.user();
-        OrgRequestJson.put("requested_by", user.subject());
+    OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
 
-        String userName = user.principal().getString("name");
-        OrgRequestJson.put("user_name", userName);
+    organizationService.createOrganizationRequest(organizationCreateRequest)
+      .compose(requests ->
 
-       OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
+        ctx.vertx().fileSystem()
+          .readFile("src/main/resources/templates/request-create-organization.html")
+          .compose(buffer -> {
 
+            String htmlTemplate = buffer.toString(StandardCharsets.UTF_8);
 
-        organizationService.createOrganizationRequest(organizationCreateRequest).
-                onSuccess(requests -> {
-                    ResponseBuilder.sendSuccess(ctx, requests);
+            String adminPortalUrl = "https://staging.catalogue.tgdex.iudx.io/";
+            htmlTemplate = htmlTemplate.replace("${adminPortalUrl}", adminPortalUrl);
 
-                })
-                .onFailure(ctx::fail);
-    }
+            String receiver = "sample_email@gmail.com";
+            String sender = "no-reply.dev@iudx.io";
+            String subject = "New Organization Creation Request";
+
+            return emailHelper.sendMail(sender, receiver, subject, htmlTemplate)
+              .map(v -> requests);
+          })
+      )
+      .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+      .onFailure(ctx::fail);
+  }
 
     public void deleteOrganisationUserById(RoutingContext ctx) {
         UUID  orgId = RequestHelper.getPathParamAsUUID(ctx, "id");

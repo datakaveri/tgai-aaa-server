@@ -121,10 +121,20 @@ public class Deployer {
       return;
     }
 
+
     int numInstances = config.getInteger("verticleInstances");
+
+    DeploymentOptions options = new DeploymentOptions()
+      .setInstances(numInstances)
+      .setConfig(config);
+
+    if (Boolean.TRUE.equals(config.getBoolean("worker"))) {
+      options.setWorker(true);
+    }
+
     vertx.deployVerticle(
         moduleName,
-        new DeploymentOptions().setInstances(numInstances).setConfig(config),
+        options.setInstances(numInstances).setConfig(config),
         ar -> {
           if (ar.succeeded()) {
             LOGGER.info("Deployed {}", moduleName);
