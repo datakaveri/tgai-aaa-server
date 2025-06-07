@@ -12,6 +12,7 @@ import org.cdpg.dx.aaa.admin.controller.AdminController;
 import org.cdpg.dx.aaa.admin.handler.AdminHandler;
 import org.cdpg.dx.aaa.credit.factory.CreditControllerFactory;
 import org.cdpg.dx.aaa.credit.service.CreditService;
+import org.cdpg.dx.aaa.email.util.EmailHelper;
 import org.cdpg.dx.aaa.kyc.controller.KYCController;
 import org.cdpg.dx.aaa.kyc.factory.KYCFactory;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
@@ -33,17 +34,20 @@ public class ControllerFactory {
 
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
 
+    EmailHelper emailHelper = new EmailHelper(vertx);
+
 
     CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService);
     OrganizationService  organizationService = OrganizationControllerFactory.createService(pgService, keycloakUserService);
 
     UserService userService = new UserServiceImpl(keycloakUserService, organizationService, creditService);
+
 ;
     ApiController creditApiController =  CreditControllerFactory.create(creditService);
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
-    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService);
+    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService,emailHelper);
 
       AdminHandler adminHandler = new AdminHandler(userService, keycloakUserService, creditService, organizationService);
       ApiController adminController = new AdminController(adminHandler);
