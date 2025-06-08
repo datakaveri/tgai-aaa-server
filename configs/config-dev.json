@@ -29,12 +29,8 @@
       "iss": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot",
       "jwtIgnoreExpiry": true,
       "jwksRefreshIntervalMs": 21600000,
-      "adminUsername": "iudx-admin",
-      "adminPassword": "WdLCfm+BOICEu2b3"
-    },
-    "jwtKeystoreOptions":{
-      "keystorePath": "configs/keystore.jks",
-      "keystorePassword": "secret"
+      "adminUsername": "xxxxx",
+      "adminPassword": "xxxxx"
     },
     "KYCOptions": {
       "digilockerTokenUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/1/token",
@@ -49,7 +45,7 @@
       "id": "org.cdpg.dx.aaa.apiserver.ApiServerVerticle",
       "verticleInstances": 1,
       "httpPort":8443,
-      "required":["postgresOptions", "commonOptions", "keycloakOptions", "jwtKeystoreOptions", "KYCOptions"],
+      "required":["postgresOptions", "commonOptions", "keycloakOptions", "KYCOptions"],
       "poolSize": "5",
       "serverTimeoutMs": 30000,
       "corsRegexString":"^https://.+\\.iudx\\.org\\.in$"
