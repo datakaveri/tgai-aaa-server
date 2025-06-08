@@ -1,6 +1,7 @@
 package org.cdpg.dx.aaa.credit.service;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.dao.*;
 import org.cdpg.dx.aaa.credit.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
@@ -26,13 +27,15 @@ public class CreditServiceImpl implements CreditService {
   private final CreditTransactionDAO creditTransactionDAO;
   private final ComputeRoleDAO computeRoleDAO;
   private final KeycloakUserService keycloakUserService;
+  private final JsonObject config;
 
-  public CreditServiceImpl(CreditDAOFactory factory, KeycloakUserService keycloakUserService) {
+  public CreditServiceImpl(CreditDAOFactory factory, KeycloakUserService keycloakUserService, JsonObject config) {
     this.creditRequestDAO = factory.creditRequestDAO();
     this.userCreditDAO = factory.userCreditDAO();
     this.creditTransactionDAO = factory.creditTransactionDAO();
     this.computeRoleDAO = factory.computeRoleDAO();
     this.keycloakUserService = keycloakUserService;
+    this.config = config;
   }
 
   @Override
@@ -210,7 +213,7 @@ public class CreditServiceImpl implements CreditService {
 
         if (Status.GRANTED.equals(status)) {
           //TODO Assigining 1000 when user get compute role
-          return userCreditDAO.create(new UserCredit(null, userId, 10000.0, LocalDateTime.now()))
+          return userCreditDAO.create(new UserCredit(null, userId, config.getInteger("initialCreditBalance"), LocalDateTime.now()))
                   .recover(dxEx -> {
                     if (dxEx instanceof UniqueConstraintViolationException) {
                       LOGGER.info("UserCredit already exists, continuing role assignment.");
