@@ -28,6 +28,7 @@ public class OrganizationController implements ApiController {
 
         routerBuilder
                 .operation("post-auth-v1-organisations-request")
+                .handler(AuthorizationHandler.requireKycVerified())
                 .handler(organizationHandler::createOrganisationRequest);
 
         routerBuilder
@@ -37,6 +38,7 @@ public class OrganizationController implements ApiController {
 
         routerBuilder
                 .operation("post-auth-v1-organisations-join-requests")
+                .handler(AuthorizationHandler.requireKycVerified())
                 .handler(organizationHandler::joinOrganisationRequest);
 
         routerBuilder
