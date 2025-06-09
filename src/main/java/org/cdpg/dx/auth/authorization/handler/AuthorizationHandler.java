@@ -52,4 +52,29 @@ public class AuthorizationHandler {
             }
         };
     }
+
+    public static Handler<RoutingContext> requireKycVerified() {
+        return ctx -> {
+            User user = ctx.user();
+            if (user == null) {
+                ctx.fail(new DxUnauthorizedException("No User Found")); // HTTP 401
+                return;
+            }
+
+            JsonObject principal = user.principal();
+
+            if (principal == null || !principal.containsKey("kyc_verified")) {
+                ctx.fail(new DxForbiddenException("KYC verification status missing")); // HTTP 403
+                return;
+            }
+
+            boolean isKycVerified = principal.getBoolean("kyc_verified", false);
+            if (!isKycVerified) {
+                ctx.fail(new DxForbiddenException("User's KYC is not verified")); // HTTP 403
+                return;
+            }
+
+            ctx.next();
+        };
+    }
 }
