@@ -32,6 +32,8 @@ public interface OrganizationService {
 
   Future<OrganizationJoinRequest> joinOrganizationRequest(OrganizationJoinRequest organizationJoinRequest);
 
+  Future<List<OrganizationUser>> getOrganisationAdminId(UUID orgId);
+
   Future<List<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(UUID orgId);
 
   Future<Boolean> updateOrganizationJoinRequestStatus(UUID requestId, Status Status);

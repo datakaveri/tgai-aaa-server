@@ -172,6 +172,17 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public Future<List<OrganizationUser>> getOrganisationAdminId(UUID orgId)
+    {
+      Map<String,Object> conditonMap = Map.of(
+        Constants.ORGANIZATION_ID ,orgId.toString(),
+        Constants.ROLE , Role.ADMIN.getRoleName());
+
+      return orgUserDAO.getAllWithFilters(conditonMap);
+    }
+
+
+  @Override
     public Future<OrganizationJoinRequest> joinOrganizationRequest(OrganizationJoinRequest organizationJoinRequest) {
         return joinRequestDAO.create(organizationJoinRequest);
     }

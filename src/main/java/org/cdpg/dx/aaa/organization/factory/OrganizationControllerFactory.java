@@ -13,6 +13,7 @@ import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.database.postgres.service.PostgresService;
+import org.cdpg.dx.email.service.EmailService;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
 
@@ -22,10 +23,10 @@ public class OrganizationControllerFactory {
 
     private OrganizationControllerFactory() {}
 
-    public static OrganizationController create(OrganizationService organizationService, UserService userService, EmailHelper emailHelper) {
+    public static OrganizationController create(OrganizationService organizationService, UserService userService, EmailHelper emailHelper, EmailService emailService) {
 
 
-        OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService, userService,emailHelper);
+        OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService, userService,emailHelper,emailService);
         return new OrganizationController(organizationHandler);
     }
 

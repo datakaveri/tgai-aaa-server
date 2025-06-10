@@ -17,6 +17,7 @@ import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
+import org.cdpg.dx.email.service.EmailService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,12 +31,14 @@ public class OrganizationHandler {
     private final OrganizationService organizationService;
     private final UserService userService;
     private final EmailHelper emailHelper;
+    private final EmailService emailService;
 
 
-    public OrganizationHandler(OrganizationService organizationService, UserService userService,EmailHelper emailHelper) {
+    public OrganizationHandler(OrganizationService organizationService, UserService userService,EmailHelper emailHelper,EmailService emailService) {
         this.organizationService = organizationService;
         this.userService = userService;
         this.emailHelper = emailHelper;
+        this.emailService = emailService;
     }
 
     public void updateOrganisationById(RoutingContext ctx) {
@@ -101,25 +104,45 @@ public class OrganizationHandler {
 
     public void joinOrganisationRequest(RoutingContext ctx) {
 
-        UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
-        JsonObject OrgRequestJson = ctx.body().asJsonObject();
-        OrganizationJoinRequest organizationJoinRequest;
-        User user = ctx.user();
-        OrgRequestJson.put("user_id", user.subject());
+      UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+      JsonObject OrgRequestJson = ctx.body().asJsonObject();
+      OrganizationJoinRequest organizationJoinRequest;
+      User user = ctx.user();
+      OrgRequestJson.put("user_id", user.subject());
 
-        String userName = user.principal().getString("name");
-        OrgRequestJson.put("user_name", userName);
-        OrgRequestJson.put("organization_id", orgId.toString());
+      String emailId = user.principal().getString("email");
 
-        System.out.println("OrgRequestJson: " + OrgRequestJson.encodePrettily());
+      String userName = user.principal().getString("name");
+      OrgRequestJson.put("user_name", userName);
+      OrgRequestJson.put("organization_id", orgId.toString());
 
-        organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
+      System.out.println("OrgRequestJson: " + OrgRequestJson.encodePrettily());
 
-        organizationService.joinOrganizationRequest(organizationJoinRequest)
-                .onSuccess(createdRequest -> ResponseBuilder.sendSuccess(ctx, "Created Join request"))
-                .onFailure(ctx::fail);
+      organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
+
+      organizationService.joinOrganizationRequest(organizationJoinRequest)
+        .onSuccess(createdRequest -> {
+          ResponseBuilder.sendSuccess(ctx, "Created Join request");
+
+          emailHelper.sendEmailRequestForJoining(userName, emailId, orgId)
+            .compose(emailRequest -> {
+
+              LOGGER.info("Email request created for organization join request by user: {}", userName);
+              LOGGER.debug("Email will be sent to: {}", emailRequest.getTo());
+
+              return emailService.sendEmail(emailRequest);
+            })
+            .onSuccess(emailResult -> {
+              LOGGER.info("Email notification sent successfully for organization join request by user: {}", userName);
+            })
+            .onFailure(emailError -> {
+              LOGGER.error("Failed to send email notification for organization join request by user: {}", userName, emailError);
+            });
+        })
+        .onFailure(ctx::fail);
 
     }
+
 
     public void approveOrganisationRequest(RoutingContext ctx) {
         LOGGER.debug("Got request>>>>>>>>>>>>>>>>>>>>");
@@ -163,31 +186,24 @@ public class OrganizationHandler {
     OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
 
     organizationService.createOrganizationRequest(organizationCreateRequest)
-      .compose(requests ->
+      .onSuccess(createdRequest -> {
+        ResponseBuilder.sendSuccess(ctx, "Created organisation request");
 
-        ctx.vertx().fileSystem()
-          .readFile("src/main/resources/templates/request-create-organization.html")
-          .compose(buffer -> {
+        emailHelper.sendEmailRequestForCreating(userName, emailId)
+          .compose(emailRequest -> {
 
-            String htmlTemplate = buffer.toString(StandardCharsets.UTF_8);
+            LOGGER.info("Email request created for organization create request by user: {}", userName);
+            LOGGER.debug("Email will be sent to: {}", emailRequest.getTo());
 
-            String adminPortalUrl = "https://staging.catalogue.tgdex.iudx.io/";
-            htmlTemplate = htmlTemplate.replace("${adminPortalUrl}", adminPortalUrl);
-            htmlTemplate = htmlTemplate.replace("${userName}",userName);
-            htmlTemplate = htmlTemplate.replace("${emailId}",emailId);
-
-
-            String receiver = "sample_email@gmail.com";
-            String sender = "no-reply.dev@iudx.io";
-            String subject = "New Organization Creation Request";
-
-
-
-            return emailHelper.sendMail(sender, receiver, subject, htmlTemplate)
-              .map(v -> requests);
+            return emailService.sendEmail(emailRequest);
           })
-      )
-      .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+          .onSuccess(emailResult -> {
+            LOGGER.info("Email notification sent successfully for organization create request by user: {}", userName);
+          })
+          .onFailure(emailError -> {
+            LOGGER.error("Failed to send email notification for organization create request by user: {}", userName, emailError);
+          });
+      })
       .onFailure(ctx::fail);
   }
 
