@@ -41,6 +41,7 @@ public class CreditController implements ApiController {
 
     routerBuilder
       .operation("post-auth-v1-compute-role-request")
+      .handler(AuthorizationHandler.requireKycVerified())
       .handler(creditHandler::createComputeRoleRequest);
 
 

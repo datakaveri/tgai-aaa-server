@@ -153,8 +153,12 @@ public class OrganizationHandler {
     JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
     User user = ctx.user();
+
     OrgRequestJson.put("requested_by", user.subject());
     OrgRequestJson.put("user_name", user.principal().getString("name"));
+
+    String userName = user.principal().getString("name");
+    String emailId = user.principal().getString("email");
 
     OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
 
@@ -169,10 +173,15 @@ public class OrganizationHandler {
 
             String adminPortalUrl = "https://staging.catalogue.tgdex.iudx.io/";
             htmlTemplate = htmlTemplate.replace("${adminPortalUrl}", adminPortalUrl);
+            htmlTemplate = htmlTemplate.replace("${userName}",userName);
+            htmlTemplate = htmlTemplate.replace("${emailId}",emailId);
+
 
             String receiver = "sample_email@gmail.com";
             String sender = "no-reply.dev@iudx.io";
             String subject = "New Organization Creation Request";
+
+
 
             return emailHelper.sendMail(sender, receiver, subject, htmlTemplate)
               .map(v -> requests);

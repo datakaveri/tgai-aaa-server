@@ -59,7 +59,7 @@ public record OrganizationCreateRequest(
         requireNonNull(json.getString(Constants.EMP_ID), Constants.EMP_ID),
               requireNonNull(json.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
               requireNonNull(json.getString(Constants.PHONE_NO), Constants.PHONE_NO),
-        json.getString(Constants.ORG_DOCUMENTS),
+        requireNonNull(json.getString(Constants.ORG_DOCUMENTS), Constants.ORG_DOCUMENTS),
         parseDateTime(json.getString(Constants.CREATED_AT)),
               parseDateTime(json.getString(Constants.UPDATED_AT))
       );
@@ -114,7 +114,7 @@ public record OrganizationCreateRequest(
     json.put("empId", empId);
     json.put("jobTitle", jobTitle);
     json.put("orgManagerphoneNo", orgManagerphoneNo);
-    if (orgDocuments != null && !orgDocuments.isEmpty()) json.put("orgDocuments", orgDocuments);
+    json.put("orgDocuments", orgDocuments);
     if (createdAt != null) json.put("createdAt", createdAt.format(FORMATTER));
     if (updatedAt != null) json.put("updatedAt", updatedAt.format(FORMATTER));
 
@@ -140,7 +140,7 @@ public record OrganizationCreateRequest(
     if (!empId.isEmpty()) map.put(Constants.EMP_ID, empId);
     if (!jobTitle.isEmpty()) map.put(Constants.JOB_TITLE, jobTitle);
     if (!orgManagerphoneNo.isEmpty()) map.put(Constants.PHONE_NO, orgManagerphoneNo);
-    if (orgDocuments != null && !orgDocuments.isEmpty()) map.put(Constants.ORG_DOCUMENTS, orgDocuments);
+    if (!orgDocuments.isEmpty()) map.put(Constants.ORG_DOCUMENTS, orgDocuments);
     if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 
