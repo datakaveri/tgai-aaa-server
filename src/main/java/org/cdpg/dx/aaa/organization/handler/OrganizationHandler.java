@@ -8,15 +8,18 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.audit.util.AuditingHelper;
 import org.cdpg.dx.aaa.email.util.EmailHelper;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
+import org.cdpg.dx.common.util.RoutingContextHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -44,7 +47,12 @@ public class OrganizationHandler {
         UpdateOrgDTO updateOrgDTO = RequestHelper.parseBody(ctx, UpdateOrgDTO::fromJson);
 
         organizationService.updateOrganizationById(orgId, updateOrgDTO)
-                .onSuccess(updatedOrg -> ResponseBuilder.sendSuccess(ctx, updatedOrg))
+                .onSuccess(updatedOrg ->{
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Organization By ID");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, updatedOrg);
+                })
                 .onFailure(err -> {
                     LOGGER.error("Failed to Update Organization id: {}, message: {}", orgId, err.getMessage(), err);
                     ctx.fail(err);
@@ -55,7 +63,12 @@ public class OrganizationHandler {
 
         UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
         organizationService.deleteOrganization(orgId)
-                .onSuccess(updatedOrg -> ResponseBuilder.sendSuccess(ctx, "Organisation deleted Successfully!"))
+                .onSuccess(updatedOrg -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "DELETE", "Delete Organization By ID");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, "Organisation deleted Successfully!");
+                })
                 .onFailure(ctx::fail);
 
     }
@@ -64,6 +77,9 @@ public class OrganizationHandler {
 
         organizationService.getOrganizations()
                 .onSuccess(orgs -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "LIST", "List All Organisations");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, orgs);
                 })
                 .onFailure(ctx::fail);
@@ -82,6 +98,9 @@ public class OrganizationHandler {
         organizationService.updateOrganizationJoinRequestStatus(requestId, status)
                 .onSuccess(approved -> {
                     if (approved) {
+                        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                                RoutingContextHelper.getRequestPath(ctx), "PUT", "Approved Join Request");
+                        RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,  "Approved Organisation Join Request");
                     } else {
                         ctx.fail(new DxNotFoundException("Request Not Found"));
@@ -95,7 +114,12 @@ public class OrganizationHandler {
 
         UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
         organizationService.getOrganizationPendingJoinRequests(orgId)
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+                .onSuccess(requests -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Pending Join Requests");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, requests);
+                })
                 .onFailure(ctx::fail);
     }
 
@@ -116,7 +140,12 @@ public class OrganizationHandler {
         organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
 
         organizationService.joinOrganizationRequest(organizationJoinRequest)
-                .onSuccess(createdRequest -> ResponseBuilder.sendSuccess(ctx, "Created Join request"))
+                .onSuccess(createdRequest -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "POST", "Create Join Organization Request");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, "Created Join request");
+                })
                 .onFailure(ctx::fail);
 
     }
@@ -133,6 +162,9 @@ public class OrganizationHandler {
         LOGGER.debug("Calling service >>>>>>>>>>>>>>>>>>>>");
         organizationService.updateOrganizationCreateRequestStatus(requestId, status)
                 .onSuccess(updated -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "PUT", "Approve Create Organisation Request");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Updated Sucessfully");
                 })
                 .onFailure(ctx::fail);
@@ -142,6 +174,9 @@ public class OrganizationHandler {
 
         organizationService.getAllOrganizationCreateRequests()
                 .onSuccess(requests -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Organisation Requests");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, requests);
 
                 })
@@ -187,7 +222,12 @@ public class OrganizationHandler {
               .map(v -> requests);
           })
       )
-      .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, requests))
+      .onSuccess(requests -> {
+          AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                  RoutingContextHelper.getRequestPath(ctx), "POST", "Create Organisation Request");
+          RoutingContextHelper.setAuditingLog(ctx, auditLog);
+          ResponseBuilder.sendSuccess(ctx, requests);
+      })
       .onFailure(ctx::fail);
   }
 
@@ -198,6 +238,9 @@ public class OrganizationHandler {
         organizationService.deleteOrganizationUser(orgId, userId)
                 .onSuccess(deleted -> {
                     if (deleted) {
+                        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                                RoutingContextHelper.getRequestPath(ctx), "DELETE", "Delete Organisation User");
+                        RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx, "Deleted Organisation User");
                     } else {
                         ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
@@ -214,6 +257,9 @@ public class OrganizationHandler {
         // TODO check this belogns to the org
 
         userService.getUserInfoByID(userId).onSuccess(users -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get User Info By ID");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, users);
                 })
                 .onFailure(ctx::fail);
@@ -226,6 +272,9 @@ public class OrganizationHandler {
 
         organizationService.getOrganizationUsers(orgId)
                 .onSuccess(users -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Organisation Users by OrgID");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, users);
                 })
                 .onFailure(ctx::fail);
@@ -245,6 +294,9 @@ public class OrganizationHandler {
         organizationService.updateUserRole(orgId, userId, role)
                 .onSuccess(updated -> {
                     if (updated) {
+                        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                                RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Organisation User Role");
+                        RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,"Updated Organisation User Role");
                     } else {
                         ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
@@ -283,7 +335,12 @@ public class OrganizationHandler {
         ProviderRoleRequest providerRoleRequest = ProviderRoleRequest.fromJson(req);
 
         organizationService.createProviderRequest(providerRoleRequest)
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, "Created Request"))
+                .onSuccess(requests -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "POST", "Create Provider Role Request");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, "Created Request");
+                })
                 .onFailure(ctx::fail);
     }
 
@@ -293,7 +350,12 @@ public class OrganizationHandler {
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
         organizationService.updateProviderRequestStatus(reqId,status)
-                .onSuccess(requests -> ResponseBuilder.sendSuccess(ctx, "Provider role updated"))
+                .onSuccess(requests -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Provider Role Request");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, "Provider role updated");
+                })
                 .onFailure(ctx::fail);
     }
 
@@ -339,7 +401,12 @@ public class OrganizationHandler {
                         return resultList;
                     });
                 })
-                .onSuccess(enrichedRequests -> ResponseBuilder.sendSuccess(ctx, enrichedRequests))
+                .onSuccess(enrichedRequests -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Provider Role Requests");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, enrichedRequests);
+                })
                 .onFailure(ctx::fail);
     }
 
@@ -347,7 +414,12 @@ public class OrganizationHandler {
         UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
 
         organizationService.getOrganizationById(orgId)
-                .onSuccess(org -> ResponseBuilder.sendSuccess(ctx, org.toJson()))
+                .onSuccess(org -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Organization By ID");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    ResponseBuilder.sendSuccess(ctx, org.toJson());
+                })
                 .onFailure(err -> {
                     if (err instanceof DxNotFoundException) {
                         ctx.fail(new DxNotFoundException("Organization not found with id: " + orgId));
