@@ -43,9 +43,9 @@ public class AAAAuditlog implements AuditLog {
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.put("id", id);
+        json.put("id", id.toString());
         json.put("assetName", assetName);
-        json.put("assetId", assetId);
+        json.put("assetId", assetId.toString());
         json.put("assetType", assetType);
         json.put("operation", operation);
         json.put("createdAt", createdAt);
@@ -53,7 +53,7 @@ public class AAAAuditlog implements AuditLog {
         json.put("method", method);
         json.put("size", size);
         json.put("role", role);
-        json.put("userId", userId);
+        json.put("userId", userId.toString());
         json.put("originServer", originServer);
         json.put("myActivityEnabled", myActivityEnabled);
         json.put("shortDescription", shortDescription);
