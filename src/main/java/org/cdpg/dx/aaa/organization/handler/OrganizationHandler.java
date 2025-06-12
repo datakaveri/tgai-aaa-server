@@ -421,6 +421,25 @@ public class OrganizationHandler {
                 .onFailure(ctx::fail);
     }
 
+  public void createProviderRole(RoutingContext ctx) {
+    JsonObject providerRequestJson = ctx.body().asJsonObject();
+
+    ProviderRoleRequest providerRoleRequest = ProviderRoleRequest.fromJson(providerRequestJson);
+
+    organizationService.createProviderRole(providerRoleRequest)
+      .onSuccess(org -> ResponseBuilder.sendSuccess(ctx, "Provider role granted successfully"))
+      .onFailure(err -> {
+        if (err instanceof DxForbiddenException) {
+          ctx.fail(new DxForbiddenException("User is not part of any organisation or does not have permission to grant provider role"));
+        } else if (err instanceof DxNotFoundException) {
+          ctx.fail(new DxNotFoundException("User not found or does not have a pending provider role request"));
+        } else {
+          ctx.fail(err);
+        }
+      });
+
+  }
+
     public void getOrganizationById(RoutingContext ctx) {
         UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
 

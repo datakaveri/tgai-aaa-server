@@ -76,5 +76,8 @@ public interface OrganizationService {
   Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId);
 
   Future<Boolean> hasPendingProviderRole(UUID userId, UUID orgId);
+
+  Future<Boolean> createProviderRole(ProviderRoleRequest providerRoleRequest);
+
 }
 
