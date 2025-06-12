@@ -44,19 +44,19 @@ public class AAAAuditlog implements AuditLog {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.put("id", id.toString());
-        json.put("assetName", assetName);
-        json.put("assetId", assetId.toString());
-        json.put("assetType", assetType);
+        json.put("asset_name", assetName);
+        json.put("asset_id", assetId.toString());
+        json.put("asset_type", assetType);
         json.put("operation", operation);
-        json.put("createdAt", createdAt);
+        json.put("created_at", createdAt);
         json.put("endpoint", endpoint);
         json.put("method", method);
         json.put("size", size);
         json.put("role", role);
-        json.put("userId", userId.toString());
-        json.put("originServer", originServer);
-        json.put("myActivityEnabled", myActivityEnabled);
-        json.put("shortDescription", shortDescription);
+        json.put("user_id", userId.toString());
+        json.put("origin_server", originServer);
+        json.put("myactivity_enabled", myActivityEnabled);
+        json.put("short_description", shortDescription);
         return json;
     }
 }

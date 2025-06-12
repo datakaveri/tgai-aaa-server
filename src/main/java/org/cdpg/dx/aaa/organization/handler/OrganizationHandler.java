@@ -78,7 +78,7 @@ public class OrganizationHandler {
         organizationService.getOrganizations()
                 .onSuccess(orgs -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                            RoutingContextHelper.getRequestPath(ctx), "LIST", "List All Organisations");
+                            RoutingContextHelper.getRequestPath(ctx), "GET", "List All Organisations");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, orgs);
                 })
