@@ -4,11 +4,13 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.cdpg.dx.aaa.audit.util.AuditingHelper;
 import org.cdpg.dx.aaa.credit.Controller.CreditController;
 import org.cdpg.dx.aaa.credit.dao.CreditDAOFactory;
 import org.cdpg.dx.aaa.credit.handler.CreditHandler;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.credit.service.CreditServiceImpl;
+import org.cdpg.dx.auditing.handler.AuditingHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 

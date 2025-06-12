@@ -20,7 +20,9 @@ import org.cdpg.dx.aaa.organization.factory.OrganizationControllerFactory;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.aaa.user.service.UserServiceImpl;
+import org.cdpg.dx.auditing.handler.AuditingHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
+import org.cdpg.dx.databroker.service.DataBrokerService;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.cdpg.dx.keyclock.service.KeycloakUserServiceImpl;
 
@@ -31,12 +33,10 @@ public class ControllerFactory {
 
   public static List<ApiController> createControllers(Vertx vertx, JsonObject config) {
     PostgresService pgService = PostgresService.createProxy(vertx, POSTGRES_SERVICE_ADDRESS);
-
+      DataBrokerService dataBrokerService = DataBrokerService.createProxy(vertx, DATA_BROKER_SERVICE_ADDRESS);
+      AuditingHandler auditingHandler = new AuditingHandler(dataBrokerService);
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
-
     EmailHelper emailHelper = new EmailHelper(vertx);
-
-
     CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService, config);
     OrganizationService  organizationService = OrganizationControllerFactory.createService(pgService, keycloakUserService);
 
@@ -47,7 +47,7 @@ public class ControllerFactory {
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
-    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService,emailHelper);
+    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService,emailHelper, auditingHandler);
 
       AdminHandler adminHandler = new AdminHandler(userService, keycloakUserService, creditService, organizationService);
       ApiController adminController = new AdminController(adminHandler);

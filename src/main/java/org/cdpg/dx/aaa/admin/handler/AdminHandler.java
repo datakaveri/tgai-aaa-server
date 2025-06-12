@@ -8,9 +8,11 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.audit.util.AuditingHelper;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
@@ -79,7 +81,9 @@ public class AdminHandler {
                                 return array;
                             });
                 })
-                .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
+                .onSuccess(response -> {
+                    ResponseBuilder.sendSuccess(ctx, response);
+                })
                 .onFailure(err -> {
                     LOGGER.error("Failed to get all DxUsers: {}", err.getMessage(), err);
                     ctx.fail(err);

@@ -106,7 +106,7 @@ public class RoutingContextHelper {
         return Optional.ofNullable(routingContext.get(AUDITING_LOG));
     }
     public static void setAuditingLog(RoutingContext routingContext, AuditLog auditingLog) {
-        List<AuditLog> logs = getAuditingLog(routingContext).get();
+        List<AuditLog> logs = getAuditingLog(routingContext).orElseGet(ArrayList::new);
         logs.add(auditingLog);
         routingContext.put(AUDITING_LOG, logs);
     }
