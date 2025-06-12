@@ -12,7 +12,7 @@ public class AAAAuditlog implements AuditLog {
     private final String assetType;
     private final String operation;
     private final String createdAt;
-    private final String endpoint;
+    private final String api;
     private final String method;
     private final long size;
     private final String role;
@@ -22,7 +22,7 @@ public class AAAAuditlog implements AuditLog {
     private final String shortDescription;
 
     public AAAAuditlog(UUID id, String assetName, UUID assetId, String assetType, String operation, String createdAt,
-                       String endpoint, String method, long size, String role, UUID userId, String originServer,
+                       String api, String method, long size, String role, UUID userId, String originServer,
                        boolean myActivityEnabled, String shortDescription) {
         this.id = id;
         this.assetName = assetName;
@@ -30,7 +30,7 @@ public class AAAAuditlog implements AuditLog {
         this.assetType = assetType;
         this.operation = operation;
         this.createdAt = createdAt;
-        this.endpoint = endpoint;
+        this.api = api;
         this.method = method;
         this.size = size;
         this.role = role;
@@ -49,7 +49,7 @@ public class AAAAuditlog implements AuditLog {
         json.put("asset_type", assetType);
         json.put("operation", operation);
         json.put("created_at", createdAt);
-        json.put("endpoint", endpoint);
+        json.put("api", api);
         json.put("method", method);
         json.put("size", size);
         json.put("role", role);
