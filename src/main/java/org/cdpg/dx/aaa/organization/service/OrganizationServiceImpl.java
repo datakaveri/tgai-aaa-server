@@ -12,6 +12,7 @@ import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map;
@@ -42,11 +43,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Future<List<OrganizationCreateRequest>> getAllPendingOrganizationCreateRequests() {
-        Map<String, Object> filterMap = Map.of(
+    public Future<List<OrganizationCreateRequest>> getAllPendingGrantedOrganizationCreateRequests() {
+        Map<String, Object> filterMapPending = Map.of(
                 Constants.STATUS, Status.PENDING.getStatus()
         );
-        return createRequestDAO.getAllWithFilters(filterMap);
+        Map<String, Object> filterMapGranted = Map.of(
+                Constants.STATUS, Status.PENDING.getStatus()
+        );
+
+        Future<List<OrganizationCreateRequest>> pendingFuture = createRequestDAO.getAllWithFilters(filterMapPending);
+        Future<List<OrganizationCreateRequest>> grantedFuture = createRequestDAO.getAllWithFilters(filterMapGranted);
+
+        return Future.all(pendingFuture, grantedFuture)
+                .map(cf -> {
+                    List<OrganizationCreateRequest> merged = new ArrayList<>();
+                    merged.addAll(cf.resultAt(0));
+                    merged.addAll(cf.resultAt(1));
+                    return merged;
+                });
     }
 
     @Override

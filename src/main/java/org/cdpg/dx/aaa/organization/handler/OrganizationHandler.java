@@ -194,10 +194,21 @@ public class OrganizationHandler {
 
     String userName = user.principal().getString("name");
     String emailId = user.principal().getString("email");
+    String orgName = OrgRequestJson.getString("name");
 
     OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
 
-    organizationService.createOrganizationRequest(organizationCreateRequest)
+
+      organizationService.getAllPendingGrantedOrganizationCreateRequests().
+        compose(requests -> {
+          for (OrganizationCreateRequest request : requests) {
+              System.out.println(request.name());
+            if (request.name().equalsIgnoreCase(orgName)) {
+              return Future.failedFuture(new DxForbiddenException("Organisation name already exists/ under review"));
+            }
+          }
+            return organizationService.createOrganizationRequest(organizationCreateRequest);
+        })
       .compose(requests ->
 
         ctx.vertx().fileSystem()
