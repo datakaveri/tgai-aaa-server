@@ -12,7 +12,6 @@ import org.cdpg.dx.aaa.admin.controller.AdminController;
 import org.cdpg.dx.aaa.admin.handler.AdminHandler;
 import org.cdpg.dx.aaa.credit.factory.CreditControllerFactory;
 import org.cdpg.dx.aaa.credit.service.CreditService;
-import org.cdpg.dx.aaa.email.util.EmailHelper;
 import org.cdpg.dx.aaa.kyc.controller.KYCController;
 import org.cdpg.dx.aaa.kyc.factory.KYCFactory;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
@@ -36,7 +35,6 @@ public class ControllerFactory {
       DataBrokerService dataBrokerService = DataBrokerService.createProxy(vertx, DATA_BROKER_SERVICE_ADDRESS);
       AuditingHandler auditingHandler = new AuditingHandler(dataBrokerService);
     KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
-    EmailHelper emailHelper = new EmailHelper(vertx);
     CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService, config);
     OrganizationService  organizationService = OrganizationControllerFactory.createService(pgService, keycloakUserService);
 
@@ -47,7 +45,7 @@ public class ControllerFactory {
 
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);
     ApiController kycController = new KYCController(kycHandler);
-    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService,emailHelper, auditingHandler);
+    ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService, auditingHandler);
 
       AdminHandler adminHandler = new AdminHandler(userService, keycloakUserService, creditService, organizationService);
       ApiController adminController = new AdminController(adminHandler);

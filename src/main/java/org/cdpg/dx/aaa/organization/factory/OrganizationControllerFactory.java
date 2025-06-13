@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.cdpg.dx.aaa.credit.service.CreditService;
-import org.cdpg.dx.aaa.email.util.EmailHelper;
 import org.cdpg.dx.aaa.organization.controller.OrganizationController;
 import org.cdpg.dx.aaa.organization.dao.OrganizationDAOFactory;
 import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
@@ -23,10 +22,10 @@ public class OrganizationControllerFactory {
 
     private OrganizationControllerFactory() {}
 
-    public static OrganizationController create(OrganizationService organizationService, UserService userService, EmailHelper emailHelper, AuditingHandler auditingHandler) {
+    public static OrganizationController create(OrganizationService organizationService, UserService userService, AuditingHandler auditingHandler) {
 
 
-        OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService, userService,emailHelper);
+        OrganizationHandler  organizationHandler = new OrganizationHandler(organizationService, userService);
         return new OrganizationController(organizationHandler, auditingHandler);
     }
 

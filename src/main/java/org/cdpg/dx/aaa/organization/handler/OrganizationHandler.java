@@ -6,10 +6,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
+import jakarta.validation.constraints.Email;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.audit.util.AuditingHelper;
-import org.cdpg.dx.aaa.email.util.EmailHelper;
+import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
@@ -32,13 +33,11 @@ public class OrganizationHandler {
     private static final Logger LOGGER = LogManager.getLogger(OrganizationHandler.class);
     private final OrganizationService organizationService;
     private final UserService userService;
-    private final EmailHelper emailHelper;
 
 
-    public OrganizationHandler(OrganizationService organizationService, UserService userService,EmailHelper emailHelper) {
+    public OrganizationHandler(OrganizationService organizationService, UserService userService ) {
         this.organizationService = organizationService;
         this.userService = userService;
-        this.emailHelper = emailHelper;
     }
 
     public void updateOrganisationById(RoutingContext ctx) {
@@ -191,13 +190,9 @@ public class OrganizationHandler {
 
     OrgRequestJson.put("requested_by", user.subject());
     OrgRequestJson.put("user_name", user.principal().getString("name"));
-
-    String userName = user.principal().getString("name");
-    String emailId = user.principal().getString("email");
     String orgName = OrgRequestJson.getString("name");
 
     OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
-
 
       organizationService.getAllPendingGrantedOrganizationCreateRequests().
         compose(requests -> {
@@ -209,30 +204,6 @@ public class OrganizationHandler {
           }
             return organizationService.createOrganizationRequest(organizationCreateRequest);
         })
-      .compose(requests ->
-
-        ctx.vertx().fileSystem()
-          .readFile("src/main/resources/templates/request-create-organization.html")
-          .compose(buffer -> {
-
-            String htmlTemplate = buffer.toString(StandardCharsets.UTF_8);
-
-            String adminPortalUrl = "https://staging.catalogue.tgdex.iudx.io/";
-            htmlTemplate = htmlTemplate.replace("${adminPortalUrl}", adminPortalUrl);
-            htmlTemplate = htmlTemplate.replace("${userName}",userName);
-            htmlTemplate = htmlTemplate.replace("${emailId}",emailId);
-
-
-            String receiver = "sample_email@gmail.com";
-            String sender = "no-reply.dev@iudx.io";
-            String subject = "New Organization Creation Request";
-
-
-
-            return emailHelper.sendMail(sender, receiver, subject, htmlTemplate)
-              .map(v -> requests);
-          })
-      )
       .onSuccess(requests -> {
           AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                   RoutingContextHelper.getRequestPath(ctx), "POST", "Create Organisation Request");
