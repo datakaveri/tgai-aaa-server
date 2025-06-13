@@ -2676,6 +2676,44 @@ paths:
       security:
         - authorization: [ ]
 
+  '/auth/v1/organization/user/provider':
+    post:
+      operationId: post-auth-v1-organization-user-provider
+      summary: Grant provider role to user
+      requestBody:
+        description: This endpoint allows organization admin grants provider role to user in its organization.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: UUID of the user to be granted provider role
+                  example: '436cb796-5826-458b-a914-a54721f70997'
+                status:
+                  type: string
+                  description: Status of the provider role request
+                  example: 'granted'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'Provider role granted successfully'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Keycloak Issued Token
+          required: true
+      security:
+        - authorization: [ ]
+
 components:
   securitySchemes:
     authorization:

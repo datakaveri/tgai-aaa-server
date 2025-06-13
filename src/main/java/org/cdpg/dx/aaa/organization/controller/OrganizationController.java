@@ -118,6 +118,11 @@ public class OrganizationController implements ApiController {
                 .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
                 .handler(organizationHandler::updateProviderRequest);
 
+      routerBuilder
+        .operation("post-auth-v1-organization-user-provider")
+        .handler(AuthorizationHandler.forRoles(DxRole.ORG_ADMIN))
+        .handler(organizationHandler::createProviderRole);
+
         routerBuilder
                 .operation("get-auth-v1-organisations-id")
                 .handler(auditingHandler::handleApiAudit)

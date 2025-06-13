@@ -462,4 +462,89 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return merged;
                 });
     }
+
+  public Future<Boolean> createProviderRole(ProviderRoleRequest providerRoleRequest) {
+
+    // Checks:
+    // 1. User id is present in organisation of org admin
+    // 2. If user Id is present in provider request and role status is pending, then change the status to granted
+
+    UUID orgId = providerRoleRequest.orgId();
+    UUID userId = providerRoleRequest.userId();
+    String status = providerRoleRequest.status();
+
+    Map<String, Object> filterMap = Map.of(
+      Constants.ORGANIZATION_ID, orgId.toString(),
+      Constants.USER_ID, userId.toString()
+    );
+
+    return orgUserDAO.getAllWithFilters(filterMap).compose(ar -> {
+      if (ar.isEmpty()) {
+        return Future.failedFuture(new DxNotFoundException("User not found in organization"));
+      } else {
+        Map<String, Object> filterMapProviderRole = Map.of(
+          Constants.ORGANIZATION_ID, orgId.toString(),
+          Constants.USER_ID, userId.toString()
+        );
+
+        return providerRequestDAO.getAllWithFilters(filterMapProviderRole)
+          .compose(providerRoleRequests -> {
+            if (providerRoleRequests.isEmpty()) {
+              return providerRequestDAO.create(providerRoleRequest)
+                .compose(createdRequest -> keycloakUserService.addRoleToUser(userId, DxRole.PROVIDER)
+                  .compose(success -> {
+                    if (!success) {
+                      return Future.failedFuture("Failed to assign PROVIDER role in Keycloak");
+                    }
+                    return Future.succeededFuture(true);
+                  }))
+                .recover(err -> {
+                  BaseDxException dxEx = BaseDxException.from(err);
+                  if (dxEx instanceof NoRowFoundException) {
+                    return Future.failedFuture(
+                      new DxNotFoundException("No User found in Keycloak", dxEx)
+                    );
+                  }
+                  return Future.failedFuture(dxEx);
+                });
+            } else {
+              ProviderRoleRequest existingRequest = providerRoleRequests.get(0);
+              if (!Status.PENDING.getStatus().equals(existingRequest.status())) {
+                return Future.failedFuture(new DxConflictException("Provider role request is not in PENDING status"));
+              }
+
+              Map<String, Object> updateDataMap = Map.of(
+                Constants.STATUS, status
+              );
+
+              Map<String, Object> conditionMap = Map.of(
+                Constants.ORG_CREATE_ID, existingRequest.id().toString()
+              );
+              return providerRequestDAO.update(conditionMap, updateDataMap)
+                .compose(updated -> {
+                  if (!updated) {
+                    return Future.failedFuture(new DxNotFoundException("Provider role request not found"));
+                  }
+                  return keycloakUserService.addRoleToUser(userId, DxRole.PROVIDER)
+                    .compose(success -> {
+                      if (!success) {
+                        return Future.failedFuture("Failed to assign PROVIDER role in Keycloak");
+                      }
+                      return Future.succeededFuture(true);
+                    });
+                });
+            }
+          }).recover(err -> {
+            BaseDxException dxEx = BaseDxException.from(err);
+            if (dxEx instanceof NoRowFoundException) {
+              return Future.failedFuture(
+                new DxNotFoundException("No user found in organization", dxEx)
+              );
+            }
+            return Future.failedFuture(dxEx);
+          });
+      }
+    });
+  }
+
 }
