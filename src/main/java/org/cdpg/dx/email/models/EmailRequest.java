@@ -1,15 +1,16 @@
 package org.cdpg.dx.email.models;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.email.models.EmailRequestConverter;
 
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen
 public class EmailRequest {
-  private String from;
-  private String to;
-  private String subject;
-  private String htmlBody;
+  private String from; //config
+  private String to; //provider email
+  private String subject; // Access Requested for the asset
+  private String htmlBody; // consumer details (from token), asset details
 
   public EmailRequest() {
     // default constructor
