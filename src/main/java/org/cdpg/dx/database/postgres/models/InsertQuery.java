@@ -4,9 +4,12 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @DataObject(generateConverter = true)
 public class InsertQuery implements Query {
+    private static final Logger LOGGER = LogManager.getLogger(InsertQuery.class);
     private String table;
     private List<String> columns;
     private List<Object> values;
@@ -60,7 +63,7 @@ public class InsertQuery implements Query {
         String finalQuery = "INSERT INTO " + table +
             " (" + String.join(", ", columns) + ") " +
             "VALUES (" + placeholders + ") RETURNING *"; // ADD THIS
-        System.out.println("Final Query: " + finalQuery);
+        LOGGER.info("Final Query: " + finalQuery);
         return finalQuery;
     }
 

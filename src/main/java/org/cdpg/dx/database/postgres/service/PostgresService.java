@@ -20,5 +20,5 @@ public interface PostgresService {
 
     Future<QueryResult> delete(DeleteQuery query);
 
-    Future<QueryResult> select(SelectQuery query);
+    Future<QueryResult> select(SelectQuery query, boolean isCountQueryEnabled);
 }

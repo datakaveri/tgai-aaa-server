@@ -11,6 +11,7 @@ public class DxPgExceptionMapper {
         case "42703" -> new InvalidColumnNameException(pgEx.getMessage());
         case "42P01" -> new DxPgException("Undefined table", pgEx);
         case "42P02" -> new DxPgException("Undefined parameter", pgEx);
+        case "42601" -> new DxPgException("Syntax error", pgEx);
 
         // Class 23 — Integrity Constraint Violation
         case "23505" -> new UniqueConstraintViolationException(pgEx.getMessage());

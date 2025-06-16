@@ -8,6 +8,8 @@ import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.util.Constants;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.*;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 import org.cdpg.dx.keyclock.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +167,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public Future<List<Organization>> getOrganizations() {
         return orgDAO.getAll();
+    }
+
+    @Override
+    public Future<PaginatedResult<Organization>> getOrganizations(PaginatedRequest paginatedRequest) {
+        return orgDAO.getAll(paginatedRequest);
     }
 
     @Override
