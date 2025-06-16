@@ -2,16 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Request for Organization Joining</title>
+  <title>Organization Join Request Notification</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        color: #333333;
+        line-height: 1.6;
+    }
+    .container {
+        width: 80%;
+        margin: auto;
+    }
+    .header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .footer {
+        margin-top: 30px;
+        font-size: 14px;
+        color: #777777;
+    }
+    a {
+        color: #1a73e8;
+        text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
-  <div class="header">Organization Join Request</div>
-  <p>A user has submitted a request to join a new organization.</p>
-  <div class="footer">
-    Please log in to the admin portal to review and take appropriate action.<br><br>
-    <a href="${adminPortalUrl}" target="_blank">Go to Admin Portal</a>
-  </div>
+  <p class="header">Organization Join Request Notification</p>
+
+  <p>Hello ${ADMIN_FIRST_NAME} ${ADMIN_LAST_NAME},</p>
+
+  <p>
+    <strong>${USER_FIRST_NAME}</strong> (Email: <a href="mailto:${USER_EMAIL_ID}">${USER_EMAIL_ID}</a>) has requested to join your organization.
+  </p>
+
+  <p>
+    <strong>Employee ID:</strong> ${EMPLOYEE_ID}<br/>
+    <strong>Job Title:</strong> ${JOB_TITLE}
+  </p>
+
+  <p>
+    To review and approve this request, please visit:<br/>
+    <a href="${ADMIN_PORTAL_URL}">${ADMIN_PORTAL_URL}</a>
+  </p>
+
+  <p class="footer">
+    Regards,<br/>
+    ${SENDER_NAME} Team
+  </p>
 </div>
 </body>
 </html>
