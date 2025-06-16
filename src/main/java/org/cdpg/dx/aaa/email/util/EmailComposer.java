@@ -6,6 +6,9 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.mail.MailMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.credit.models.ComputeRole;
+import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
+import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 import org.cdpg.dx.aaa.organization.models.OrganizationUser;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
@@ -33,13 +36,6 @@ public class EmailComposer {
     this.organizationService = organizationService;
     this.userService = userService;
   }
-
-//  //TODO: call keycloak to get provider email id, first name by using provider ID
-//  // TODO 2 : create email body by extracting html template from resources folder
-//
-//  // TODO 3: create email message object with subject, body, from, to, cc, bcc etc.
-//  // TODO 4: call email service to send email
-
   /**
    * Loads an HTML email template from the resources folder.
    *
@@ -55,52 +51,76 @@ public class EmailComposer {
     }
   }
 
+  // TODO : send organization creation request model info
+  public Future<Void> sendEmailForCreatingOrg(OrganizationCreateRequest organizationCreateRequest, User user) {
 
-  public Future<Void> sendEmailForCreating(User user) {
-
-    String userName = user.principal().getString("username");
+    String orgName = organizationCreateRequest.name();
+    String orgSector = organizationCreateRequest.orgSector();
+    String orgEntityType = organizationCreateRequest.entityType();
+    String orgWebsite = organizationCreateRequest.websiteLink();
+    String userName = organizationCreateRequest.userName();
     String emailId = user.principal().getString("email");
 
-    String senderEmail = config.getString("emailSender"); // no-org-reply
-    String emailTemplate = loadTemplate("templates/request-create-organization.html");
-    String TGDxUrl = config.getString("TgdexUrl");
-
-    String cosAdminEmailId = config.getString("cosAdminEmailId");
+    String senderEmail = config.getString("emailSender"); // e.g., no-reply@domain.com
+    String emailTemplate = loadTemplate("templates/request-create-organization.html"); // Path to HTML template
+    String adminPortalUrl = config.getString("TGDxUrl"); // Admin portal URL
+    String cosAdminEmailId = config.getString("cosAdminEmailId"); // Email of COS admin
 
     Map<String, String> emailDetails = Map.of(
-      "userName", userName,
-      "emailId", emailId,
-      "adminPortalUrl", TGDxUrl
+      "USER_FIRST_NAME", userName,
+      "USER_EMAIL_ID", emailId,
+      "ORGANIZATION_NAME", orgName,
+      "ORGANIZATION_DESCRIPTION", orgSector + " | " + orgEntityType + " | " + orgWebsite,
+      "ADMIN_FIRST_NAME", "Admin",
+      "ADMIN_LAST_NAME", "",
+      "ADMIN_PORTAL_URL", adminPortalUrl,
+      "SENDER_NAME", "TGDx"
     );
 
     String htmlBody = getHtmlBody(emailTemplate, emailDetails);
-    MailMessage mailMessage = createMailMessage(senderEmail, cosAdminEmailId, htmlBody,"Create Organization Request");
+
+    MailMessage mailMessage = createMailMessage(
+      senderEmail,
+      cosAdminEmailId,
+      htmlBody,
+      "Organization Creation Request"
+    );
+
     return emailService.sendEmail(mailMessage).onComplete(res -> {
       if (res.succeeded()) {
-        LOGGER.info("Email sent successfully to {}", cosAdminEmailId);
+        LOGGER.info("Organization creation request email sent to {}", cosAdminEmailId);
       } else {
-        LOGGER.error("Failed to send email: {}", res.cause().getMessage());
+        LOGGER.error("Failed to send organization creation email: {}", res.cause().getMessage());
       }
     }).recover(failure -> {
-      LOGGER.error("Failed to retrieve provider user details for user {}: {}", userName, failure.getMessage());
+      LOGGER.error("Failed to handle email for organization creation: {}", failure.getMessage());
       return Future.failedFuture(failure);
     });
-
   }
 
-  public Future<Void> sendEmailForJoining(User user,UUID orgId) {
 
-    String userName = user.principal().getString("username");
+  public Future<Void> sendEmailForJoiningOrg(OrganizationJoinRequest organizationJoinRequest,User user) {
+
+
+    UUID orgId = organizationJoinRequest.organizationId();
+    String userName = organizationJoinRequest.userName();
+    String employeeId = organizationJoinRequest.empId();
+    String jobTitle = organizationJoinRequest.jobTitle();
     String emailId = user.principal().getString("email");
 
     String senderEmail = config.getString("emailSender"); // no-org-reply
     String emailTemplate = loadTemplate("templates/request-join-organization.html");
-    String TGDxUrl = config.getString("TgdexUrl");
+    String adminPortalUrl = config.getString("TgdexUrl");
 
     Map<String, String> emailDetails = Map.of(
-      "userName", userName,
-      "emailId", emailId,
-      "adminPortalUrl", TGDxUrl
+      "ADMIN_FIRST_NAME", "Admin",
+      "ADMIN_LAST_NAME", "",
+      "USER_FIRST_NAME", userName,
+      "USER_EMAIL_ID", emailId,
+      "EMPLOYEE_ID", employeeId,
+      "JOB_TITLE", jobTitle,
+      "ADMIN_PORTAL_URL", adminPortalUrl,
+      "SENDER_NAME", "TGDx"
     );
 
     return getOrgAdminEmail(orgId).compose(orgAdminEmail -> {
@@ -119,6 +139,51 @@ public class EmailComposer {
 
     });
   }
+
+  public Future<Void> sendEmailForComputeRole(ComputeRole computeRole,User user) {
+
+
+    UUID userId = computeRole.userId();
+    String userName = computeRole.userName();
+    String emailId = user.principal().getString("email");
+
+    String senderEmail = config.getString("emailSender"); // no-org-reply
+    String emailTemplate = loadTemplate("templates/request-compute-role.html");
+    String adminPortalUrl = config.getString("TgdexUrl");
+    String cosAdminEmailId = config.getString("cosAdminEmailId"); // Email of COS admin
+
+
+    Map<String, String> emailDetails = Map.of(
+      "ADMIN_FIRST_NAME", "Admin",
+      "ADMIN_LAST_NAME", "",
+      "USER_FIRST_NAME", userName,
+      "USER_EMAIL_ID", emailId,
+      "USER_ID", userId.toString(),
+      "ADMIN_PORTAL_URL", adminPortalUrl,
+      "SENDER_NAME", "TGDx"
+    );
+
+    String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+    MailMessage mailMessage = createMailMessage(
+      senderEmail,
+      cosAdminEmailId,
+      htmlBody,
+      "Organization Creation Request"
+    );
+
+    return emailService.sendEmail(mailMessage).onComplete(res -> {
+          if (res.succeeded()) {
+            LOGGER.info("Organization creation request email sent to {}", cosAdminEmailId);
+          } else {
+            LOGGER.error("Failed to send organization creation email: {}", res.cause().getMessage());
+          }
+        }).recover(failure -> {
+          LOGGER.error("Failed to handle email for organization creation: {}", failure.getMessage());
+          return Future.failedFuture(failure);
+        });
+      }
+
   /**
    * Replaces placeholders in the HTML template with actual values.
    *
