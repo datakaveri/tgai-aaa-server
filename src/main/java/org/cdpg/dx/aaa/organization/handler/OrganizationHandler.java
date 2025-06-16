@@ -18,14 +18,20 @@ import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.common.request.PaginationRequestBuilder;
+import org.cdpg.dx.common.request.PaginationRequestConfig;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import static org.cdpg.dx.aaa.organization.util.Constants.API_TO_DB_MAP;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
 
 
 public class OrganizationHandler {
@@ -74,12 +80,29 @@ public class OrganizationHandler {
 
     public void listAllOrganisations(RoutingContext ctx) {
 
-        organizationService.getOrganizations()
+        Set<String> allowedFilters = Set.of("id", "orgName", "entityType", "orgSector");
+        Set<String> allowedTimeFields = Set.of("created_at");
+        Set<String> allowedSortFields = Set.of("createdAt", "orgName", "entityType", "orgSector");
+
+        PaginationRequestConfig config =
+                new PaginationRequestConfig.Builder()
+                        .ctx(ctx)
+                        .allowedFilterKeys(allowedFilters)
+                        .apiToDbMap(API_TO_DB_MAP)
+                        .allowedTimeFields(allowedTimeFields)
+                        .defaultTimeField("created_at")
+                        .defaultSortBy("created_at")
+                        .defaultOrder(DEFAULT_SORTIMG_ORDER)
+                        .allowedSortFields(allowedSortFields)
+                        .build();
+        PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
+
+        organizationService.getOrganizations(request)
                 .onSuccess(orgs -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "GET", "List All Organisations");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, orgs);
+                    ResponseBuilder.sendSuccess(ctx, orgs.data(), orgs.paginationInfo());
                 })
                 .onFailure(ctx::fail);
 

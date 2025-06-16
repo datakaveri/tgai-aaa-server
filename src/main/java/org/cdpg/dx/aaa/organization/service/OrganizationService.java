@@ -5,6 +5,8 @@ import io.vertx.core.Future;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.models.Role;
 import org.cdpg.dx.aaa.organization.models.Status;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +44,8 @@ public interface OrganizationService {
   Future<Boolean> deleteOrganization(UUID orgId);
 
   Future<List<Organization>> getOrganizations();
+  Future<PaginatedResult<Organization>> getOrganizations(PaginatedRequest paginatedRequest);
+
 
   Future<Organization> getOrganizationById(UUID orgId);
 
