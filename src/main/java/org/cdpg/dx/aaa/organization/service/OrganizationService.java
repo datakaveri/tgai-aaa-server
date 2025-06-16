@@ -71,6 +71,9 @@ public interface OrganizationService {
   // to check - info about the users
  // Future<OrganizationUser> getOrganizationUserById(UUID userId);
 
+  Future<List<OrganizationUser>> getOrganisationAdminId(UUID orgId);
+
+
   //############################Provider Request#############################
 
   Future<ProviderRoleRequest> createProviderRequest(ProviderRoleRequest providerRoleRequest);
