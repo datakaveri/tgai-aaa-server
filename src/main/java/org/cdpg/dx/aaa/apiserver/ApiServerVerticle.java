@@ -44,6 +44,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     private int port;
     private HttpServer server;
     private Router router;
+    public static List<String> allowedOrigins;
 
     public static String errorResponse(HttpStatusCode code) {
         return new JsonObject()
@@ -56,6 +57,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     @Override
     public void start() {
         port = config().getInteger("httpPort", 8443);
+        System.out.println(config());
+        allowedOrigins = config().getJsonArray("corsAllowedOrigin").getList();
+
         // Register the module for default Vert.x ObjectMapper
         ObjectMapper mapper = DatabindCodec.mapper();
         mapper.registerModule(new JavaTimeModule());
@@ -156,7 +160,13 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
     private void configureCorsHandler(Router router) {
-        router.route().handler(CorsHandler.create("*")
+        CorsHandler corsHandler = CorsHandler.create();
+
+        for (String origin : allowedOrigins) {
+            corsHandler.addOrigin(origin);
+        }
+
+        corsHandler
                 .allowedMethod(HttpMethod.GET)
                 .allowedMethod(HttpMethod.POST)
                 .allowedMethod(HttpMethod.OPTIONS)
@@ -164,8 +174,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .allowedMethod(HttpMethod.DELETE)
                 .allowedHeader("Content-Type")
                 .allowedHeader("Authorization")
-                .allowCredentials(true)
-        );
+                .allowCredentials(true);
+
+        router.route().handler(corsHandler);
     }
 
     private void putCommonResponseHeaders() {
