@@ -1,8 +1,11 @@
 package org.cdpg.dx.aaa.organization.config;
 
+import org.cdpg.dx.aaa.organization.models.Role;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public final class Constants {
 
@@ -91,10 +94,28 @@ public final class Constants {
 
   public static final String ORG_USER_TABLE = "organization_users";
 
+  //organization user fields
   public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_ORG = Map.of(
           "orgName", ORG_NAME,
           "entityType", ENTITY_TYPE,
           "orgSector", ORG_SECTOR
+  );
+
+  public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST = Map.of(
+    "status", STATUS
+  );
+
+  public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_ORG_USERS = Map.of(
+    "organizationId", ORGANIZATION_ID,
+    "userId", USER_ID,
+    "userName", USER_NAME,
+    "role", ROLE
+  );
+  public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST = Map.of(
+    "orgName", ORG_NAME,
+    "entityType", ENTITY_TYPE,
+    "orgSector", ORG_SECTOR,
+    "status", STATUS
   );
 
   public static final Set<String> ALLOWED_SORT_FEILDS_ORG = Set.of("createdAt", "orgName", "entityType", "orgSector");

@@ -33,7 +33,7 @@ public interface OrganizationService {
 
   Future<OrganizationJoinRequest> joinOrganizationRequest(OrganizationJoinRequest organizationJoinRequest);
 
-  Future<List<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(UUID orgId);
+  Future<PaginatedResult<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(PaginatedRequest paginatedRequest);
 
   Future<Boolean> updateOrganizationJoinRequestStatus(UUID requestId, Status Status);
 
@@ -43,6 +43,7 @@ public interface OrganizationService {
   Future<Boolean> deleteOrganization(UUID orgId);
 
   Future<List<Organization>> getOrganizations();
+
   Future<PaginatedResult<Organization>> getOrganizations(PaginatedRequest paginatedRequest);
 
 
@@ -59,7 +60,7 @@ public interface OrganizationService {
   Future<Boolean> deleteOrganizationUser(UUID orgId,UUID userId);
 
 
-  Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId);
+  Future<PaginatedResult<OrganizationUser>> getOrganizationUsers(PaginatedRequest paginatedRequest); //UUID orgId
 
   Future<Boolean> updateUserRole(UUID orgId, UUID userId, Role Role);
 
