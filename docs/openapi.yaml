@@ -26,6 +26,31 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 41290efb-057b-4296-872c-a764f6ff5615
+                        requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        name: Quant Sandbox
+                        logoPath: /logos/ai.png
+                        entityType: Private
+                        orgSector: Technology
+                        websiteLink: 'https://ai.example.com'
+                        address: '123 Quant Labs, Bangalore, India'
+                        certificatePath: /documents/certificate.pdf
+                        pancardPath: /documents/pancard.pdf
+                        relevantDocPath: null
+                        status: pending
+                        userName: test test
+                        empId: EMP12345
+                        jobTitle: Manager
+                        orgManagerphoneNo: +91-9876543210
+                        orgDocuments: null
+                        createdAt: '2025-06-03T16:01:59.532782'
+                        updatedAt: '2025-06-03T16:01:59.532782'
+                        tableName: organization_create_requests
                 properties:
                   type:
                     type: string
@@ -76,31 +101,35 @@ paths:
                           type: string
                         tableName:
                           type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - id: 41290efb-057b-4296-872c-a764f6ff5615
-                        requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
-                        name: Quant Sandbox
-                        logoPath: /logos/ai.png
-                        entityType: Private
-                        orgSector: Technology
-                        websiteLink: 'https://ai.example.com'
-                        address: '123 Quant Labs, Bangalore, India'
-                        certificatePath: /documents/certificate.pdf
-                        pancardPath: /documents/pancard.pdf
-                        relevantDocPath: null
-                        status: pending
-                        userName: test test
-                        empId: EMP12345
-                        jobTitle: Manager
-                        orgManagerphoneNo: +91-9876543210
-                        orgDocuments: null
-                        createdAt: '2025-06-03T16:01:59.532782'
-                        updatedAt: '2025-06-03T16:01:59.532782'
-                        tableName: organization_create_requests
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: 68gz95wyt495q
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: exk9ai4b674hx
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: 3we0ltgnr3bp3
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: yv4wghr2odoij
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: ucldaqig5rrqi
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: rv11tnh70dk2d
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: 94av5w5dqsuu7
               examples:
                 Example 1:
                   value:
@@ -127,6 +156,13 @@ paths:
                         createdAt: '2025-06-03T16:01:59.532782'
                         updatedAt: '2025-06-03T16:01:59.532782'
                         tableName: organization_create_requests
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
         '401':
           description: Unauthorized
           content:
@@ -560,6 +596,21 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 5fc228bb-9a20-4052-968e-427c733d2264
+                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: ac2f3390-c7b0-4d4e-bb72-0bb8d9170309
+                        userName: coder coder
+                        status: pending
+                        jobTitle: Employee
+                        empId: EMP8790
+                        requestedAt: '2025-06-03T16:35:48.404509'
+                        processedAt: '2025-06-03T16:35:48.404509'
+                        tableName: organization_join_requests
                 properties:
                   type:
                     type: string
@@ -590,21 +641,35 @@ paths:
                           type: string
                         tableName:
                           type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - id: 5fc228bb-9a20-4052-968e-427c733d2264
-                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
-                        userId: ac2f3390-c7b0-4d4e-bb72-0bb8d9170309
-                        userName: coder coder
-                        status: pending
-                        jobTitle: Employee
-                        empId: EMP8790
-                        requestedAt: '2025-06-03T16:35:48.404509'
-                        processedAt: '2025-06-03T16:35:48.404509'
-                        tableName: organization_join_requests
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: g611fejvw6i5c
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: m1tr4l1qlfhyi
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: 5phhnqq4a33vk
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: zax7u0jx6y8vi
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: w6u2rx121k799
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: bkdi5mfhznyeg
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: 0mi5or7vq74qf
               examples:
                 Example 1:
                   value:
@@ -630,7 +695,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
     post:
       summary: Create Request to Join an Organisation
       tags:
@@ -797,7 +862,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         required: true
         content:
@@ -890,6 +955,25 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: e87246e2-5da5-40b0-973c-690d2f48f879
+                        orgName: Quant Sandbox
+                        orgLogo: /logos/ai.png
+                        entityType: Private
+                        orgSector: Technology
+                        websiteLink: 'https://ai.example.com'
+                        address: '123 Quant Labs, Bangalore, India'
+                        certificatePath: /documents/certificate.pdf
+                        pancardPath: /documents/pancard.pdf
+                        relevantDocPath: null
+                        orgDocuments: null
+                        createdAt: '2025-06-03T16:28:24.205541'
+                        updatedAt: '2025-06-03T16:28:24.205541'
+                        tableName: organizations
                 properties:
                   type:
                     type: string
@@ -928,25 +1012,35 @@ paths:
                           type: string
                         tableName:
                           type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - id: e87246e2-5da5-40b0-973c-690d2f48f879
-                        orgName: Quant Sandbox
-                        orgLogo: /logos/ai.png
-                        entityType: Private
-                        orgSector: Technology
-                        websiteLink: 'https://ai.example.com'
-                        address: '123 Quant Labs, Bangalore, India'
-                        certificatePath: /documents/certificate.pdf
-                        pancardPath: /documents/pancard.pdf
-                        relevantDocPath: null
-                        orgDocuments: null
-                        createdAt: '2025-06-03T16:28:24.205541'
-                        updatedAt: '2025-06-03T16:28:24.205541'
-                        tableName: organizations
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: ovssaqwsc8tf6
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: xb7s3m8lzcetn
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: 3jjx01zggkwbr
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: q0uuo9pfi5bc8
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: rv92iqo7um14v
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: iln40dfs71bnk
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: rn3a509g73wgf
               examples:
                 Example 1:
                   value:
@@ -967,6 +1061,13 @@ paths:
                         createdAt: '2025-06-03T16:28:24.205541'
                         updatedAt: '2025-06-03T16:28:24.205541'
                         tableName: organizations
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
         '401':
           description: Unauthorized
           content:
@@ -1026,7 +1127,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   '/auth/v1/organisations/{id}':
     parameters:
       - schema:
@@ -1051,7 +1152,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
     put:
       summary: Update Organisation by ID
       tags:
@@ -1147,7 +1248,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -1251,16 +1352,16 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   '/auth/v1/organisations/{id}/users':
     parameters:
-    - name: id
-      in: path
-      required: true
-      description: UUID of the organisation
-      schema:
-        type: string
-        format: uuid
+      - name: id
+        in: path
+        required: true
+        description: UUID of the organisation
+        schema:
+          type: string
+          format: uuid
     get:
       summary: List organisation Users
       tags:
@@ -1380,7 +1481,7 @@ paths:
         - schema:
             type: string
           in: query
-          name: 'id'
+          name: id
           description: UUID of organizations
         - schema:
             type: string
@@ -1389,7 +1490,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
   '/auth/v1/organisations/{id}/users/{user_id}':
     parameters:
       - name: id
@@ -1454,7 +1555,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
     put:
       summary: Update Organization User Role
       tags:
@@ -1518,7 +1619,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
     get:
       summary: (Org Admin) Get User Information
       tags:
@@ -1535,7 +1636,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   /auth/v1/credit/request:
     get:
       summary: Get all credit requests by status
@@ -1610,7 +1711,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
     post:
       summary: Create Credit Request
       tags:
@@ -1682,7 +1783,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -1777,7 +1878,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -1883,7 +1984,7 @@ paths:
           name: Authorization
           description: Keycloak issued token
       security:
-          - authorization: [ ]
+        - authorization: []
   /auth/v1/compute/requests:
     get:
       summary: Get All Pending ComputeRole Requests
@@ -1958,7 +2059,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
     post:
       summary: Create Compute Role Request
       tags:
@@ -2030,7 +2131,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   '/auth/v1/compute/requests/{id}':
     parameters:
       - name: id
@@ -2083,7 +2184,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -2113,7 +2214,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -2146,7 +2247,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
   /auth/v1/organization/user/provider_role/requests:
     get:
       summary: Get All pending provider role requests
@@ -2164,7 +2265,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
     post:
       summary: Create a Provider Role Request
       tags:
@@ -2188,7 +2289,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-          - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -2224,7 +2325,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         content:
           application/json:
@@ -2392,7 +2493,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   '/auth/v1/admin/user/{id}':
     parameters:
       - schema:
@@ -2494,7 +2595,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
+        - authorization: []
   /auth/v1/admin/user:
     get:
       summary: (COS Admin) Get All Users Info
@@ -2674,9 +2775,8 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
-
-  '/auth/v1/organization/user/provider':
+        - authorization: []
+  /auth/v1/organization/user/provider:
     post:
       operationId: post-auth-v1-organization-user-provider
       summary: Grant provider role to user
@@ -2691,11 +2791,11 @@ paths:
                 user_id:
                   type: string
                   description: UUID of the user to be granted provider role
-                  example: '436cb796-5826-458b-a914-a54721f70997'
+                  example: 436cb796-5826-458b-a914-a54721f70997
                 status:
                   type: string
                   description: Status of the provider role request
-                  example: 'granted'
+                  example: granted
       responses:
         '200':
           description: OK
@@ -2703,7 +2803,7 @@ paths:
             application/json:
               schema:
                 type: string
-                example: 'Provider role granted successfully'
+                example: Provider role granted successfully
       parameters:
         - schema:
             type: string
@@ -2712,8 +2812,7 @@ paths:
           description: Keycloak Issued Token
           required: true
       security:
-        - authorization: [ ]
-
+        - authorization: []
 components:
   securitySchemes:
     authorization:
