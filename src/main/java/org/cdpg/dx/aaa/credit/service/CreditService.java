@@ -2,6 +2,9 @@ package org.cdpg.dx.aaa.credit.service;
 
 import io.vertx.core.Future;
 import org.cdpg.dx.aaa.credit.models.*;
+import org.cdpg.dx.aaa.organization.models.Organization;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.database.postgres.models.PaginatedResult;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +29,8 @@ public interface CreditService {
   Future<ComputeRole> createComputeRoleRequest(ComputeRole computeRole);
 
   Future<List<ComputeRole>> getAllComputeRequests();
+
+  Future<PaginatedResult<ComputeRole>> getAllComputeRequests(PaginatedRequest paginatedRequest);
 
   Future<Boolean> hasPendingComputeRequest(UUID userId);
 
