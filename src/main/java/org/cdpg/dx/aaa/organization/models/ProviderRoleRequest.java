@@ -1,7 +1,7 @@
 package org.cdpg.dx.aaa.organization.models;
 
 import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.aaa.organization.config.Constants;
 import org.cdpg.dx.common.exception.DxValidationException;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 

@@ -1,4 +1,4 @@
-package org.cdpg.dx.keyclock.service;
+package org.cdpg.dx.keycloak.service;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -6,10 +6,10 @@ import org.apache.logging.log4j.LogManager;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.KeycloakServiceException;
 import org.cdpg.dx.common.util.BlockingExecutionUtil;
-import org.cdpg.dx.keyclock.client.KeycloakClientProvider;
-import org.cdpg.dx.keyclock.config.KeycloakConstants;
+import org.cdpg.dx.keycloak.client.KeycloakClientProvider;
+import org.cdpg.dx.keycloak.config.KeycloakConstants;
 import org.cdpg.dx.common.model.DxUser;
-import org.cdpg.dx.keyclock.util.DxUserMapper;
+import org.cdpg.dx.keycloak.util.DxUserMapper;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;

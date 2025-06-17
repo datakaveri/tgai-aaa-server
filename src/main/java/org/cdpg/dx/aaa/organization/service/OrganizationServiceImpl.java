@@ -1,16 +1,14 @@
 package org.cdpg.dx.aaa.organization.service;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.organization.models.*;
-import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.aaa.organization.config.Constants;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.*;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.database.postgres.models.PaginatedResult;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +64,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Future<List<OrganizationCreateRequest>> getAllOrganizationCreateRequests() {
-        return createRequestDAO.getAll();
+    public
+    Future <PaginatedResult<OrganizationCreateRequest>> getAllOrganizationCreateRequests(PaginatedRequest request) {
+        return createRequestDAO.getAllWithFilters(request);
     }
 
     @Override
@@ -86,7 +85,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return createRequestDAO.update(conditionMap, updateDataMap).
                 compose(updated -> {
-                    if (!updated) return Future.failedFuture("Unexpected Error");
                     if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return createOrganizationFromRequest(requestId);
                     }
@@ -209,7 +207,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return joinRequestDAO.update(conditionMap, updateDataMap)
                 .compose(approved -> {
-                    if (!approved) return Future.succeededFuture(false);
                     if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return addUserToOrganizationFromRequest(requestId);
                     }
@@ -295,8 +292,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Constants.ROLE, role.getRoleName()
         );
 
-        return orgUserDAO.update(conditionMap, updateDataMap)
-                .recover(err -> {
+        return orgUserDAO.update(conditionMap, updateDataMap).map(
+                  true
+                ).recover(err -> {
                     BaseDxException dxEx = BaseDxException.from(err);
                     if (dxEx instanceof NoRowFoundException) {
                         return Future.failedFuture(
@@ -353,10 +351,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return providerRequestDAO.update(conditionMap, updateDataMap)
                 .compose(updated -> {
-                    if (!updated) {
-                        return Future.failedFuture(new DxNotFoundException("Request not found"));
-                    }
-                    //Update in KC
                     if (Status.GRANTED.getStatus().equals(status.getStatus())) {
                         return providerRequestDAO.get(requestId)
                                 .compose(providerRequest -> {
@@ -529,9 +523,6 @@ public class OrganizationServiceImpl implements OrganizationService {
               );
               return providerRequestDAO.update(conditionMap, updateDataMap)
                 .compose(updated -> {
-                  if (!updated) {
-                    return Future.failedFuture(new DxNotFoundException("Provider role request not found"));
-                  }
                   return keycloakUserService.addRoleToUser(userId, DxRole.PROVIDER)
                     .compose(success -> {
                       if (!success) {
@@ -545,7 +536,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             BaseDxException dxEx = BaseDxException.from(err);
             if (dxEx instanceof NoRowFoundException) {
               return Future.failedFuture(
-                new DxNotFoundException("No user found in organization", dxEx)
+                new DxNotFoundException("No Request or  user found in organization", dxEx)
               );
             }
             return Future.failedFuture(dxEx);

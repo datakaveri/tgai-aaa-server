@@ -1,14 +1,10 @@
-package org.cdpg.dx.aaa.organization.util;
-import org.bouncycastle.pqc.crypto.newhope.NHSecretKeyProcessor;
+package org.cdpg.dx.aaa.organization.config;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Set;
 
 public final class Constants {
-
-
 
   private Constants()
   {
@@ -22,9 +18,6 @@ public final class Constants {
   public static final String UPDATED_AT = "updated_at";
 
 
-  public static List<String> getAllPolicyFields() {
-    return ALL_ORG_FIELDS;
-  }
 
   public static final String ORG_JOIN_REQUEST_TABLE = "organization_join_requests";
 
@@ -98,20 +91,13 @@ public final class Constants {
 
   public static final String ORG_USER_TABLE = "organization_users";
 
-  public static final Map<String, String> API_TO_DB_MAP = Map.ofEntries(
-          Map.entry("id", "id"),
-          Map.entry("orgName", "name"),
-          Map.entry("orgLogo", "logo_path"),
-          Map.entry("entityType", "entity_type"),
-          Map.entry("orgSector", "org_sector"),
-          Map.entry("websiteLink", "website_link"),
-          Map.entry("address", "address"),
-          Map.entry("certificatePath", "certificate_path"),
-          Map.entry("pancardPath", "pancard_path"),
-          Map.entry("relevantDocPath", "relevant_doc_path"),
-          Map.entry("createdAt", "created_at"),
-          Map.entry("updatedAt", "updated_at")
+  public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_ORG = Map.of(
+          "orgName", ORG_NAME,
+          "entityType", ENTITY_TYPE,
+          "orgSector", ORG_SECTOR
   );
+
+  public static final Set<String> ALLOWED_SORT_FEILDS_ORG = Set.of("createdAt", "orgName", "entityType", "orgSector");
 
 
 

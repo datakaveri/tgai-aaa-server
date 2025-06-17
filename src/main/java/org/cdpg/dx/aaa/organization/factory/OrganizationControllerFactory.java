@@ -1,10 +1,8 @@
 package org.cdpg.dx.aaa.organization.factory;
 
-import jakarta.validation.constraints.Email;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.controller.OrganizationController;
 import org.cdpg.dx.aaa.organization.dao.OrganizationDAOFactory;
 import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
@@ -13,7 +11,7 @@ import org.cdpg.dx.aaa.organization.service.OrganizationServiceImpl;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.handler.AuditingHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 
 public class OrganizationControllerFactory {

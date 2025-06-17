@@ -1,4 +1,4 @@
-package org.cdpg.dx.keyclock.config;
+package org.cdpg.dx.keycloak.config;
 
 // 1. Constants
 public class KeycloakConstants {

@@ -1,11 +1,9 @@
 package org.cdpg.dx.aaa.organization.dao.impl;
 
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.dao.OrganizationUserDAO;
-import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
 import org.cdpg.dx.aaa.organization.models.OrganizationUser;
-import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.aaa.organization.config.Constants;
 import org.cdpg.dx.aaa.organization.models.Role;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.models.*;
@@ -14,10 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.cdpg.dx.aaa.organization.util.Constants.ORG_ID;
-import static org.cdpg.dx.aaa.organization.util.Constants.ORG_USER_ID;
+import static org.cdpg.dx.aaa.organization.config.Constants.ORG_USER_ID;
 
 public class OrganizationUserDAOImpl extends AbstractBaseDAO<OrganizationUser> implements  OrganizationUserDAO {
 
@@ -59,7 +55,7 @@ public class OrganizationUserDAOImpl extends AbstractBaseDAO<OrganizationUser> i
     );
     SelectQuery query = new SelectQuery(Constants.ORG_USER_TABLE, List.of(Constants.ROLE), conditions, null, null, null, null);
 
-    return postgresService.select(query)
+    return postgresService.select(query, false )
       .compose(result -> {
         if (result.getRows().isEmpty()) {
           return Future.failedFuture("User is not part of this organization");

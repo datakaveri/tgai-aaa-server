@@ -2,15 +2,12 @@ package org.cdpg.dx.aaa.organization.handler;
 
 
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
-import jakarta.validation.constraints.Email;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.audit.util.AuditingHelper;
-import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
@@ -20,17 +17,15 @@ import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
-import org.cdpg.dx.common.request.PaginationRequestConfig;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.cdpg.dx.aaa.organization.util.Constants.API_TO_DB_MAP;
+import static org.cdpg.dx.aaa.organization.config.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
 
 
@@ -79,23 +74,14 @@ public class OrganizationHandler {
     }
 
     public void listAllOrganisations(RoutingContext ctx) {
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .allowedTimeFields(Set.of(CREATED_AT))
+                .defaultTimeField(CREATED_AT)
+                .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .build();
 
-        Set<String> allowedFilters = Set.of("id", "orgName", "entityType", "orgSector");
-        Set<String> allowedTimeFields = Set.of("created_at");
-        Set<String> allowedSortFields = Set.of("createdAt", "orgName", "entityType", "orgSector");
-
-        PaginationRequestConfig config =
-                new PaginationRequestConfig.Builder()
-                        .ctx(ctx)
-                        .allowedFilterKeys(allowedFilters)
-                        .apiToDbMap(API_TO_DB_MAP)
-                        .allowedTimeFields(allowedTimeFields)
-                        .defaultTimeField("created_at")
-                        .defaultSortBy("created_at")
-                        .defaultOrder(DEFAULT_SORTIMG_ORDER)
-                        .allowedSortFields(allowedSortFields)
-                        .build();
-        PaginatedRequest request = PaginationRequestBuilder.fromRoutingContext(config);
 
         organizationService.getOrganizations(request)
                 .onSuccess(orgs -> {
@@ -193,13 +179,22 @@ public class OrganizationHandler {
     }
 
     public void getOrganisationRequest(RoutingContext ctx) {
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .allowedTimeFields(Set.of(CREATED_AT))
+                .defaultTimeField(CREATED_AT)
+                .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .build();
 
-        organizationService.getAllOrganizationCreateRequests()
-                .onSuccess(requests -> {
+
+        organizationService.getAllOrganizationCreateRequests(request)
+                .onSuccess(res -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Organisation Requests");
+
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, requests);
+                    ResponseBuilder.sendSuccess(ctx, res.data(), res.paginationInfo());
 
                 })
                 .onFailure(ctx::fail);

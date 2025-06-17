@@ -8,14 +8,8 @@ import org.cdpg.dx.aaa.credit.models.CreditRequest;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import static org.cdpg.dx.aaa.credit.util.Constants.CREDIT_REQUEST_ID;
 import static org.cdpg.dx.aaa.credit.util.Constants.CREDIT_REQUEST_TABLE;
-import static org.cdpg.dx.aaa.organization.util.Constants.ORG_ID;
 
 public class CreditRequestDAOImpl extends AbstractBaseDAO<CreditRequest> implements CreditRequestDAO {
   private static final Logger LOGGER = LogManager.getLogger(CreditRequestDAOImpl.class);

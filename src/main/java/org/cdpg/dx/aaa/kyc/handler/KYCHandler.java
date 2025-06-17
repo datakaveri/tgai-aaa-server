@@ -6,11 +6,8 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
-import org.cdpg.dx.aaa.organization.handler.OrganizationHandler;
-import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
 
 import java.util.UUID;
 

@@ -49,7 +49,7 @@ public class TemporalRequestHelper {
       LOGGER.error(
           "Invalid datetime format. Expected ISO format (e.g., '2025-06-04T12:30:00') : {}",
           e.getMessage());
-      throw new DxBadRequestException("Invalid datetime format: " + e.getMessage());
+      throw new DxBadRequestException("Invalid datetime format. Expected ISO format (e.g., '2025-06-04T12:30:00'");
     }
   }
 }

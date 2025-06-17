@@ -7,6 +7,6 @@ import org.cdpg.dx.database.postgres.models.OrderBy;
 public record PaginatedRequest(
     int page,
     int size,
-    Map<String, String> filters,
+    Map<String, Object> filters,
     List<TemporalRequest> temporalRequests,
     List<OrderBy> orderByList) {}

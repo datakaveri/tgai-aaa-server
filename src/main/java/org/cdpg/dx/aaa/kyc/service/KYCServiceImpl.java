@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import org.cdpg.dx.aaa.cache.service.CacheService;
 import org.cdpg.dx.common.exception.DxValidationException;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;

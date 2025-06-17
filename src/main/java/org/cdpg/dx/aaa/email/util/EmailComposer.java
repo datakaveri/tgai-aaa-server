@@ -13,7 +13,7 @@ import org.cdpg.dx.aaa.organization.models.OrganizationUser;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.email.service.EmailService;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

@@ -15,22 +15,20 @@
     },
     "commonOptions":{
       "cosDomain":"asdasd",
-      "cosAdminUserId": "asdas",
+      "cosAdminUserId": "e59dfb08-66b2-49c3-891b-390f8f488c6d",
       "initialCreditBalance": 1000
     },
     "keycloakOptions":{
       "keycloakRealm": "tgdex-pilot",
       "keycloakUrl": "https://staging.keycloak.update.iudx.io/auth",
-      "keycloakAdminClientId": "admin-cli",
-      "keycloakAdminClientSecret": "",
+      "keycloakAdminClientId": "admin-client",
+      "keycloakAdminClientSecret": "437O1pxcsHseXPjKPqoeg30GHUrpNmcx",
       "keycloakAdminPoolSize": "10",
       "keycloakJwtLeeway": 90,
       "keycloakCertUrl": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot/protocol/openid-connect/certs",
       "iss": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot",
       "jwtIgnoreExpiry": true,
-      "jwksRefreshIntervalMs": 21600000,
-      "adminUsername": "xxxxx",
-      "adminPassword": "xxxxx"
+      "jwksRefreshIntervalMs": 21600000
     },
     "KYCOptions": {
       "digilockerTokenUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/1/token",

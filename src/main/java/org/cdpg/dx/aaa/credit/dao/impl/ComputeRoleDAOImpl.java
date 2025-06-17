@@ -1,29 +1,21 @@
 package org.cdpg.dx.aaa.credit.dao.impl;
 
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.dao.ComputeRoleDAO;
 import org.cdpg.dx.aaa.credit.models.ComputeRole;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.util.Constants;
-import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
 import org.cdpg.dx.database.postgres.base.dao.AbstractBaseDAO;
 import org.cdpg.dx.database.postgres.models.Condition;
-import org.cdpg.dx.database.postgres.models.InsertQuery;
 import org.cdpg.dx.database.postgres.models.SelectQuery;
-import org.cdpg.dx.database.postgres.models.UpdateQuery;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.cdpg.dx.aaa.credit.util.Constants.COMPUTE_ROLE_ID;
-import static org.cdpg.dx.aaa.organization.util.Constants.ORG_ID;
 
 public class ComputeRoleDAOImpl extends AbstractBaseDAO<ComputeRole>implements ComputeRoleDAO {
 
@@ -44,7 +36,7 @@ public class ComputeRoleDAOImpl extends AbstractBaseDAO<ComputeRole>implements C
       null, null, null, null
     );
 
-    return postgresService.select(query)
+    return postgresService.select(query, false)
       .compose(result -> {
       if(!result.getRows().isEmpty())
       {

@@ -1,4 +1,4 @@
-package org.cdpg.dx.keyclock.service;
+package org.cdpg.dx.keycloak.service;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;

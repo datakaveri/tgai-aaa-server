@@ -22,8 +22,8 @@ import org.cdpg.dx.aaa.user.service.UserServiceImpl;
 import org.cdpg.dx.auditing.handler.AuditingHandler;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.databroker.service.DataBrokerService;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
-import org.cdpg.dx.keyclock.service.KeycloakUserServiceImpl;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
+import org.cdpg.dx.keycloak.service.KeycloakUserServiceImpl;
 
 public class ControllerFactory {
   private static final Logger LOGGER = LogManager.getLogger(ControllerFactory.class);

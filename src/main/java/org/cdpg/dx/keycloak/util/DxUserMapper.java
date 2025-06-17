@@ -1,7 +1,7 @@
-package org.cdpg.dx.keyclock.util;
+package org.cdpg.dx.keycloak.util;
 
 import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.keyclock.config.KeycloakConstants;
+import org.cdpg.dx.keycloak.config.KeycloakConstants;
 import org.cdpg.dx.common.model.DxUser;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;

@@ -10,8 +10,8 @@ import org.cdpg.dx.aaa.cache.service.CacheServiceImpl;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
 import org.cdpg.dx.aaa.kyc.service.KYCServiceImpl;
-import org.cdpg.dx.keyclock.service.KeycloakUserService;
-import org.cdpg.dx.keyclock.service.KeycloakUserServiceImpl;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
+import org.cdpg.dx.keycloak.service.KeycloakUserServiceImpl;
 
 public class KYCFactory {
     private static final Logger LOGGER = LogManager.getLogger(KYCFactory.class);

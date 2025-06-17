@@ -1,14 +1,13 @@
 package org.cdpg.dx.aaa.organization.models;
 
 import io.vertx.core.json.JsonObject;
-import org.cdpg.dx.aaa.organization.util.Constants;
+import org.cdpg.dx.aaa.organization.config.Constants;
 import org.cdpg.dx.common.exception.DxValidationException;
 import org.cdpg.dx.database.postgres.base.entity.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
