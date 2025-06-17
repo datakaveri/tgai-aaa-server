@@ -12,6 +12,7 @@ import org.cdpg.dx.aaa.credit.models.CreditRequest;
 import org.cdpg.dx.aaa.credit.models.CreditTransaction;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
+import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
@@ -22,10 +23,12 @@ public class CreditHandler {
 
   private static final Logger LOGGER = LogManager.getLogger(CreditHandler.class);
     private final CreditService creditService;
+    private final EmailComposer emailComposer;
 
 
-  public CreditHandler(CreditService creditService) {
+  public CreditHandler(CreditService creditService,EmailComposer emailComposer) {
     this.creditService = creditService;
+    this.emailComposer = emailComposer;
   }
 
 
@@ -111,6 +114,8 @@ public class CreditHandler {
     creditService.createComputeRoleRequest(computeRoleRequest)
       .onSuccess(requests -> {
         ResponseBuilder.sendSuccess(ctx, requests);
+        Future<Void> future = emailComposer.sendEmailForComputeRole(computeRoleRequest, user);
+
       })
       .onFailure(ctx::fail);
   }

@@ -8,6 +8,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.audit.util.AuditingHelper;
+import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
@@ -35,11 +36,14 @@ public class OrganizationHandler {
     private static final Logger LOGGER = LogManager.getLogger(OrganizationHandler.class);
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final EmailComposer emailComposer;
 
 
-    public OrganizationHandler(OrganizationService organizationService, UserService userService ) {
+
+  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer ) {
         this.organizationService = organizationService;
         this.userService = userService;
+        this.emailComposer = emailComposer;
     }
 
     public void updateOrganisationById(RoutingContext ctx) {
@@ -167,6 +171,8 @@ public class OrganizationHandler {
                             RoutingContextHelper.getRequestPath(ctx), "POST", "Create Join Organization Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Created Join request");
+                    Future<Void> future = emailComposer.sendEmailForJoiningOrg(organizationJoinRequest,user);
+
                 })
                 .onFailure(ctx::fail);
 
@@ -237,10 +243,13 @@ public class OrganizationHandler {
             return organizationService.createOrganizationRequest(organizationCreateRequest);
         })
       .onSuccess(requests -> {
-          AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+         AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                   RoutingContextHelper.getRequestPath(ctx), "POST", "Create Organisation Request");
           RoutingContextHelper.setAuditingLog(ctx, auditLog);
           ResponseBuilder.sendSuccess(ctx, requests);
+          Future<Void> future = emailComposer.sendEmailForCreatingOrg(organizationCreateRequest, user);
+
+
       })
       .onFailure(ctx::fail);
   }

@@ -9,6 +9,7 @@ import org.cdpg.dx.aaa.credit.dao.CreditDAOFactory;
 import org.cdpg.dx.aaa.credit.handler.CreditHandler;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.credit.service.CreditServiceImpl;
+import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
@@ -17,10 +18,10 @@ public class CreditControllerFactory {
 
   private CreditControllerFactory() {}
 
-  public static CreditController create(CreditService creditService) {
+  public static CreditController create(CreditService creditService, EmailComposer emailComposer) {
 
 
-    CreditHandler creditHandler = new CreditHandler(creditService);
+    CreditHandler creditHandler = new CreditHandler(creditService,emailComposer);
 
     return new CreditController(creditHandler);
   }
