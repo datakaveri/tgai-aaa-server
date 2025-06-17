@@ -686,6 +686,13 @@ paths:
                         requestedAt: '2025-06-03T16:35:48.404509'
                         processedAt: '2025-06-03T16:35:48.404509'
                         tableName: organization_join_requests
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
       operationId: get-auth-v1-organisations-join-requests
       parameters:
         - schema:
@@ -1275,6 +1282,22 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      id: e87246e2-5da5-40b0-973c-690d2f48f879
+                      name: Quant Sandbox
+                      logo_path: /logos/ai.png
+                      entity_type: Private
+                      org_sector: Technology
+                      website_link: 'https://ai.example.com'
+                      address: '123 Quant Labs, Bangalore, India'
+                      certificate_path: /documents/certificate.pdf
+                      pancard_path: /documents/pancard.pdf
+                      created_at: '2025-06-03T16:28:24.205541'
+                      updated_at: '2025-06-03T16:28:24.205541'
                 properties:
                   type:
                     type: string
@@ -1305,22 +1328,35 @@ paths:
                         type: string
                       updated_at:
                         type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      id: e87246e2-5da5-40b0-973c-690d2f48f879
-                      name: Quant Sandbox
-                      logo_path: /logos/ai.png
-                      entity_type: Private
-                      org_sector: Technology
-                      website_link: 'https://ai.example.com'
-                      address: '123 Quant Labs, Bangalore, India'
-                      certificate_path: /documents/certificate.pdf
-                      pancard_path: /documents/pancard.pdf
-                      created_at: '2025-06-03T16:28:24.205541'
-                      updated_at: '2025-06-03T16:28:24.205541'
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: i2j6hw45mr0m1
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: atus73ss5j3hx
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: ldplp5tqmab1s
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: 5b8htl3mzyatn
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: 8rxpevtk2xz4z
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: dbvf8j5jsd3qq
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: bq5pj0ajkf4wq
               examples:
                 Example 1:
                   value:
@@ -1338,6 +1374,13 @@ paths:
                       pancard_path: /documents/pancard.pdf
                       created_at: '2025-06-03T16:28:24.205541'
                       updated_at: '2025-06-03T16:28:24.205541'
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
       operationId: get-auth-v1-organisations-id
       parameters:
         - schema:
@@ -1373,6 +1416,22 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 81980801-85b6-4b7d-ae54-5df38a3535bd
+                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        userName: test test
+                        role: ADMIN
+                        jobTitle: Manager
+                        empId: EMP12345
+                        orgManagerPhoneNo: +91-9876543210
+                        createdAt: '2025-06-03T16:28:24.852025'
+                        updatedAt: '2025-06-03T16:28:24.852025'
+                        tableName: organization_users
                 properties:
                   type:
                     type: string
@@ -1405,22 +1464,35 @@ paths:
                           type: string
                         tableName:
                           type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - id: 81980801-85b6-4b7d-ae54-5df38a3535bd
-                        organizationId: e87246e2-5da5-40b0-973c-690d2f48f879
-                        userId: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
-                        userName: test test
-                        role: ADMIN
-                        jobTitle: Manager
-                        empId: EMP12345
-                        orgManagerPhoneNo: +91-9876543210
-                        createdAt: '2025-06-03T16:28:24.852025'
-                        updatedAt: '2025-06-03T16:28:24.852025'
-                        tableName: organization_users
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: habzk85vhyv4i
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: qquspu2iw2wyf
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: 5rqm7fj3rgcqi
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: iwkoo03wfc2d2
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: euhafbyvvrncv
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: ndure5aywto2y
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: cbqgznf2sy6d3
               examples:
                 Example 1:
                   value:
@@ -1438,6 +1510,13 @@ paths:
                         createdAt: '2025-06-03T16:28:24.852025'
                         updatedAt: '2025-06-03T16:28:24.852025'
                         tableName: organization_users
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
         '401':
           description: Unauthorized
           content:
@@ -1649,6 +1728,19 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: f1061c0c-21fd-46ad-9cb3-83e479b8635d
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        amount: 10000
+                        status: pending
+                        requestedAt: '2025-06-04T09:47:27.323861'
+                        processedAt: '2025-06-04T09:47:27.323861'
+                        tableName: credit_requests
                 properties:
                   type:
                     type: string
@@ -1675,19 +1767,35 @@ paths:
                           type: string
                         tableName:
                           type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - id: f1061c0c-21fd-46ad-9cb3-83e479b8635d
-                        userId: 436cb796-5826-458b-a914-a54721f70997
-                        userName: test test
-                        amount: 10000
-                        status: pending
-                        requestedAt: '2025-06-04T09:47:27.323861'
-                        processedAt: '2025-06-04T09:47:27.323861'
-                        tableName: credit_requests
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: my3px3mqewfgl
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: 9goqrkh1sslar
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: ilgv9t0luge3z
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: wuibbpgtxgiua
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: 9v8m5zcqo3hz8
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: 6grp7j6i0idak
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: jerroo5o1sohq
               examples:
                 Example 1:
                   value:
@@ -1702,6 +1810,14 @@ paths:
                         requestedAt: '2025-06-04T09:47:27.323861'
                         processedAt: '2025-06-04T09:47:27.323861'
                         tableName: credit_requests
+                    'null': null
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
       operationId: get-auth-v1-credit
       parameters:
         - schema:
@@ -1997,6 +2113,19 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - id: 25fcafb9-d65e-454f-9196-8648dcf08854
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        status: pending
+                        approvedBy: null
+                        createdAt: '2025-06-04T10:54:53.301846'
+                        updatedAt: '2025-06-04T10:54:53.301846'
+                        tableName: compute_role
                 properties:
                   type:
                     type: string
@@ -2023,19 +2152,35 @@ paths:
                           type: string
                         tableName:
                           type: string
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - id: 25fcafb9-d65e-454f-9196-8648dcf08854
-                        userId: 436cb796-5826-458b-a914-a54721f70997
-                        userName: test test
-                        status: pending
-                        approvedBy: null
-                        createdAt: '2025-06-04T10:54:53.301846'
-                        updatedAt: '2025-06-04T10:54:53.301846'
-                        tableName: compute_role
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: dvchbrtielggu
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: jsb48m8i9u6tf
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: kvq43ldkz27sd
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: q0k9gr696ttcb
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: 35bjtleqjjbku
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: sxydke5qcz876
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: bxo6cgx6zpp4r
               examples:
                 Example 1:
                   value:
@@ -2050,6 +2195,13 @@ paths:
                         createdAt: '2025-06-04T10:54:53.301846'
                         updatedAt: '2025-06-04T10:54:53.301846'
                         tableName: compute_role
+                    paginationInfo:
+                      page: 1
+                      size: 1
+                      totalCount: 346
+                      totalPages: 346
+                      hasNext: true
+                      hasPrevious: false
       operationId: get-auth-v1-compute-role-request
       parameters:
         - schema:
@@ -2348,6 +2500,41 @@ paths:
             application/json:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      roles:
+                        - offline_access
+                        - compute
+                        - consumer
+                        - default-roles-myrealm
+                        - uma_authorization
+                      organisationId: ''
+                      organisationName: ''
+                      sub: 436cb796-5826-458b-a914-a54721f70997
+                      emailVerified: true
+                      kycVerified: false
+                      name: test test
+                      preferredUsername: test
+                      givenName: test
+                      familyName: test
+                      email: testing@gmail.com
+                      pendingRoles: []
+                      organisation:
+                        id: 98e74f31-4e40-4615-85b8-61256f0bc7c4
+                        organisationId: e87246e2-5da5-40b0-973c-690d2f48f879
+                        userId: 436cb796-5826-458b-a914-a54721f70997
+                        userName: test test
+                        status: granted
+                        jobTitle: Employee
+                        empId: EMP8790
+                        requestedAt: '2025-06-04T06:13:58.917342'
+                        processedAt: '2025-06-04T06:13:58.917342'
+                        request_type: organisation_join
+                      createdAt: '2025-06-04T06:12:48.991'
+                      kycData: {}
                 properties:
                   type:
                     type: string
@@ -2384,7 +2571,6 @@ paths:
                         type: array
                         items:
                           type: object
-                          properties: {}
                       organisation:
                         type: object
                         properties:
@@ -2412,42 +2598,6 @@ paths:
                         type: string
                       kycData:
                         type: object
-                        properties: {}
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      roles:
-                        - offline_access
-                        - compute
-                        - consumer
-                        - default-roles-myrealm
-                        - uma_authorization
-                      organisationId: ''
-                      organisationName: ''
-                      sub: 436cb796-5826-458b-a914-a54721f70997
-                      emailVerified: true
-                      kycVerified: false
-                      name: test test
-                      preferredUsername: test
-                      givenName: test
-                      familyName: test
-                      email: testing@gmail.com
-                      pendingRoles: []
-                      organisation:
-                        id: 98e74f31-4e40-4615-85b8-61256f0bc7c4
-                        organisationId: e87246e2-5da5-40b0-973c-690d2f48f879
-                        userId: 436cb796-5826-458b-a914-a54721f70997
-                        userName: test test
-                        status: granted
-                        jobTitle: Employee
-                        empId: EMP8790
-                        requestedAt: '2025-06-04T06:13:58.917342'
-                        processedAt: '2025-06-04T06:13:58.917342'
-                        request_type: organisation_join
-                      createdAt: '2025-06-04T06:12:48.991'
-                      kycData: {}
               examples:
                 Example 1:
                   value:
@@ -2608,6 +2758,43 @@ paths:
             application/x-www-form-urlencoded:
               schema:
                 type: object
+                x-examples:
+                  Example 1:
+                    type: 'urn:dx:aaa:success'
+                    title: Success
+                    result:
+                      - organisationId: org-123
+                        organisationName: ''
+                        sub: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                        emailVerified: false
+                        kycVerified: true
+                        name: test test
+                        preferredUsername: testuser
+                        givenName: test
+                        familyName: test
+                        email: test@gmail.com
+                        pending_roles: []
+                        organisation:
+                          id: 4202493c-7c64-49b0-8f61-2000ca3d147c
+                          requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
+                          name: Quants Sandbox
+                          logoPath: /logos/ai.png
+                          entityType: Private
+                          orgSector: Technology
+                          websiteLink: 'https://ai.example.com'
+                          address: '123 Quant Labs, Bangalore, India'
+                          certificatePath: /documents/certificate.pdf
+                          pancardPath: /documents/pancard.pdf
+                          status: pending
+                          userName: test test
+                          empId: EMP12345
+                          jobTitle: Manager
+                          orgManagerphoneNo: +91-9876543210
+                          createdAt: '2025-06-03T16:25:25.167724'
+                          updatedAt: '2025-06-03T16:25:25.167724'
+                          request_type: organisation_create
+                        createdAt: null
+                        kycInformation: {}
                 properties:
                   type:
                     type: string
@@ -2642,7 +2829,6 @@ paths:
                           type: array
                           items:
                             type: object
-                            properties: {}
                         organisation:
                           type: object
                           properties:
@@ -2686,44 +2872,35 @@ paths:
                           type: string
                         kycInformation:
                           type: object
-                          properties: {}
-                x-examples:
-                  Example 1:
-                    type: 'urn:dx:aaa:success'
-                    title: Success
-                    result:
-                      - organisationId: org-123
-                        organisationName: ''
-                        sub: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
-                        emailVerified: false
-                        kycVerified: true
-                        name: test test
-                        preferredUsername: testuser
-                        givenName: test
-                        familyName: test
-                        email: test@gmail.com
-                        pending_roles: []
-                        organisation:
-                          id: 4202493c-7c64-49b0-8f61-2000ca3d147c
-                          requestedBy: c908f4ed-69ef-4d27-8e50-8f95f89b6c4d
-                          name: Quants Sandbox
-                          logoPath: /logos/ai.png
-                          entityType: Private
-                          orgSector: Technology
-                          websiteLink: 'https://ai.example.com'
-                          address: '123 Quant Labs, Bangalore, India'
-                          certificatePath: /documents/certificate.pdf
-                          pancardPath: /documents/pancard.pdf
-                          status: pending
-                          userName: test test
-                          empId: EMP12345
-                          jobTitle: Manager
-                          orgManagerphoneNo: +91-9876543210
-                          createdAt: '2025-06-03T16:25:25.167724'
-                          updatedAt: '2025-06-03T16:25:25.167724'
-                          request_type: organisation_create
-                        createdAt: null
-                        kycInformation: {}
+                  paginationInfo:
+                    type: object
+                    x-stoplight:
+                      id: q5nv96hnpwunm
+                    properties:
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: qr8qhteoqy2g9
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: ogsnoc6zb4i5r
+                      totalPages:
+                        type: integer
+                        x-stoplight:
+                          id: qyz4oigpr2pld
+                      totalCount:
+                        type: integer
+                        x-stoplight:
+                          id: wn8hfnis26t2t
+                      hasNext:
+                        type: boolean
+                        x-stoplight:
+                          id: lzh9xiuynbj2d
+                      hasPrevious:
+                        type: boolean
+                        x-stoplight:
+                          id: cbvofwsy8sllb
               examples:
                 Example 1:
                   value:
