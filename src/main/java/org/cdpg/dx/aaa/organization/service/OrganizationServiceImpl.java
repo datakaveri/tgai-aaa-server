@@ -391,6 +391,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         return providerRequestDAO.getAllWithFilters(filterMap);
     }
 
+    @Override
+    public Future<PaginatedResult<ProviderRoleRequest>> getAllPendingProviderRoleRequests(PaginatedRequest paginatedRequest) {
+        return providerRequestDAO.getAllWithFilters(paginatedRequest);
+    }
+
 
     @Override
     public Future<Organization> getOrganizationByName(String orgName) {

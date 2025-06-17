@@ -14,10 +14,17 @@ import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.common.exception.DxNotFoundException;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import static org.cdpg.dx.aaa.organization.config.Constants.*;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
 
 public class CreditHandler {
 
@@ -122,9 +129,18 @@ public class CreditHandler {
 
   public void getAllComputeRequests(RoutingContext ctx) {
 
-    creditService.getAllComputeRequests()
+    PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+            .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+            .additionalFilters(Map.of())
+            .allowedTimeFields(Set.of(CREATED_AT))
+            .defaultTimeField(CREATED_AT)
+            .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+            .allowedSortFields(ALLOWED_SORT_FIELDS_COMPUTE_ROLE)
+            .build();
+
+    creditService.getAllComputeRequests(request)
       .onSuccess(reqs -> {
-        ResponseBuilder.sendSuccess(ctx, reqs);
+        ResponseBuilder.sendSuccess(ctx, reqs.data(), reqs.paginationInfo());
       })
       .onFailure(ctx::fail);
 
