@@ -22,6 +22,7 @@ import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -73,6 +74,8 @@ public class OrganizationHandler {
 
     }
 
+
+
     public void listAllOrganisations(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
@@ -120,13 +123,24 @@ public class OrganizationHandler {
 
     public void getJoinOrganisationRequests(RoutingContext ctx) {
 
-        UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
-        organizationService.getOrganizationPendingJoinRequests(orgId)
-                .onSuccess(requests -> {
+      UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+
+      PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+        .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST)
+        .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+        .allowedTimeFields(Set.of(REQUESTED_AT))
+        .defaultTimeField(REQUESTED_AT)
+        .defaultSort(REQUESTED_AT, DEFAULT_SORTIMG_ORDER)
+        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .build();
+
+
+        organizationService.getOrganizationPendingJoinRequests(request)
+                .onSuccess(result -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "GET", "Get Pending Join Requests");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, requests);
+                    ResponseBuilder.sendSuccess(ctx, result.data(), result.paginationInfo());
                 })
                 .onFailure(ctx::fail);
     }
@@ -180,7 +194,7 @@ public class OrganizationHandler {
 
     public void getOrganisationRequest(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
-                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
@@ -268,14 +282,23 @@ public class OrganizationHandler {
 
     public void getOrganisationUsers(RoutingContext ctx) {
 
-        UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+      UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
 
-        organizationService.getOrganizationUsers(orgId)
-                .onSuccess(users -> {
+      PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+        .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_USERS)
+        .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+        .allowedTimeFields(Set.of(CREATED_AT))
+        .defaultTimeField(CREATED_AT)
+        .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .build();
+
+      organizationService.getOrganizationUsers(request)
+                .onSuccess(res -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "GET", "Get Organisation Users by OrgID");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, users);
+                    ResponseBuilder.sendSuccess(ctx,res.data(), res.paginationInfo());
                 })
                 .onFailure(ctx::fail);
 
@@ -360,6 +383,8 @@ public class OrganizationHandler {
     }
 
     public void getProviderRequest(RoutingContext ctx) {
+
+
         User user = ctx.user();
         LOGGER.debug("User: {}", user);
         if (user == null || user.subject() == null || user.principal() == null) {

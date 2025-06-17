@@ -263,19 +263,21 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Future<List<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(UUID orgId) {
+    public Future<PaginatedResult<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(PaginatedRequest paginatedRequest) {
         //TODO need to create another funtion for this
-        Map<String, Object> filterMap = Map.of(
-                Constants.ORGANIZATION_ID, orgId.toString()
-        );
+//        Map<String, Object> filterMap = Map.of(
+//                Constants.ORGANIZATION_ID, orgId.toString()
+//        );
 
-        return joinRequestDAO.getAllWithFilters(filterMap);
+        return joinRequestDAO.getAllWithFilters(paginatedRequest);
     }
 
+
+
     @Override
-    public Future<List<OrganizationUser>> getOrganizationUsers(UUID orgId) {
-        Map<String, Object> filterMap = Map.of(Constants.ORGANIZATION_ID, orgId.toString());
-        return orgUserDAO.getAllWithFilters(filterMap);
+    public Future<PaginatedResult<OrganizationUser>> getOrganizationUsers(PaginatedRequest paginatedRequest) {
+//        Map<String, Object> filterMap = Map.of(Constants.ORGANIZATION_ID, paginatedRequest);
+        return orgUserDAO.getAllWithFilters(paginatedRequest);
     }
 
 
@@ -381,8 +383,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 });
     }
 
-    public Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId) {
-        //TODO need to create another one
+  //TODO need to create another one
+  public Future<List<ProviderRoleRequest>> getAllPendingProviderRoleRequests(UUID orgId) {
         Map<String, Object> filterMap = Map.of(
                 Constants.ORGANIZATION_ID, orgId.toString()
         );
