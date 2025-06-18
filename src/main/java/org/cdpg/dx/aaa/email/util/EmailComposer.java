@@ -78,7 +78,7 @@ public class EmailComposer {
       "ADMIN_FIRST_NAME", "Admin",
       "ADMIN_LAST_NAME", "",
       "ADMIN_PORTAL_URL", adminPortalUrl,
-      "SENDER_NAME", "TGDx"
+      "SENDER_NAME", "TGDeX Team"
     );
 
     String htmlBody = getHtmlBody(emailTemplate, emailDetails);
@@ -113,7 +113,7 @@ public class EmailComposer {
 
     String senderEmail = config.getString("emailSender"); // no-org-reply
     String emailTemplate = loadTemplate("templates/request-join-organization.html");
-    String adminPortalUrl = config.getString("TgdexUrl");
+    String adminPortalUrl = config.getString("TGDxUrl");
 
     Map<String, String> emailDetails = Map.of(
       "ADMIN_FIRST_NAME", "Admin",
@@ -123,7 +123,7 @@ public class EmailComposer {
       "EMPLOYEE_ID", employeeId,
       "JOB_TITLE", jobTitle,
       "ADMIN_PORTAL_URL", adminPortalUrl,
-      "SENDER_NAME", "TGDx"
+      "SENDER_NAME", "TGDeX Team"
     );
 
 
@@ -155,7 +155,7 @@ public class EmailComposer {
 
     String senderEmail = config.getString("emailSender"); // no-org-reply
     String emailTemplate = loadTemplate("templates/request-compute-role.html");
-    String adminPortalUrl = config.getString("TgdexUrl");
+    String adminPortalUrl = config.getString("TGDxUrl");
     String cosAdminEmailId = config.getString("cosAdminEmailId"); // Email of COS admin
 
 
@@ -166,7 +166,7 @@ public class EmailComposer {
       "USER_EMAIL_ID", emailId,
       "USER_ID", userId.toString(),
       "ADMIN_PORTAL_URL", adminPortalUrl,
-      "SENDER_NAME", "TGDx"
+      "SENDER_NAME", "TGDeX Team"
     );
 
     String htmlBody = getHtmlBody(emailTemplate, emailDetails);
