@@ -381,6 +381,8 @@ public class OrganizationHandler {
                             RoutingContextHelper.getRequestPath(ctx), "POST", "Create Provider Role Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Created Request");
+                    Future<Void> future = emailComposer.sendEmailForProviderRole(providerRoleRequest,user);
+
                 })
                 .onFailure(ctx::fail);
     }
