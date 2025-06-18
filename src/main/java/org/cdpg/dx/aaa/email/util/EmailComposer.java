@@ -10,6 +10,7 @@ import org.cdpg.dx.aaa.credit.models.ComputeRole;
 import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
 import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
 import org.cdpg.dx.aaa.organization.models.OrganizationUser;
+import org.cdpg.dx.aaa.organization.models.ProviderRoleRequest;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.email.service.EmailService;
@@ -189,6 +190,49 @@ public class EmailComposer {
           return Future.failedFuture(failure);
         });
       }
+
+  public Future<Void> sendEmailForProviderRole(ProviderRoleRequest providerRoleRequest, User user) {
+
+
+    UUID userId = providerRoleRequest.userId();
+    UUID orgId = providerRoleRequest.orgId();
+    String userName = user.principal().getString("name");
+    String emailId = user.principal().getString("email");
+
+    String senderEmail = config.getString("emailSender"); // no-org-reply
+    String emailTemplate = loadTemplate("templates/request-provider-role.html");
+    String adminPortalUrl = config.getString("TGDxUrl");
+
+    Map<String, String> emailDetails = Map.of(
+      "ADMIN_FIRST_NAME", "Admin",
+      "ADMIN_LAST_NAME", "",
+      "USER_FIRST_NAME", userName,
+      "USER_EMAIL_ID", emailId,
+      "USER_ID", userId.toString(),
+      "ORG_ID", orgId.toString(),
+      "ADMIN_PORTAL_URL", adminPortalUrl,
+      "SENDER_NAME", "TGDeX Team"
+    );
+
+    return getOrgAdminEmail(orgId).compose(orgAdminEmail -> {
+      String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+      LOGGER.info("Org Admin Email Id is : {}", orgAdminEmail);
+
+      MailMessage mailMessage = createMailMessage(senderEmail, orgAdminEmail, htmlBody,"Provider Role Request");
+      return emailService.sendEmail(mailMessage).onComplete(res -> {
+        if (res.succeeded()) {
+          LOGGER.info("Email sent successfully to {}", orgAdminEmail);
+        } else {
+          LOGGER.error("Failed to send email: {}", res.cause().getMessage());
+        }
+      }).recover(failure -> {
+        LOGGER.error("Failed to retrieve provider user details for user {}: {}", userName, failure.getMessage());
+        return Future.failedFuture(failure);
+      });
+
+    });
+  }
+
 
   /**
    * Replaces placeholders in the HTML template with actual values.

@@ -27,9 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.cdpg.dx.aaa.organization.config.Constants.*;
-import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 
 public class OrganizationHandler {
@@ -86,7 +87,7 @@ public class OrganizationHandler {
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
-                .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+                .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
                 .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
                 .build();
 
@@ -96,7 +97,9 @@ public class OrganizationHandler {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "GET", "List All Organisations");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, orgs.data(), orgs.paginationInfo());
+                    ResponseBuilder.sendSuccess(ctx, orgs.data().stream()
+                      .map(Organization::toFilteredJson).collect(Collectors.toList()), orgs.paginationInfo());
+
                 })
                 .onFailure(ctx::fail);
 
@@ -135,7 +138,7 @@ public class OrganizationHandler {
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(REQUESTED_AT))
         .defaultTimeField(REQUESTED_AT)
-        .defaultSort(REQUESTED_AT, DEFAULT_SORTIMG_ORDER)
+        .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
         .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
         .build();
 
@@ -204,7 +207,7 @@ public class OrganizationHandler {
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
-                .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+                .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
                 .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
                 .build();
 
@@ -259,6 +262,11 @@ public class OrganizationHandler {
         UUID  orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
         UUID userId = RequestHelper.getPathParamAsUUID(ctx, "user_id");
 
+      if (orgId == null || userId == null) {
+        ctx.fail(new DxNotFoundException("Organization ID or User ID is missing"));
+        return;
+      }
+
         organizationService.deleteOrganizationUser(orgId, userId)
                 .onSuccess(deleted -> {
                     if (deleted) {
@@ -299,7 +307,7 @@ public class OrganizationHandler {
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(CREATED_AT))
         .defaultTimeField(CREATED_AT)
-        .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+        .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
         .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
         .build();
 
@@ -373,6 +381,8 @@ public class OrganizationHandler {
                             RoutingContextHelper.getRequestPath(ctx), "POST", "Create Provider Role Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Created Request");
+                    Future<Void> future = emailComposer.sendEmailForProviderRole(providerRoleRequest,user);
+
                 })
                 .onFailure(ctx::fail);
     }

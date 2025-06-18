@@ -76,6 +76,21 @@ public record Organization(
 
     return json;
   }
+
+  public JsonObject toFilteredJson() {
+    JsonObject json = new JsonObject();
+
+    json.put(Constants.ORG_NAME, orgName);
+    if (orgLogo != null && !orgLogo.isEmpty()) json.put(Constants.ORG_LOGO, orgLogo);
+    json.put(Constants.ENTITY_TYPE, entityType);
+    json.put(Constants.ORG_SECTOR, orgSector);
+    json.put(Constants.ORG_WEBSITE, websiteLink);
+    json.put(Constants.ORG_ADDRESS, address);
+    return json;
+  }
+
+
+
   @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
     Map<String, Object> map = new HashMap<>();

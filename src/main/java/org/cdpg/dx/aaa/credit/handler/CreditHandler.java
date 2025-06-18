@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.cdpg.dx.aaa.organization.config.Constants.*;
-import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTIMG_ORDER;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 public class CreditHandler {
 
@@ -134,7 +134,7 @@ public class CreditHandler {
             .additionalFilters(Map.of())
             .allowedTimeFields(Set.of(CREATED_AT))
             .defaultTimeField(CREATED_AT)
-            .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
+            .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
             .allowedSortFields(ALLOWED_SORT_FIELDS_COMPUTE_ROLE)
             .build();
 
