@@ -80,16 +80,17 @@ public record Organization(
   public JsonObject toFilteredJson() {
     JsonObject json = new JsonObject();
 
-    json.put(Constants.ORG_NAME, orgName);
-    if (orgLogo != null && !orgLogo.isEmpty()) json.put(Constants.ORG_LOGO, orgLogo);
-    json.put(Constants.ENTITY_TYPE, entityType);
-    json.put(Constants.ORG_SECTOR, orgSector);
-    json.put(Constants.ORG_WEBSITE, websiteLink);
-    json.put(Constants.ORG_ADDRESS, address);
+    json.put("id", id.toString());
+    json.put("orgName", orgName);
+    if (orgLogo != null && !orgLogo.isEmpty()) json.put("orgLogo", orgLogo);
+    json.put("entityType", entityType);
+    json.put("orgSector", orgSector);
+    json.put("websiteLink", websiteLink);
+    json.put("address", address);
+    if (createdAt != null) json.put("createdAt", createdAt.format(FORMATTER));
+    if (updatedAt != null) json.put("updatedAt", updatedAt.format(FORMATTER));
     return json;
   }
-
-
 
   @Override
   public Map<String, Object> toNonEmptyFieldsMap() {
