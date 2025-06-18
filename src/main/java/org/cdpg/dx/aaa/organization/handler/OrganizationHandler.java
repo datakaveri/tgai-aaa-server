@@ -425,11 +425,7 @@ public class OrganizationHandler {
                             UUID orgId = orgUser.organizationId();
                             PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                                     .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
-                                    .additionalFilters(Map.of(STATUS, Status.PENDING.toString(), ORGANIZATION_ID, orgId.toString()))
-                                    .allowedTimeFields(Set.of(CREATED_AT))
-                                    .defaultTimeField(CREATED_AT)
-                                    .defaultSort(CREATED_AT, DEFAULT_SORTIMG_ORDER)
-                                    .allowedSortFields(ALLOWED_SORT_FIELDS_PROVIDER_ROLE_REQUEST)
+                                    .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
                                     .build();
 
                             return organizationService.getAllPendingProviderRoleRequests(request);

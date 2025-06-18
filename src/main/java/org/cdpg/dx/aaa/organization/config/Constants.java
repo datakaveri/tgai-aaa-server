@@ -121,11 +121,7 @@ public final class Constants {
   public static final Set<String> ALLOWED_SORT_FEILDS_ORG = Set.of("createdAt", "orgName", "entityType", "orgSector");
 
   public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST = Map.of(
-          "id", "id",
-          "userId", USER_ID,
-          "orgId", "organization_id",
-          "createdAt", "requested_at",
-          "updatedAt", "processed_at"
+          "status", STATUS
   );
 
   public static final Set<String> ALLOWED_SORT_FIELDS_PROVIDER_ROLE_REQUEST = Set.of("createdAt", "updatedAt");

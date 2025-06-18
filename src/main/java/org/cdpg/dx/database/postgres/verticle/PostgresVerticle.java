@@ -17,6 +17,8 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 import org.cdpg.dx.database.postgres.service.PostgresServiceImpl;
 
+import java.util.Map;
+
 public class PostgresVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(PostgresVerticle.class);
   private MessageConsumer<JsonObject> consumer;
@@ -28,19 +30,19 @@ public class PostgresVerticle extends AbstractVerticle {
     /* Database Properties */
     String databaseIp = config().getString("databaseIP");
     int databasePort = config().getInteger("databasePort");
-    // String databaseSchema = config().getString("databaseSchema");
+    String databaseSchema = config().getString("databaseSchema");
     String databaseName = config().getString("databaseName");
     String databaseUserName = config().getString("databaseUserName");
     String databasePassword = config().getString("databasePassword");
     int poolSize = config().getInteger("poolSize");
-    // Map<String, String> schemaProp = Map.of("search_path", databaseSchema);
+    Map<String, String> schemaProp = Map.of("search_path", databaseSchema);
 
     /* Set Connection Object and schema */
     PgConnectOptions connectOptions =
         new PgConnectOptions()
             .setPort(databasePort)
             .setHost(databaseIp)
-            // .setProperties(schemaProp)
+            .setProperties(schemaProp)
             .setDatabase(databaseName)
             .setUser(databaseUserName)
             .setPassword(databasePassword)
