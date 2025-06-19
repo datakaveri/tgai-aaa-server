@@ -174,6 +174,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .allowedMethod(HttpMethod.DELETE)
                 .allowedHeader("Content-Type")
                 .allowedHeader("Authorization")
+                .allowedHeader("Origin")
                 .allowCredentials(true);
 
         router.route().handler(corsHandler);

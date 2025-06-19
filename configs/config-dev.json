@@ -16,7 +16,14 @@
     "commonOptions":{
       "cosDomain":"asdasd",
       "cosAdminUserId": "e59dfb08-66b2-49c3-891b-390f8f488c6d",
-      "initialCreditBalance": 1000
+      "initialCreditBalance": 1000,
+      "corsAllowedOrigin": ["*"]
+    },
+    "emailOptions": {
+      "emailSender": "no-reply.dev@iudx.io",
+      "senderName": "TGDEX",
+      "cosAdminEmailId": "admin.cos.tgdex@datakaveri.org",
+      "TGDxUrl": "https://staging.catalogue.tgdex.iudx.io/"
     },
     "keycloakOptions":{
       "keycloakRealm": "tgdex-pilot",
@@ -43,7 +50,7 @@
       "id": "org.cdpg.dx.aaa.apiserver.ApiServerVerticle",
       "verticleInstances": 1,
       "httpPort":8443,
-      "required":["postgresOptions", "commonOptions", "keycloakOptions", "KYCOptions"],
+      "required":["postgresOptions", "commonOptions", "keycloakOptions", "KYCOptions","emailOptions"],
       "poolSize": "5",
       "serverTimeoutMs": 30000,
       "corsRegexString":"^https://.+\\.iudx\\.org\\.in$"
@@ -53,6 +60,36 @@
       "verticleInstances": 1,
       "required":["postgresOptions"],
       "poolSize": 5
+    },{
+      "id": "org.cdpg.dx.email.verticle.EmailVerticle",
+      "verticleInstances": 1,
+      "emailHostName": "email-smtp.ap-south-1.amazonaws.com",
+      "emailPort": 2587,
+      "emailUserName": "AKIAROAMFPEM2M4QITED",
+      "emailPassword": "BE6v8Dw3LC/snQ/JEJh4aKwo2gWkCGvtNPh9axF6F86r",
+      "notifyByEmail": true,
+      "poolSize": 5
+    },
+    {
+      "id": "org.cdpg.dx.databroker.DataBrokerVerticle",
+      "isWorkerVerticle": false,
+      "verticleInstances": 1,
+      "dataBrokerIP": "databroker.iudx.io",
+      "dataBrokerPort": 24568,
+      "prodVhost": "IUDX",
+      "internalVhost": "IUDX-INTERNAL",
+      "externalVhost": "IUDX-EXTERNAL",
+      "dataBrokerUserName": "admin",
+      "dataBrokerPassword": "eDeOcxowwCuh4rI",
+      "dataBrokerManagementPort": 28042,
+      "connectionTimeout": 6000,
+      "requestedHeartbeat": 60,
+      "handshakeTimeout": 6000,
+      "requestedChannelMax": 5,
+      "networkRecoveryInterval": 500,
+      "automaticRecoveryEnabled": "true",
+      "brokerAmqpIp": "databroker.iudx.io",
+      "brokerAmqpPort": 24567
     }
   ]
 }
