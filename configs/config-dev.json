@@ -17,7 +17,7 @@
       "cosDomain":"asdasd",
       "cosAdminUserId": "e59dfb08-66b2-49c3-891b-390f8f488c6d",
       "initialCreditBalance": 1000,
-      "corsAllowedOrigin": ["*"]
+      "corsAllowedOrigin": ["*", "http://localhost:4001"]
     },
     "emailOptions": {
       "emailSender": "no-reply.dev@iudx.io",

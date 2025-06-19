@@ -59,6 +59,9 @@ public class FailureHandler implements Handler<RoutingContext> {
         context
                 .response()
                 .putHeader("Content-Type", "application/json")
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
                 .setStatusCode(status)
                 .end(errorResponse.toJson().encode());
       }
