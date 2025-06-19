@@ -32,15 +32,15 @@ public class ResponseBuilder {
     DxResponse<T> response =
             new DxResponse<>(status.getUrn(), status.getDescription(), detail, result, pageInfo);
     String requestOrigin = ctx.request().getHeader("Origin");
-    if (allowedOrigins != null && requestOrigin != null && allowedOrigins.contains(requestOrigin)) {
-      ctx.response()
-              .putHeader("Content-Type", "application/json")
-              .putHeader("Access-Control-Allow-Origin", requestOrigin)
-              .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-              .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
-              .setStatusCode(status.getValue())
-              .end(JsonObject.mapFrom(response).encode());
-    } else {
+//    if (allowedOrigins != null && requestOrigin != null && allowedOrigins.contains(requestOrigin)) {
+//      ctx.response()
+//              .putHeader("Content-Type", "application/json")
+//              .putHeader("Access-Control-Allow-Origin", requestOrigin)
+//              .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+//              .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
+//              .setStatusCode(status.getValue())
+//              .end(JsonObject.mapFrom(response).encode());
+//    } else {
       ctx.response()
               .putHeader("Content-Type", "application/json")
               .putHeader("Access-Control-Allow-Origin", "*")
@@ -48,7 +48,7 @@ public class ResponseBuilder {
               .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
               .setStatusCode(status.getValue())
               .end(JsonObject.mapFrom(response).encode());
-    }
+    //}
   }
 
   public static void sendSuccess(RoutingContext ctx, String detail) {
