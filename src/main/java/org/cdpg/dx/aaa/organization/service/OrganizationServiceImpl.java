@@ -339,7 +339,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<ProviderRoleRequest> createProviderRequest(ProviderRoleRequest providerRoleRequest) {
-        return providerRequestDAO.create(providerRoleRequest);
+      Map<String, Object> filterMap = Map.of(Constants.USER_ID, providerRoleRequest.userId().toString());
+
+      // check if there is a pending or granted request for the same user
+      // if yes then dont create a new request
+      // if status is rejected then only allow to create a new request
+
+      return providerRequestDAO.getAllWithFilters(filterMap)
+        .compose(requests -> {
+          if (!requests.isEmpty()) {
+            // If there is a pending or granted request, do not create a new one
+            ProviderRoleRequest existingRequest = requests.get(0);
+            if (Status.PENDING.getStatus().equals(existingRequest.status()) ||
+                Status.GRANTED.getStatus().equals(existingRequest.status())) {
+              return Future.failedFuture(new DxConflictException("A pending or granted provider role request already exists for this user"));
+            }
+            else if( Status.REJECTED.getStatus().equals(existingRequest.status())) {
+              // If the existing request is rejected, allow to create a new one
+              LOGGER.info("Existing request is rejected, allowing to create a new provider role request");
+              return providerRequestDAO.create(providerRoleRequest);
+            } else {
+              return Future.failedFuture(new DxConflictException("Provider role request is not in a state that allows creation of a new request"));
+            }
+          }
+          else {
+              // No existing requests found, proceed to create a new one
+                return providerRequestDAO.create(providerRoleRequest);
+          }
+        });
     }
 
     @Override
