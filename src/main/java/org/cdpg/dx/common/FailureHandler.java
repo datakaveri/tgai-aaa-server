@@ -43,7 +43,19 @@ public class FailureHandler implements Handler<RoutingContext> {
         status = 500;
       }
 
-
+      String requestOrigin = context.request().getHeader("Origin");
+      if (CorsUtil.allowedOrigins != null
+              && requestOrigin != null
+              && (CorsUtil.allowedOrigins.contains(requestOrigin) || CorsUtil.allowedOrigins.contains("*"))) {
+        context
+                .response()
+                .putHeader("Content-Type", "application/json")
+                .putHeader("Access-Control-Allow-Origin", requestOrigin)
+                .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
+                .setStatusCode(status)
+                .end(errorResponse.toJson().encode());
+      } else {
         context
                 .response()
                 .putHeader("Content-Type", "application/json")
@@ -52,7 +64,7 @@ public class FailureHandler implements Handler<RoutingContext> {
                 .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
                 .setStatusCode(status)
                 .end(errorResponse.toJson().encode());
-
+      }
     }
   }
 }
