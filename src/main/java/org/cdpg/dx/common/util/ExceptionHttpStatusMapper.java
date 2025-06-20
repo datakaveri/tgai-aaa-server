@@ -15,6 +15,7 @@ public class ExceptionHttpStatusMapper {
             case AuthenticationException e-> HttpStatusCode.UNAUTHORIZED;
             case DxUnauthorizedException e-> HttpStatusCode.UNAUTHORIZED;
             case DxForbiddenException e-> HttpStatusCode.FORBIDDEN;
+            case DxConflictException e -> HttpStatusCode.CONFLICT;
             case BaseDxException e -> HttpStatusCode.BAD_REQUEST;
             default -> HttpStatusCode.INTERNAL_SERVER_ERROR;
         };
