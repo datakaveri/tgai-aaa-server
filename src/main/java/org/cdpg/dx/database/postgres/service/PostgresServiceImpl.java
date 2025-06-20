@@ -54,7 +54,7 @@ public class PostgresServiceImpl implements PostgresService {
     } else {
       LOG.info("Rows unaffected");
     }
-    LOG.info("Returned rows: {}", jsonArray.encodePrettily());
+    //LOG.info("Returned rows: {}", jsonArray.encodePrettily());
 
     QueryResult queryResult = new QueryResult();
     queryResult.setRows(jsonArray);

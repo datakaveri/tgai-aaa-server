@@ -24,6 +24,7 @@ import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.serviceproxy.HelperUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.core.json.jackson.DatabindCodec;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.cdpg.dx.common.config.CorsUtil;
 import org.cdpg.dx.common.util.BlockingExecutionUtil;
 
 public class ApiServerVerticle extends AbstractVerticle {
@@ -44,7 +46,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     private int port;
     private HttpServer server;
     private Router router;
-    public static List<String> allowedOrigins;
+
 
     public static String errorResponse(HttpStatusCode code) {
         return new JsonObject()
@@ -57,8 +59,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     @Override
     public void start() {
         port = config().getInteger("httpPort", 8443);
-        System.out.println(config());
-        allowedOrigins = config().getJsonArray("corsAllowedOrigin").getList();
+        CorsUtil.allowedOrigins = config().getJsonArray("corsAllowedOrigin").getList();
 
         // Register the module for default Vert.x ObjectMapper
         ObjectMapper mapper = DatabindCodec.mapper();
@@ -162,7 +163,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     private void configureCorsHandler(Router router) {
         CorsHandler corsHandler = CorsHandler.create();
 
-        for (String origin : allowedOrigins) {
+        for (String origin : CorsUtil.allowedOrigins) {
             corsHandler.addOrigin(origin);
         }
 
