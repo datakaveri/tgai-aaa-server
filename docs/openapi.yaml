@@ -2680,6 +2680,67 @@ paths:
                   type: string
                   x-stoplight:
                     id: 66hcqj28wo7vu
+  /auth/v1/user/password:
+    put:
+      summary: '(User) Change Password'
+      description: |
+        Allows the logged-in user to change their password. 
+        Only the new password needs to be provided.
+      tags:
+        - Role APIs
+      operationId: put-auth-v1-user-password
+      security:
+        - authorization: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - new_password
+              properties:
+                new_password:
+                  type: string
+                  description: The new password to be set
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: 'urn:dx:aaa:success'
+                  title:
+                    type: string
+                    example: 'Password Change Successful'
+                  result:
+                    type: string
+                    example: 'Password updated successfully.'
+        '400':
+          description: Bad Request - Failed password policy validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: 'urn:dx:aaa:error'
+                  title:
+                    type: string
+                    example: 'Password Change Failed'
+                  detail:
+                    type: string
+                    example: 'New password does not meet policy requirements.'
+        '401':
+          description: Unauthorized - Missing or invalid authentication token
+        '500':
+          description: Internal Server Error
+
   '/auth/v1/admin/user/{id}':
     parameters:
       - schema:
