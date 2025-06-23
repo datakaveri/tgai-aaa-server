@@ -46,7 +46,7 @@ public class FailureHandler implements Handler<RoutingContext> {
       String requestOrigin = context.request().getHeader("Origin");
       if (CorsUtil.allowedOrigins != null
               && requestOrigin != null
-              && CorsUtil.allowedOrigins.contains(requestOrigin)) {
+              && (CorsUtil.allowedOrigins.contains(requestOrigin) || CorsUtil.allowedOrigins.contains("*"))) {
         context
                 .response()
                 .putHeader("Content-Type", "application/json")

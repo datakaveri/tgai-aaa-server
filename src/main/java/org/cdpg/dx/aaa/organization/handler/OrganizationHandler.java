@@ -14,6 +14,7 @@ import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.model.AuditLog;
+import org.cdpg.dx.common.exception.DxConflictException;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.request.PaginatedRequest;
@@ -246,7 +247,7 @@ public class OrganizationHandler {
           for (OrganizationCreateRequest request : requests) {
               System.out.println(request.name());
             if (request.name().equalsIgnoreCase(orgName)) {
-              return Future.failedFuture(new DxForbiddenException("Organisation name already exists/ under review"));
+              return Future.failedFuture(new DxConflictException("Organisation name already exists/ under review"));
             }
           }
             return organizationService.createOrganizationRequest(organizationCreateRequest);

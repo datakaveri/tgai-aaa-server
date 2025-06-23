@@ -19,6 +19,6 @@ public class DxErrorCodes {
     public static final int TOKEN_INVALID = 12002;
     public static final int KEYCLOAK_SERVICE_ERROR = 12100;
 
-    public static final int CONFLICT = 12003;
+    public static final int CONFLICT = 409;
 
 }
