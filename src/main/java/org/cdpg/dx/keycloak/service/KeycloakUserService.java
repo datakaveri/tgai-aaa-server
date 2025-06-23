@@ -22,5 +22,6 @@ public interface KeycloakUserService {
     Future<Boolean> setOrganisationDetails(UUID userId, UUID orgId, String orgName);
     Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData);
     Future<Boolean> setKycVerifiedFalse(UUID userId);
+    Future<Boolean> updateUserPassword(UUID userId, String password);
 }
 

@@ -115,6 +115,22 @@ public class AdminHandler {
                 });
     }
 
+    public void updatePassword(RoutingContext ctx) {
+        User user = ctx.user();
+
+        JsonObject requestBody = ctx.body().asJsonObject();
+        String newPassword = requestBody.getString("new_password");
+
+        keycloakUserService.updateUserPassword(UUID.fromString(user.subject()), newPassword)
+                .onSuccess(response -> {
+                    ResponseBuilder.sendSuccess(ctx, "User password updated successfully");
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to update Password info: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
+    }
+
     public void deactivateDxUser(RoutingContext ctx) {
         User user = ctx.user();
 
