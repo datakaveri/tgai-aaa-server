@@ -1,8 +1,6 @@
 package org.cdpg.dx.aaa.organization.dao;
 
-import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.organization.dao.impl.*;
-import org.cdpg.dx.aaa.organization.models.ProviderRoleRequest;
 import org.cdpg.dx.database.postgres.service.PostgresService;
 
 public class OrganizationDAOFactory {

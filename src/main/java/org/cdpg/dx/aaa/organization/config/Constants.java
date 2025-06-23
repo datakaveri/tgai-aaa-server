@@ -1,5 +1,6 @@
 package org.cdpg.dx.aaa.organization.config;
 
+import net.sf.saxon.expr.Component;
 import org.cdpg.dx.aaa.organization.models.Role;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public final class Constants {
   public static final String JOB_TITLE="job_title";
   public static final String PHONE_NO="phone_no";
   public static final String USER_NAME = "user_name";
+  public static final String MANAGER_EMAIL = "manager_email";
   public static final String ORG_DOCUMENTS = "organisation_documents";
 
 
@@ -70,6 +72,7 @@ public final class Constants {
     EMP_ID,
     JOB_TITLE,
     PHONE_NO,
+    MANAGER_EMAIL,
     ORG_DOCUMENTS,
     CREATED_AT,
     UPDATED_AT
@@ -115,8 +118,7 @@ public final class Constants {
     "orgName", ORG_NAME,
     "entityType", ENTITY_TYPE,
     "orgSector", ORG_SECTOR,
-    "status", STATUS
-  );
+    "status", STATUS);
 
   public static final Set<String> ALLOWED_SORT_FEILDS_ORG = Set.of("createdAt", "orgName", "entityType", "orgSector");
 
