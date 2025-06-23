@@ -2672,7 +2672,7 @@ paths:
                   type: string
                   x-stoplight:
                     id: dxe1oy55b3ovw
-                linkedin_account-:
+                linkedin_account:
                   type: string
                   x-stoplight:
                     id: gvxoaj47lbpib
