@@ -116,6 +116,7 @@ public class KYCServiceImpl implements KYCService {
             }
 
             boolean isVerified = codeVerifier.equals(cachedData.getString("code_verifier"));
+            System.out.println("isverified"+isVerified);
             if (isVerified) {
                 keycloakUserService.setKycVerifiedTrueWithData(userId, cachedData)
                     .onComplete(kycResult -> {
