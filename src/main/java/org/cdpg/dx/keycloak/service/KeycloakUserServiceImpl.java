@@ -134,6 +134,29 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
+    public Future<Boolean> updateUserAttributes(UUID userId, Map<String, String> attributes, String firstName, String lastName) {
+        return BlockingExecutionUtil.runBlocking(() -> {
+            try {
+                UserRepresentation user = usersResource().get(userId.toString()).toRepresentation();
+                Map<String, List<String>> existingAttrs = Optional.ofNullable(user.getAttributes()).orElse(new HashMap<>());
+                attributes.forEach((k, v) -> existingAttrs.put(k, List.of(v)));
+                user.setAttributes(existingAttrs);
+
+                if(firstName != null && !firstName.isEmpty()) {
+                    user.setFirstName(firstName);
+                }
+                if(lastName != null && !lastName.isEmpty()) {
+                    user.setLastName(lastName);
+                }
+                usersResource().get(userId.toString()).update(user);
+                return true;
+            } catch (Exception e) {
+                throw new KeycloakServiceException("Failed to update attributes for user with ID: " + userId, e);
+            }
+        });
+    }
+
+    @Override
     public Future<Boolean> deleteUser(UUID userId) {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
@@ -180,6 +203,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             }
         }
         attributes.put(KeycloakConstants.AADHAAR_KYC_DATA, aadhaarJson.encode());
+        System.out.println("attributes = " + attributes);
         return updateUserAttributes(userId, attributes);
     }
 

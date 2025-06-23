@@ -38,7 +38,10 @@ public class DxUserMapper {
                 new ArrayList<>(),
                 new JsonObject(),
                 createdAt,
-                getAttr(attrs, "aadhaar_kyc_data").isBlank() ? new JsonObject() : new JsonObject(getAttr(attrs, "aadhaar_kyc_data"))
+                getAttr(attrs, "aadhaar_kyc_data").isBlank() ? new JsonObject() : new JsonObject(getAttr(attrs, "aadhaar_kyc_data")),
+                getAttr(attrs, "twitter_account") != null ? getAttr(attrs, "twitter_account") : "",
+                getAttr(attrs, "linkedin_account") != null ? getAttr(attrs, "linkedin_account") : "",
+                getAttr(attrs, "github_account") != null ? getAttr(attrs, "github_account") : ""
         );
     }
 
