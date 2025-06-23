@@ -43,7 +43,7 @@ public class ControllerFactory {
     CreditService creditService = CreditControllerFactory.createService(pgService, keycloakUserService, config);
     OrganizationService  organizationService = OrganizationControllerFactory.createService(pgService, keycloakUserService);
     UserService userService = new UserServiceImpl(keycloakUserService, organizationService, creditService);
-    EmailComposer emailComposer = new EmailComposer(emailService, keycloakUserService, config, organizationService, userService);
+    EmailComposer emailComposer = new EmailComposer(emailService, keycloakUserService, config, organizationService, userService, creditService);
 
     ApiController creditApiController =  CreditControllerFactory.create(creditService,emailComposer);
     KYCHandler kycHandler = KYCFactory.createHandler(vertx, config);

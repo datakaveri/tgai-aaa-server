@@ -44,4 +44,5 @@ public class Constants {
   public static final String APPROVED_BY="approved_by";
   public static final String UPDATED_BALANCE="updated_balance";
 
+  public static final String ADDITONAL_INFO= "additional_info";
 }

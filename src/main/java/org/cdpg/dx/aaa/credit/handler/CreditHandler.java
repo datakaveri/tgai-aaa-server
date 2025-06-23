@@ -155,10 +155,13 @@ public class CreditHandler {
     Status status = Status.fromString(creditRequestJson.getString("status"));
     UUID requestId = RequestHelper.getPathParamAsUUID(ctx,"id");
 
-
     creditService.updateComputeRoleStatus( requestId, status, approvedBy)
             .onSuccess(updated -> {
               ResponseBuilder.sendSuccess(ctx, "Updated Resquest ");
+              if (updated) {
+                // Send email notification
+                Future<Void> future = emailComposer.sendUserEmailForComputeRoleApproval(requestId);
+              }
             })
             .onFailure(ctx::fail);
   }

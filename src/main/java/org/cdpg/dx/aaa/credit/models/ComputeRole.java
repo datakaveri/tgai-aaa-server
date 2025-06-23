@@ -21,6 +21,7 @@ public record ComputeRole(
   String userName,
   String status,
   UUID approvedBy,
+  JsonObject additionalInfo,
   LocalDateTime createdAt,
   LocalDateTime updatedAt
 ) implements BaseEntity<ComputeRole> {
@@ -39,6 +40,7 @@ public record ComputeRole(
         json.getString(Constants.APPROVED_BY) != null
           ? UUID.fromString(json.getString(Constants.APPROVED_BY))
           : null,
+        json.getJsonObject(Constants.ADDITONAL_INFO, new JsonObject()),
         parseDateTime(json.getString(Constants.CREATED_AT)),
         parseDateTime(json.getString(Constants.UPDATED_AT))
       );
@@ -55,6 +57,7 @@ public record ComputeRole(
     if (userName != null) json.put(Constants.USER_NAME, userName);
     if (status != null && !status.isEmpty()) json.put(Constants.STATUS, status);
     if (approvedBy != null) json.put(Constants.APPROVED_BY, approvedBy.toString());
+    if (additionalInfo != null) json.put(Constants.ADDITONAL_INFO, additionalInfo); // <-- new field
     if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
     return json;
@@ -68,6 +71,7 @@ public record ComputeRole(
     if  (userName!=null) map.put(Constants.USER_NAME, userName.toString());
     if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
     if (approvedBy != null) map.put(Constants.APPROVED_BY, approvedBy.toString());
+    if (additionalInfo != null) map.put(Constants.ADDITONAL_INFO, additionalInfo.encode());
     if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
     return map;

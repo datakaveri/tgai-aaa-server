@@ -48,7 +48,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Constants.STATUS, Status.PENDING.getStatus()
         );
         Map<String, Object> filterMapGranted = Map.of(
-                Constants.STATUS, Status.PENDING.getStatus()
+                Constants.STATUS, Status.GRANTED.getStatus()
         );
 
         Future<List<OrganizationCreateRequest>> pendingFuture = createRequestDAO.getAllWithFilters(filterMapPending);
@@ -70,9 +70,20 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Future<OrganizationCreateRequest> getOrganizationCreateRequests(UUID requestId) {
+    public Future<OrganizationCreateRequest> getOrganizationCreateRequestById(UUID requestId) {
         return createRequestDAO.get(requestId);
     }
+
+    @Override
+    public Future<OrganizationJoinRequest> getOrganizationJoinRequestById(UUID requestId) {
+      return joinRequestDAO.get(requestId);
+  }
+
+  @Override
+  public Future<ProviderRoleRequest> getProviderRequestById(UUID requestId) {
+    return providerRequestDAO.get(requestId);
+  }
+
 
     @Override
     public Future<Boolean> updateOrganizationCreateRequestStatus(UUID requestId, Status status) {

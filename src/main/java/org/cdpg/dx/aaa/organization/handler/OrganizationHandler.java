@@ -114,7 +114,6 @@ public class OrganizationHandler {
 
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
-
         organizationService.updateOrganizationJoinRequestStatus(requestId, status)
                 .onSuccess(approved -> {
                     if (approved) {
@@ -122,6 +121,9 @@ public class OrganizationHandler {
                                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Approved Join Request");
                         RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,  "Approved Organisation Join Request");
+                      if(status.equals(Status.GRANTED)) {
+                        Future<Void> future = emailComposer.sendUserEmailForOrgJoinRequestApproval(requestId);
+                      }
                     } else {
                         ctx.fail(new DxNotFoundException("Request Not Found"));
                     }
@@ -184,7 +186,6 @@ public class OrganizationHandler {
     }
 
     public void approveOrganisationRequest(RoutingContext ctx) {
-        LOGGER.debug("Got request>>>>>>>>>>>>>>>>>>>>");
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
         UUID requestId = UUID.fromString(OrgRequestJson.getString("req_id"));
@@ -192,13 +193,17 @@ public class OrganizationHandler {
 
         JsonObject responseObject = OrgRequestJson.copy();
         responseObject.remove("status");
-        LOGGER.debug("Calling service >>>>>>>>>>>>>>>>>>>>");
+
         organizationService.updateOrganizationCreateRequestStatus(requestId, status)
                 .onSuccess(updated -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "PUT", "Approve Create Organisation Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Updated Sucessfully");
+
+                  if(status.equals(Status.GRANTED)) {
+                        Future<Void> future = emailComposer.sendUserEmailForOrgCreateRequestApproval(requestId);
+                    }
                 })
                 .onFailure(ctx::fail);
     }
@@ -253,8 +258,6 @@ public class OrganizationHandler {
           RoutingContextHelper.setAuditingLog(ctx, auditLog);
           ResponseBuilder.sendSuccess(ctx, requests);
           Future<Void> future = emailComposer.sendEmailForCreatingOrg(organizationCreateRequest, user);
-
-
       })
       .onFailure(ctx::fail);
   }
@@ -340,6 +343,7 @@ public class OrganizationHandler {
                                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Organisation User Role");
                         RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,"Updated Organisation User Role");
+
                     } else {
                         ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
                     }
@@ -393,12 +397,17 @@ public class OrganizationHandler {
         UUID reqId = RequestHelper.getPathParamAsUUID(ctx, "id");
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
+
         organizationService.updateProviderRequestStatus(reqId,status)
                 .onSuccess(requests -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Provider Role Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Provider role updated");
+                  if(status.equals(Status.GRANTED)) {
+                    Future<Void> future = emailComposer.sendUserEmailForProviderRoleApproval(reqId);
+                  }
+
                 })
                 .onFailure(ctx::fail);
     }
