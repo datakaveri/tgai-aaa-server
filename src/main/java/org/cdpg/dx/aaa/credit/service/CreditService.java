@@ -37,4 +37,6 @@ public interface CreditService {
   Future<Boolean> updateComputeRoleStatus(UUID requestId, Status status,UUID approvedBy);
 
   Future<Boolean> hasUserComputeAccess(UUID userId);
+
+  Future<ComputeRole> getComputeRequestById(UUID requestId);
 }

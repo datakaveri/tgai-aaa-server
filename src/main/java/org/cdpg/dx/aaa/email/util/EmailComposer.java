@@ -7,12 +7,11 @@ import io.vertx.ext.mail.MailMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.models.ComputeRole;
-import org.cdpg.dx.aaa.organization.models.OrganizationCreateRequest;
-import org.cdpg.dx.aaa.organization.models.OrganizationJoinRequest;
-import org.cdpg.dx.aaa.organization.models.OrganizationUser;
-import org.cdpg.dx.aaa.organization.models.ProviderRoleRequest;
+import org.cdpg.dx.aaa.credit.service.CreditService;
+import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
+
 import org.cdpg.dx.email.service.EmailService;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
@@ -20,7 +19,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.UUID;
+
+import static org.cdpg.dx.aaa.organization.config.Constants.*;
+import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 public class EmailComposer {
   private static final Logger LOGGER = LogManager.getLogger(EmailComposer.class);
@@ -29,13 +32,17 @@ public class EmailComposer {
   private final JsonObject config;
   private final OrganizationService  organizationService;
   private final UserService userService;
+  private final CreditService creditService;
 
-  public EmailComposer(EmailService emailService, KeycloakUserService keycloakUserService, JsonObject config,OrganizationService organizationService,UserService userService) {
+  public EmailComposer(EmailService emailService, KeycloakUserService keycloakUserService, JsonObject config, OrganizationService organizationService, UserService userService, CreditService creditService
+  ) {
     this.emailService = emailService;
     this.keycloakUserService = keycloakUserService;
     this.config = config;
     this.organizationService = organizationService;
     this.userService = userService;
+    this.creditService = creditService;
+
   }
   /**
    * Loads an HTML email template from the resources folder.
@@ -233,6 +240,204 @@ public class EmailComposer {
     });
   }
 
+  //**** APPROVAL EMAILS ****//
+
+  public Future<Void> sendUserEmailForOrgJoinRequestApproval(UUID reqId) {
+
+    return organizationService.getOrganizationJoinRequestById(reqId).compose(ar-> {
+
+      String userName = ar.userName();
+      UUID userId = ar.userId();
+      UUID orgId = ar.organizationId();
+
+      return userService.getUserInfoByID(userId).compose(userInfo-> {
+        String emailId = userInfo.email();
+        String subject = "Organization Join Request Approved";
+        String senderEmail = config.getString("emailSender");
+        String adminPortalUrl = config.getString("TGDxUrl");
+
+      Map<String, String> emailDetails = Map.of(
+            "USER_FIRST_NAME", userName,
+            "ADMIN_PORTAL_URL", adminPortalUrl,
+            "SENDER_NAME", "TGDeX Team",
+            "ORGANIZATION_ID", orgId.toString(),
+            "SUBJECT", subject);
+
+
+          String emailTemplate = loadTemplate("templates/approved-join-organization.html"); // Path to HTML template
+          String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+          MailMessage mailMessage = createMailMessage(
+          senderEmail,
+          emailId,
+          htmlBody,
+          subject
+        );
+
+    return emailService.sendEmail(mailMessage).onComplete(res -> {
+      if (res.succeeded()) {
+        LOGGER.info("Approved email sent to {}", emailId);
+      } else {
+        LOGGER.error("Failed to send approved email: {}", res.cause().getMessage());
+      }
+    }).recover(failure -> {
+      LOGGER.error("Failed to handle email for approval: {}", failure.getMessage());
+      return Future.failedFuture(failure);
+    });
+      });
+    });
+
+  }
+
+  public Future<Void> sendUserEmailForComputeRoleApproval(UUID reqId)
+  {
+
+    return creditService.getComputeRequestById(reqId).compose(ar-> {
+
+      UUID userId = ar.userId();
+
+      if (userId == null) {
+        return Future.failedFuture("User ID is null for compute role request with ID: " + reqId);
+      }
+
+      return userService.getUserInfoByID(userId).compose(userInfo -> {
+        String emailId = userInfo.email();
+        String userName = userInfo.name();
+        String subject = "Compute Role Request Approved";
+        String senderEmail = config.getString("emailSender");
+        String adminPortalUrl = config.getString("TGDxUrl");
+
+        Map<String, String> emailDetails = Map.of(
+          "USER_FIRST_NAME", userName,
+          "ADMIN_PORTAL_URL", adminPortalUrl,
+          "SENDER_NAME", "TGDeX Team",
+          "SUBJECT", subject);
+
+        String emailTemplate = loadTemplate("templates/approved-compute-role.html"); // Path to HTML template
+        String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+        MailMessage mailMessage = createMailMessage(
+          senderEmail,
+          emailId,
+          htmlBody,
+          subject
+        );
+
+        return emailService.sendEmail(mailMessage).onComplete(res -> {
+          if (res.succeeded()) {
+            LOGGER.info("Approved email sent to {}", emailId);
+          } else {
+            LOGGER.error("Failed to send approved email: {}", res.cause().getMessage());
+          }
+        }).recover(failure -> {
+          LOGGER.error("Failed to handle email for approval: {}", failure.getMessage());
+          return Future.failedFuture(failure);
+        });
+      });
+
+    });
+
+  }
+
+  public Future<Void> sendUserEmailForProviderRoleApproval(UUID reqId) {
+
+    return organizationService.getProviderRequestById(reqId).compose(ar-> {
+
+      UUID userId = ar.userId();
+      UUID orgId = ar.orgId();
+
+      return userService.getUserInfoByID(userId).compose(userInfo-> {
+        String emailId = userInfo.email();
+        String userName = userInfo.name();
+        String subject = "Provider Role Request Approved";
+        String senderEmail = config.getString("emailSender");
+        String adminPortalUrl = config.getString("TGDxUrl");
+
+        Map<String, String> emailDetails = Map.of(
+          "USER_FIRST_NAME", userName,
+          "ADMIN_PORTAL_URL", adminPortalUrl,
+          "SENDER_NAME", "TGDeX Team",
+          "ORGANIZATION_ID", orgId.toString(),
+          "SUBJECT", subject);
+
+
+        String emailTemplate = loadTemplate("templates/approved-pending-role.html"); // Path to HTML template
+        String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+        MailMessage mailMessage = createMailMessage(
+          senderEmail,
+          emailId,
+          htmlBody,
+          subject
+        );
+
+        return emailService.sendEmail(mailMessage).onComplete(res -> {
+          if (res.succeeded()) {
+            LOGGER.info("Approved email sent to {}", emailId);
+          } else {
+            LOGGER.error("Failed to send approved email: {}", res.cause().getMessage());
+          }
+        }).recover(failure -> {
+          LOGGER.error("Failed to handle email for approval: {}", failure.getMessage());
+          return Future.failedFuture(failure);
+        });
+      });
+    });
+
+  }
+
+  public Future<Void> sendUserEmailForOrgCreateRequestApproval(UUID reqId) {
+
+    return organizationService.getOrganizationCreateRequestById(reqId).compose(ar-> {
+
+      UUID requestedBy = ar.requestedBy();
+      String userName = ar.userName();
+      String orgName = ar.name();
+
+
+      return userService.getUserInfoByID(requestedBy).compose(userInfo-> {
+        String emailId = userInfo.email();
+        String subject = "Organization Creation Request Approved";
+        String senderEmail = config.getString("emailSender");
+        String adminPortalUrl = config.getString("TGDxUrl"); // Admin portal URL
+
+        Map<String, String> emailDetails = Map.of(
+          "USER_FIRST_NAME", userName,
+          "ORGANIZATION_NAME", orgName,
+          "ADMIN_PORTAL_URL", adminPortalUrl,
+          "SENDER_NAME", "TGDeX Team",
+          "SUBJECT", subject);
+
+
+        String emailTemplate = loadTemplate("templates/approved-create-organization.html"); // Path to HTML template
+        String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+        MailMessage mailMessage = createMailMessage(
+          senderEmail,
+          emailId,
+          htmlBody,
+          subject
+        );
+
+        return emailService.sendEmail(mailMessage).onComplete(res -> {
+          if (res.succeeded()) {
+            LOGGER.info("Approved email sent to {}", emailId);
+          } else {
+            LOGGER.error("Failed to send approved email for org create request: {}", res.cause().getMessage());
+          }
+        }).recover(failure -> {
+          LOGGER.error("Failed to handle email for approval of org create request: {}", failure.getMessage());
+          return Future.failedFuture(failure);
+        });
+      });
+    });
+
+  }
+
+
+
+
+
 
   /**
    * Replaces placeholders in the HTML template with actual values.
@@ -288,6 +493,8 @@ public class EmailComposer {
         return Future.failedFuture("Failed to retrieve organization admin email: " + throwable.getMessage());
       });
   }
+
+
 
 
 }

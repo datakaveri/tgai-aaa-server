@@ -16,7 +16,7 @@ public interface OrganizationService {
 
 
   // ************ ORGANIZATION CREATE REQUEST *********
-  Future<OrganizationCreateRequest> getOrganizationCreateRequests(UUID requestId);
+  Future<OrganizationCreateRequest> getOrganizationCreateRequestById(UUID requestId);
 
   Future<List<OrganizationCreateRequest>> getOrganizationCreateRequestsByUserId(UUID userId);
 
@@ -34,6 +34,8 @@ public interface OrganizationService {
   Future<OrganizationJoinRequest> joinOrganizationRequest(OrganizationJoinRequest organizationJoinRequest);
 
   Future<PaginatedResult<OrganizationJoinRequest>> getOrganizationPendingJoinRequests(PaginatedRequest paginatedRequest);
+
+  Future<OrganizationJoinRequest> getOrganizationJoinRequestById(UUID requestId);
 
   Future<Boolean> updateOrganizationJoinRequestStatus(UUID requestId, Status Status);
 
@@ -87,6 +89,8 @@ public interface OrganizationService {
   Future<Boolean> hasPendingProviderRole(UUID userId, UUID orgId);
 
   Future<Boolean> createProviderRole(ProviderRoleRequest providerRoleRequest);
+
+  Future<ProviderRoleRequest> getProviderRequestById(UUID requestId);
 
 }
 

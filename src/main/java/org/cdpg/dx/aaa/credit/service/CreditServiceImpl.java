@@ -132,6 +132,7 @@ public class CreditServiceImpl implements CreditService {
   @Override
   public Future<CreditTransaction> deductCredits(CreditTransaction creditTransaction) {
     LocalDateTime reqAt = creditTransaction.requestedAt();
+    System.out.println("Request at: " + reqAt);
     UUID userId = creditTransaction.userId();
 
     if (creditTransaction.amount() == null) {
@@ -265,6 +266,12 @@ public class CreditServiceImpl implements CreditService {
               }
               return Future.failedFuture(err);
             });
+  }
+
+  @Override
+  public Future<ComputeRole> getComputeRequestById(UUID requestId)
+  {
+    return computeRoleDAO.get(requestId);
   }
 
   @Override
