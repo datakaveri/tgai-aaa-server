@@ -2644,6 +2644,42 @@ paths:
           required: true
       security:
         - authorization: []
+    put:
+      summary: '(User) Update First Name, Last Name, Social Media Information'
+      tags:
+        - Role APIs
+      responses:
+        '200':
+          description: OK
+      operationId: put-auth-v1-user
+      security:
+        - authorization: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  x-stoplight:
+                    id: pdtm28py9tigj
+                last_name:
+                  type: string
+                  x-stoplight:
+                    id: l8unuppdsu8n6
+                twitter_account:
+                  type: string
+                  x-stoplight:
+                    id: dxe1oy55b3ovw
+                linkedin_account:
+                  type: string
+                  x-stoplight:
+                    id: gvxoaj47lbpib
+                github_account:
+                  type: string
+                  x-stoplight:
+                    id: 66hcqj28wo7vu
   '/auth/v1/admin/user/{id}':
     parameters:
       - schema:
@@ -2988,6 +3024,16 @@ paths:
           name: Authorization
           description: Keycloak Issued Token
           required: true
+      security:
+        - authorization: []
+  /auth/v1/user/deactivate:
+    post:
+      summary: (User) Deactivate User Account
+      tags: [Role APIs]
+      responses:
+        '200':
+          description: OK
+      operationId: post-auth-v1-user-deactivate
       security:
         - authorization: []
 components:
