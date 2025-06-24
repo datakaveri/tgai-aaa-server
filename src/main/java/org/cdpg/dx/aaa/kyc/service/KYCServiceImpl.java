@@ -13,6 +13,7 @@ import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -87,7 +88,9 @@ public class KYCServiceImpl implements KYCService {
                     try {
                         JsonObject aadhaarJson = parseKYCxml(response.bodyAsString());
                         aadhaarJson.put("code_verifier", codeVerifier);
-                        cacheService.store(userId, aadhaarJson);
+                        JsonObject aadhaarJsonNoPhoto = new JsonObject(aadhaarJson.encode());
+                        aadhaarJsonNoPhoto.remove("Pht");// Remove Pht as per requirement
+                        cacheService.store(userId, aadhaarJsonNoPhoto);
                         return Future.succeededFuture(new JsonObject().put("aadhaarDetails", aadhaarJson));
                     } catch (DxValidationException e) {
                         return Future.failedFuture(e);
@@ -146,6 +149,7 @@ public class KYCServiceImpl implements KYCService {
     private JsonObject parseKYCxml(String xmlData) {
         try {
             JSONObject jsonObject = XML.toJSONObject(xmlData);
+             // For debugging purposes
             Map<String, Object> map = jsonObject.toMap();
 
             JsonObject root = new JsonObject(map);
@@ -188,6 +192,12 @@ public class KYCServiceImpl implements KYCService {
             if (uidData.containsKey("Poi")) {
                 result.put("Poi", uidData.getJsonObject("Poi"));
             }
+
+            if (uidData.containsKey("Pht")) {
+                result.put("Pht", uidData.getString("Pht"));
+            }
+
+            result.put("requestedAt", Instant.now().toString());
 
             return result;
 
