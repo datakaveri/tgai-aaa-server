@@ -3,8 +3,12 @@ package org.cdpg.dx.database.postgres.util;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class EntityUtil {
+  private static final Logger LOGGER = LogManager.getLogger(EntityUtil.class);
+
   public static void putIfPresent(Map<String, Object> map, String key, Optional<?> value) {
     value.ifPresent(v -> map.put(key, v));
   }
@@ -21,11 +25,11 @@ public class EntityUtil {
     }
   }
 
-  public static UUID parseUUID(String value) {
+  public static UUID parseUUID(String value, String name) {
     if (value != null && !value.isEmpty()) {
       return UUID.fromString(value);
     }
-    System.out.printf("requested UUID is null or empty: %s%n", value);
+    LOGGER.warn("requested UUID is null or empty for {}", name);
     return null;
   }
 }
