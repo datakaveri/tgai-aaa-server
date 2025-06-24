@@ -131,11 +131,12 @@ public class CreditHandler {
 
     PaginatedRequest request = PaginationRequestBuilder.from(ctx)
             .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+            .apiToDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
             .additionalFilters(Map.of())
             .allowedTimeFields(Set.of(CREATED_AT))
             .defaultTimeField(CREATED_AT)
             .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-            .allowedSortFields(ALLOWED_SORT_FIELDS_COMPUTE_ROLE)
+            .allowedSortFields(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE.keySet())
             .build();
 
     creditService.getAllComputeRequests(request)

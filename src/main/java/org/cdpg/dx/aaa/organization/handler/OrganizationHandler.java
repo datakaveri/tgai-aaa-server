@@ -86,10 +86,11 @@ public class OrganizationHandler {
     public void listAllOrganisations(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .apiToDbMap(API_TO_DB_ORG)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .allowedSortFields(API_TO_DB_ORG.keySet())
                 .build();
 
 
@@ -138,11 +139,12 @@ public class OrganizationHandler {
 
       PaginatedRequest request = PaginationRequestBuilder.from(ctx)
         .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST)
+              .apiToDbMap(API_TO_DB_ORG_JOIN_REQUEST)
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(REQUESTED_AT))
         .defaultTimeField(REQUESTED_AT)
         .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
-        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .allowedSortFields(API_TO_DB_ORG_JOIN_REQUEST.keySet())
         .build();
 
 
@@ -211,10 +213,11 @@ public class OrganizationHandler {
     public void getOrganisationRequest(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST)
+                .apiToDbMap(API_TO_DB_ORG_CREATE_REQUEST)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .allowedSortFields(API_TO_DB_ORG_CREATE_REQUEST.keySet())
                 .build();
 
 
@@ -308,11 +311,12 @@ public class OrganizationHandler {
 
       PaginatedRequest request = PaginationRequestBuilder.from(ctx)
         .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_USERS)
+              .apiToDbMap(API_TO_DB_ORG_USERS)
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(CREATED_AT))
         .defaultTimeField(CREATED_AT)
         .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .allowedSortFields(API_TO_DB_ORG_USERS.keySet())
         .build();
 
       organizationService.getOrganizationUsers(request)
@@ -445,7 +449,9 @@ public class OrganizationHandler {
                             UUID orgId = orgUser.organizationId();
                             PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                                     .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
+                                    .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
                                     .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+                                    .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
                                     .build();
 
                             return organizationService.getAllPendingProviderRoleRequests(request);
