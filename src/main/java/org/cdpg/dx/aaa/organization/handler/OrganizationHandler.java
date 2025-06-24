@@ -1,6 +1,7 @@
 package org.cdpg.dx.aaa.organization.handler;
 
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -147,16 +148,45 @@ public class OrganizationHandler {
         .allowedSortFields(API_TO_DB_ORG_JOIN_REQUEST.keySet())
         .build();
 
+    organizationService.getOrganizationPendingJoinRequests(request)
+      .compose(result -> {
+        List<Future<JsonObject>> enrichedFutures = result.data().stream()
+          .map(joinRequest -> userService.getUserInfoByID(joinRequest.userId())
+            .map(user -> {
+              JsonObject enriched = joinRequest.toJson();
+              enriched.put("roles", user.roles());
+              return enriched;
+            })
+            .recover(err -> {
+              System.out.println("In recover block!");
+              JsonObject enriched = joinRequest.toJson();
+              enriched.put("roles", List.of());
+              return Future.succeededFuture(enriched);
+            })
+          )
+          .toList();
 
-        organizationService.getOrganizationPendingJoinRequests(request)
-                .onSuccess(result -> {
-                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Pending Join Requests");
-                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, result.data(), result.paginationInfo());
-                })
-                .onFailure(ctx::fail);
-    }
+        return Future.all(enrichedFutures).map(cf -> {
+          List<JsonObject> enrichedList = new java.util.ArrayList<>();
+          for (int i = 0; i < cf.size(); i++) {
+            enrichedList.add((JsonObject) cf.resultAt(i));
+          }
+          return Map.entry(enrichedList, result.paginationInfo());
+        });
+      })
+      .onSuccess(entry -> {
+        List<JsonObject> enrichedList = entry.getKey();
+        PaginationInfo paginationInfo = entry.getValue();
+
+        AuditLog auditLog = AuditingHelper.createAuditLog(
+          ctx.user(), RoutingContextHelper.getRequestPath(ctx),
+          "GET", "Get Pending Join Requests");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
+
+        ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
+      })
+      .onFailure(ctx::fail);
+  }
 
     public void joinOrganisationRequest(RoutingContext ctx) {
 
@@ -457,10 +487,23 @@ public class OrganizationHandler {
                             return organizationService.getAllPendingProviderRoleRequests(request);
                         }
                 ).compose(requests -> {
-                    List<Future<JsonObject>> enrichedFutures = requests.data().stream().map(req ->
-                            organizationService.getOrganizationUserInfo(req.userId())
-                                    .map(userInfo -> ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, userInfo))
-                    ).toList();
+            List<Future<JsonObject>> enrichedFutures = requests.data().stream()
+              .map(req ->
+                organizationService.getOrganizationUserInfo(req.userId())
+                  .compose(orgUser ->
+                    userService.getUserInfoByID(req.userId())
+                      .map(dxUser -> {
+                        JsonObject enriched = ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, orgUser);
+                        enriched.put("roles", dxUser.roles());
+                        return enriched;
+                      })
+                      .recover(err -> {
+                        JsonObject enriched = ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, orgUser);
+                        enriched.put("roles", List.of());
+                        return Future.succeededFuture(enriched);
+                      })
+                  )
+              ).toList();
                     return Future.all(enrichedFutures).map(cf -> {
                         List<JsonObject> resultList = new java.util.ArrayList<>();
                         for (int i = 0; i < cf.size(); i++) {
