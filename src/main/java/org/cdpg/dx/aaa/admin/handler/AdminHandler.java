@@ -3,6 +3,7 @@ package org.cdpg.dx.aaa.admin.handler;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -13,11 +14,10 @@ import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.model.DxUser;
+import org.cdpg.dx.keycloak.config.KeycloakConstants;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class AdminHandler {
 
@@ -84,6 +84,65 @@ public class AdminHandler {
                     LOGGER.error("Failed to get all DxUsers: {}", err.getMessage(), err);
                     ctx.fail(err);
                 });
+    }
+
+    public void updateDxUserInfo(RoutingContext ctx) {
+        User user = ctx.user();
+        Map<String, String> attributes = new HashMap<>();
+
+        JsonObject requestBody = ctx.body().asJsonObject();
+
+        String firstName = requestBody.getString("first_name");
+        String lastName = requestBody.getString("last_name");
+
+        if (requestBody.getString("twitter_account") != null) {
+            attributes.put("twitter_account", requestBody.getString("twitter_account"));
+        }
+        if (requestBody.getString("linkedin_account") != null) {
+            attributes.put("linkedin_account", requestBody.getString("linkedin_account"));
+        }
+        if (requestBody.getString("github_account") != null) {
+            attributes.put("github_account", requestBody.getString("github_account"));
+        }
+
+        keycloakUserService.updateUserAttributes(UUID.fromString(user.subject()), attributes, firstName, lastName)
+                .onSuccess(response -> {
+                    ResponseBuilder.sendSuccess(ctx, "User info updated successfully");
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to update DxUser info: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
+    }
+
+    public void updatePassword(RoutingContext ctx) {
+        User user = ctx.user();
+
+        JsonObject requestBody = ctx.body().asJsonObject();
+        String newPassword = requestBody.getString("new_password");
+
+        keycloakUserService.updateUserPassword(UUID.fromString(user.subject()), newPassword)
+                .onSuccess(response -> {
+                    ResponseBuilder.sendSuccess(ctx, "User password updated successfully");
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to update Password info: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
+    }
+
+    public void deactivateDxUser(RoutingContext ctx) {
+        User user = ctx.user();
+
+        keycloakUserService.disableUser(UUID.fromString(user.subject()))
+                .onSuccess(response -> {
+                    ResponseBuilder.sendSuccess(ctx, "User deactivated successfully");
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to deactivate DxUser: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
+
     }
 
 }

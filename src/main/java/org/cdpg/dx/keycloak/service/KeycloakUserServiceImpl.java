@@ -16,6 +16,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.apache.logging.log4j.Logger;
+import org.keycloak.representations.idm.CredentialRepresentation;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +37,28 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     private UsersResource usersResource() {
         return keycloak.realm(realm).users();
 
+    }
+
+
+    @Override
+    public Future<Boolean> updateUserPassword(UUID userId, String newPassword) {
+        return BlockingExecutionUtil.runBlocking(() -> {
+            try {
+                // Build the new password credential
+                CredentialRepresentation credential = new CredentialRepresentation();
+                credential.setType(CredentialRepresentation.PASSWORD);
+                credential.setValue(newPassword);
+                credential.setTemporary(false); // set to 'true' if you want the user to reset on next login
+
+                // Update password
+                usersResource().get(userId.toString()).resetPassword(credential);
+                LOGGER.info("Password updated successfully for user '{}'", userId);
+                return true;
+            } catch (Exception e) {
+                LOGGER.error("Failed to update password for user '{}': {}", userId, e.getMessage(), e);
+                throw new KeycloakServiceException("Failed to update password for user: " + userId, e);
+            }
+        });
     }
 
     @Override
@@ -134,6 +157,29 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
+    public Future<Boolean> updateUserAttributes(UUID userId, Map<String, String> attributes, String firstName, String lastName) {
+        return BlockingExecutionUtil.runBlocking(() -> {
+            try {
+                UserRepresentation user = usersResource().get(userId.toString()).toRepresentation();
+                Map<String, List<String>> existingAttrs = Optional.ofNullable(user.getAttributes()).orElse(new HashMap<>());
+                attributes.forEach((k, v) -> existingAttrs.put(k, List.of(v)));
+                user.setAttributes(existingAttrs);
+
+                if(firstName != null && !firstName.isEmpty()) {
+                    user.setFirstName(firstName);
+                }
+                if(lastName != null && !lastName.isEmpty()) {
+                    user.setLastName(lastName);
+                }
+                usersResource().get(userId.toString()).update(user);
+                return true;
+            } catch (Exception e) {
+                throw new KeycloakServiceException("Failed to update attributes for user with ID: " + userId, e);
+            }
+        });
+    }
+
+    @Override
     public Future<Boolean> deleteUser(UUID userId) {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
@@ -180,6 +226,7 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
             }
         }
         attributes.put(KeycloakConstants.AADHAAR_KYC_DATA, aadhaarJson.encode());
+        System.out.println("attributes = " + attributes);
         return updateUserAttributes(userId, attributes);
     }
 

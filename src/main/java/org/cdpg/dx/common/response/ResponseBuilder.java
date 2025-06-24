@@ -3,7 +3,6 @@ package org.cdpg.dx.common.response;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.cdpg.dx.common.HttpStatusCode;
-import org.cdpg.dx.common.config.CorsUtil;
 import org.cdpg.dx.common.util.PaginationInfo;
 
 import static org.cdpg.dx.common.config.CorsUtil.allowedOrigins;
@@ -48,6 +47,9 @@ public class ResponseBuilder {
     } else {
       ctx.response()
               .putHeader("Content-Type", "application/json")
+              .putHeader("Access-Control-Allow-Origin", "*")
+              .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+              .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type")
               .setStatusCode(status.getValue())
               .end(JsonObject.mapFrom(response).encode());
     }

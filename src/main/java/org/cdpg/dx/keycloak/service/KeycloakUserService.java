@@ -13,6 +13,7 @@ public interface KeycloakUserService {
     Future<List<DxUser>> getUsers(int page, int size);
     Future<DxUser> getUserById(UUID userId);
     Future<Boolean> updateUserAttributes(UUID userId, Map<String, String> attributes);
+    Future<Boolean> updateUserAttributes(UUID userId, Map<String, String> attributes, String firstName, String lastName);
     Future<Boolean> deleteUser(UUID userId);
     Future<Boolean> enableUser(UUID userId);
     Future<Boolean> disableUser(UUID userId);
@@ -21,5 +22,6 @@ public interface KeycloakUserService {
     Future<Boolean> setOrganisationDetails(UUID userId, UUID orgId, String orgName);
     Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData);
     Future<Boolean> setKycVerifiedFalse(UUID userId);
+    Future<Boolean> updateUserPassword(UUID userId, String password);
 }
 

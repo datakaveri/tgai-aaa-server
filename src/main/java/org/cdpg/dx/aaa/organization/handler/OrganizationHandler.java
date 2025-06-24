@@ -14,6 +14,7 @@ import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.model.AuditLog;
+import org.cdpg.dx.common.exception.DxConflictException;
 import org.cdpg.dx.common.exception.DxForbiddenException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.request.PaginatedRequest;
@@ -85,10 +86,11 @@ public class OrganizationHandler {
     public void listAllOrganisations(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .apiToDbMap(API_TO_DB_ORG)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .allowedSortFields(API_TO_DB_ORG.keySet())
                 .build();
 
 
@@ -113,7 +115,6 @@ public class OrganizationHandler {
 
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
-
         organizationService.updateOrganizationJoinRequestStatus(requestId, status)
                 .onSuccess(approved -> {
                     if (approved) {
@@ -121,6 +122,9 @@ public class OrganizationHandler {
                                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Approved Join Request");
                         RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,  "Approved Organisation Join Request");
+                      if(status.equals(Status.GRANTED)) {
+                        Future<Void> future = emailComposer.sendUserEmailForOrgJoinRequestApproval(requestId);
+                      }
                     } else {
                         ctx.fail(new DxNotFoundException("Request Not Found"));
                     }
@@ -135,11 +139,12 @@ public class OrganizationHandler {
 
       PaginatedRequest request = PaginationRequestBuilder.from(ctx)
         .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST)
+              .apiToDbMap(API_TO_DB_ORG_JOIN_REQUEST)
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(REQUESTED_AT))
         .defaultTimeField(REQUESTED_AT)
         .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
-        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .allowedSortFields(API_TO_DB_ORG_JOIN_REQUEST.keySet())
         .build();
 
 
@@ -183,7 +188,6 @@ public class OrganizationHandler {
     }
 
     public void approveOrganisationRequest(RoutingContext ctx) {
-        LOGGER.debug("Got request>>>>>>>>>>>>>>>>>>>>");
         JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
         UUID requestId = UUID.fromString(OrgRequestJson.getString("req_id"));
@@ -191,13 +195,17 @@ public class OrganizationHandler {
 
         JsonObject responseObject = OrgRequestJson.copy();
         responseObject.remove("status");
-        LOGGER.debug("Calling service >>>>>>>>>>>>>>>>>>>>");
+
         organizationService.updateOrganizationCreateRequestStatus(requestId, status)
                 .onSuccess(updated -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "PUT", "Approve Create Organisation Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Updated Sucessfully");
+
+                  if(status.equals(Status.GRANTED)) {
+                        Future<Void> future = emailComposer.sendUserEmailForOrgCreateRequestApproval(requestId);
+                    }
                 })
                 .onFailure(ctx::fail);
     }
@@ -205,10 +213,11 @@ public class OrganizationHandler {
     public void getOrganisationRequest(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST)
+                .apiToDbMap(API_TO_DB_ORG_CREATE_REQUEST)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .allowedSortFields(API_TO_DB_ORG_CREATE_REQUEST.keySet())
                 .build();
 
 
@@ -241,7 +250,7 @@ public class OrganizationHandler {
           for (OrganizationCreateRequest request : requests) {
               System.out.println(request.name());
             if (request.name().equalsIgnoreCase(orgName)) {
-              return Future.failedFuture(new DxForbiddenException("Organisation name already exists/ under review"));
+              return Future.failedFuture(new DxConflictException("Organisation name already exists/ under review"));
             }
           }
             return organizationService.createOrganizationRequest(organizationCreateRequest);
@@ -252,8 +261,6 @@ public class OrganizationHandler {
           RoutingContextHelper.setAuditingLog(ctx, auditLog);
           ResponseBuilder.sendSuccess(ctx, requests);
           Future<Void> future = emailComposer.sendEmailForCreatingOrg(organizationCreateRequest, user);
-
-
       })
       .onFailure(ctx::fail);
   }
@@ -304,11 +311,12 @@ public class OrganizationHandler {
 
       PaginatedRequest request = PaginationRequestBuilder.from(ctx)
         .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_USERS)
+              .apiToDbMap(API_TO_DB_ORG_USERS)
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(CREATED_AT))
         .defaultTimeField(CREATED_AT)
         .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .allowedSortFields(API_TO_DB_ORG_USERS.keySet())
         .build();
 
       organizationService.getOrganizationUsers(request)
@@ -339,6 +347,7 @@ public class OrganizationHandler {
                                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Organisation User Role");
                         RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,"Updated Organisation User Role");
+
                     } else {
                         ctx.fail(new DxNotFoundException( "Organisation User Not Found"));
                     }
@@ -392,12 +401,17 @@ public class OrganizationHandler {
         UUID reqId = RequestHelper.getPathParamAsUUID(ctx, "id");
         Status status = Status.fromString(OrgRequestJson.getString("status"));
 
+
         organizationService.updateProviderRequestStatus(reqId,status)
                 .onSuccess(requests -> {
                     AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                             RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Provider Role Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Provider role updated");
+                  if(status.equals(Status.GRANTED)) {
+                    Future<Void> future = emailComposer.sendUserEmailForProviderRoleApproval(reqId);
+                  }
+
                 })
                 .onFailure(ctx::fail);
     }
@@ -435,7 +449,9 @@ public class OrganizationHandler {
                             UUID orgId = orgUser.organizationId();
                             PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                                     .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
+                                    .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
                                     .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+                                    .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
                                     .build();
 
                             return organizationService.getAllPendingProviderRoleRequests(request);

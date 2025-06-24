@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.cdpg.dx.database.postgres.models.*;
 import org.cdpg.dx.database.postgres.util.DxPgExceptionMapper;
+import org.keycloak.common.util.SystemEnvProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,14 +81,15 @@ public class PostgresServiceImpl implements PostgresService {
                 + param);
 
         if (param instanceof String paramStr) {
-
           // Check if it's an ISO timestamp string
-          if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
-              || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
+          if (paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$")
+            || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
+            || paramStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,9}$")) {
             try {
               // Parse and
               // qconvert to LocalDateTime
               LocalDateTime time = LocalDateTime.parse(paramStr);
+
               tuple.addValue(time);
               continue;
             } catch (Exception e) {

@@ -131,11 +131,12 @@ public class CreditHandler {
 
     PaginatedRequest request = PaginationRequestBuilder.from(ctx)
             .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+            .apiToDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
             .additionalFilters(Map.of())
             .allowedTimeFields(Set.of(CREATED_AT))
             .defaultTimeField(CREATED_AT)
             .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-            .allowedSortFields(ALLOWED_SORT_FIELDS_COMPUTE_ROLE)
+            .allowedSortFields(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE.keySet())
             .build();
 
     creditService.getAllComputeRequests(request)
@@ -155,10 +156,13 @@ public class CreditHandler {
     Status status = Status.fromString(creditRequestJson.getString("status"));
     UUID requestId = RequestHelper.getPathParamAsUUID(ctx,"id");
 
-
     creditService.updateComputeRoleStatus( requestId, status, approvedBy)
             .onSuccess(updated -> {
               ResponseBuilder.sendSuccess(ctx, "Updated Resquest ");
+              if (updated) {
+                // Send email notification
+                Future<Void> future = emailComposer.sendUserEmailForComputeRoleApproval(requestId);
+              }
             })
             .onFailure(ctx::fail);
   }
