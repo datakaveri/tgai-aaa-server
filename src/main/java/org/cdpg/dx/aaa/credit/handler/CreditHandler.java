@@ -1,7 +1,6 @@
 package org.cdpg.dx.aaa.credit.handler;
 
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
@@ -14,7 +13,6 @@ import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.user.service.UserService;
-import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
@@ -132,13 +130,14 @@ public class CreditHandler {
   public void getAllComputeRequests(RoutingContext ctx) {
 
     PaginatedRequest request = PaginationRequestBuilder.from(ctx)
-      .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
-      .additionalFilters(Map.of())
-      .allowedTimeFields(Set.of(CREATED_AT))
-      .defaultTimeField(CREATED_AT)
-      .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-      .allowedSortFields(ALLOWED_SORT_FIELDS_COMPUTE_ROLE)
-      .build();
+            .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+            .apiToDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+            .additionalFilters(Map.of())
+            .allowedTimeFields(Set.of(CREATED_AT))
+            .defaultTimeField(CREATED_AT)
+            .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+            .allowedSortFields(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE.keySet())
+            .build();
 
     creditService.getAllComputeRequests(request)
       .compose(result->{
@@ -173,7 +172,8 @@ public class CreditHandler {
         ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
       })
       .onFailure(ctx::fail);
-}
+
+  }
 
   public void updateComputeRoleStatus(RoutingContext ctx) {
 

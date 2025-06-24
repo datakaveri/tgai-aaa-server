@@ -20,6 +20,7 @@ public class PaginationRequestBuilder {
   private Set<String> allowedSortFields = Collections.emptySet();
   private String defaultSortBy = null;
   private String defaultOrder = "desc";
+  private Map<String, String> apiToDbMap = Collections.emptyMap();
 
   private PaginationRequestBuilder(RoutingContext ctx) {
     this.ctx = ctx;
@@ -69,6 +70,11 @@ public class PaginationRequestBuilder {
     if (order != null) {
       this.defaultOrder = order;
     }
+    return this;
+  }
+
+  public PaginationRequestBuilder apiToDbMap(Map<String, String> apiToDbMap) {
+    this.apiToDbMap = apiToDbMap != null ? apiToDbMap : Collections.emptyMap();
     return this;
   }
 
@@ -149,6 +155,7 @@ public class PaginationRequestBuilder {
   private List<OrderBy> extractSortOrders() {
     List<OrderBy> orderByList = new ArrayList<>();
     String sortParam = getQueryParam("sort");
+    LOGGER.debug("Param being sorted: {}", sortParam);
     final int MAX_SORT_FIELDS = 3;
 
     if (sortParam != null && !sortParam.isEmpty()) {
@@ -175,8 +182,10 @@ public class PaginationRequestBuilder {
           throw new DxBadRequestException("Invalid sort order: " + direction);
         }
 
-        field = allowedFiltersDbMap.get(field);
+        LOGGER.info("Sorting by field: {}, direction: {}", field, direction);
+        field = apiToDbMap.get(field);
 
+        LOGGER.info("Mapped field for sorting: {}", apiToDbMap.keySet());
         orderByList.add(new OrderBy(field, OrderBy.Direction.valueOf(direction.toUpperCase())));
       }
     } else if (defaultSortBy != null) {
@@ -212,6 +221,10 @@ public class PaginationRequestBuilder {
   private String getQueryParam(String paramName) {
     MultiMap params = ctx.request().params(true);
     String values = params.get(paramName);
+    LOGGER.error("getQueryParam: {} = {}", paramName, values);
     return (values != null && !values.isEmpty()) ? values : null;
   }
+
+
+
 }
