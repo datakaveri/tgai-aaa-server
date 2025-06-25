@@ -56,7 +56,7 @@ public class KYCHandler {
             return;
         }
 
-        kycService.confirmKYCData(userId, codeVerifier)
+        kycService.confirmKYCData(userId, codeVerifier, user.principal().getString("name"))
                 .onSuccess(res -> {
                     ResponseBuilder.sendSuccess(ctx, res);
                 })

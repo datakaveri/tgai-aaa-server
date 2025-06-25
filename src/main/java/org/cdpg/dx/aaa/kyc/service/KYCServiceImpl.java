@@ -99,7 +99,7 @@ public class KYCServiceImpl implements KYCService {
     }
     //TODO remove code_verifier from cachedData
     @Override
-    public Future<JsonObject> confirmKYCData(UUID userId, String codeVerifier) {
+    public Future<JsonObject> confirmKYCData(UUID userId, String codeVerifier, String userName) {
         Promise<JsonObject> promise = Promise.promise();
 
         cacheService.retrieve(userId.toString()).onComplete(ar -> {
@@ -121,7 +121,7 @@ public class KYCServiceImpl implements KYCService {
             boolean isVerified = codeVerifier.equals(cachedData.getString("code_verifier"));
             System.out.println("isverified"+isVerified);
             if (isVerified) {
-                keycloakUserService.setKycVerifiedTrueWithData(userId, cachedData)
+                keycloakUserService.setKycVerifiedTrueWithData(userId, cachedData, userName)
                     .onComplete(kycResult -> {
                         if (kycResult.succeeded() && kycResult.result()) {
                             LOGGER.info("KYC verification successful for userId: {}", userId);
@@ -149,6 +149,7 @@ public class KYCServiceImpl implements KYCService {
     private JsonObject parseKYCxml(String xmlData) {
         try {
             JSONObject jsonObject = XML.toJSONObject(xmlData);
+            //System.out.println("jsonObject: " + jsonObject); // For debugging purposes
              // For debugging purposes
             Map<String, Object> map = jsonObject.toMap();
 
@@ -195,6 +196,10 @@ public class KYCServiceImpl implements KYCService {
 
             if (uidData.containsKey("Pht")) {
                 result.put("Pht", uidData.getString("Pht"));
+            }
+
+            if(kycRes.containsKey("txn")) {
+                result.put("txn", kycRes.getString("txn"));
             }
 
             result.put("requestedAt", Instant.now().toString());
