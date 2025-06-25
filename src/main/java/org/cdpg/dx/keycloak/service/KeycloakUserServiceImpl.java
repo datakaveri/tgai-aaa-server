@@ -65,9 +65,16 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     public Future<List<DxUser>> getUsers(int page, int size) {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
-                List<UserRepresentation> reps = usersResource().list(page * size, size);
+                //System.out.println("Fetching users from Keycloak: page=" + page + ", size=" + size + ", enabled=" + enabled);
+                List<UserRepresentation> reps = usersResource().search(
+                        null,          // search string
+                        page * size,   // first (offset)
+                        size,          // max
+                        true// filter by enabled/disabled
+                );
                 return reps.stream()
                         .map(user -> {
+                            System.out.println("User ID: " + user.getId());
                             List<RoleRepresentation> roles = usersResource().get(user.getId()).roles().realmLevel().listEffective();
                             return DxUserMapper.fromUserRepresentation(user, roles);
                         }).collect(Collectors.toList());
