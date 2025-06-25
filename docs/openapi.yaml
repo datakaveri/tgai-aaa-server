@@ -2682,7 +2682,7 @@ paths:
                     id: 66hcqj28wo7vu
   /auth/v1/user/password:
     put:
-      summary: '(User) Change Password'
+      summary: (User) Change Password
       description: |
         Allows the logged-in user to change their password. 
         Only the new password needs to be provided.
@@ -2690,7 +2690,7 @@ paths:
         - Role APIs
       operationId: put-auth-v1-user-password
       security:
-        - authorization: [ ]
+        - authorization: []
       requestBody:
         required: true
         content:
@@ -2716,10 +2716,10 @@ paths:
                     example: 'urn:dx:aaa:success'
                   title:
                     type: string
-                    example: 'Password Change Successful'
+                    example: Password Change Successful
                   result:
                     type: string
-                    example: 'Password updated successfully.'
+                    example: Password updated successfully.
         '400':
           description: Bad Request - Failed password policy validation
           content:
@@ -2732,15 +2732,14 @@ paths:
                     example: 'urn:dx:aaa:error'
                   title:
                     type: string
-                    example: 'Password Change Failed'
+                    example: Password Change Failed
                   detail:
                     type: string
-                    example: 'New password does not meet policy requirements.'
+                    example: New password does not meet policy requirements.
         '401':
           description: Unauthorized - Missing or invalid authentication token
         '500':
           description: Internal Server Error
-
   '/auth/v1/admin/user/{id}':
     parameters:
       - schema:
@@ -3090,12 +3089,24 @@ paths:
   /auth/v1/user/deactivate:
     post:
       summary: (User) Deactivate User Account
-      tags: [Role APIs]
+      tags:
+        - Role APIs
       responses:
         '200':
           description: OK
       operationId: post-auth-v1-user-deactivate
       security:
+        - authorization: []
+  /auth/v1/kyc/revoke:
+    post:
+      summary: Your POST endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: post-auth-v1-kyc-revoke
+      security:
+        - authorization: []
         - authorization: []
 components:
   securitySchemes:
