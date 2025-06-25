@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 import java.util.UUID;
 
@@ -15,10 +16,12 @@ import java.util.UUID;
 public class KYCHandler {
     private static final Logger LOGGER = LogManager.getLogger(KYCHandler.class);
     private final KYCService kycService;
+    private final KeycloakUserService keycloakUserService;
 
 
-    public KYCHandler(KYCService kycService) {
+    public KYCHandler(KYCService kycService, KeycloakUserService keycloakService) {
         this.kycService = kycService;
+        this.keycloakUserService = keycloakService;
     }
 
     public void verifyKYC(RoutingContext ctx) {
@@ -61,6 +64,18 @@ public class KYCHandler {
                     ResponseBuilder.sendSuccess(ctx, res);
                 })
                 .onFailure(ctx::fail);
+    }
+
+    public void revokeKYC(RoutingContext ctx) {
+        User user = ctx.user();
+        keycloakUserService.setKycVerifiedFalse(UUID.fromString(user.subject()))
+                .onSuccess(res -> {
+                    ResponseBuilder.sendSuccess(ctx, "KYC revoked successfully");
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to revoke KYC: {}", err.getMessage(), err);
+                    ctx.fail(err);
+                });
     }
 
 
