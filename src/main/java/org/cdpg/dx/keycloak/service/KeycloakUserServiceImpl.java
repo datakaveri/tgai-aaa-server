@@ -65,9 +65,16 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     public Future<List<DxUser>> getUsers(int page, int size) {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
-                List<UserRepresentation> reps = usersResource().list(page * size, size);
+                //System.out.println("Fetching users from Keycloak: page=" + page + ", size=" + size + ", enabled=" + enabled);
+                List<UserRepresentation> reps = usersResource().search(
+                        null,          // search string
+                        page * size,   // first (offset)
+                        size,          // max
+                        true// filter by enabled/disabled
+                );
                 return reps.stream()
                         .map(user -> {
+                            System.out.println("User ID: " + user.getId());
                             List<RoleRepresentation> roles = usersResource().get(user.getId()).roles().realmLevel().listEffective();
                             return DxUserMapper.fromUserRepresentation(user, roles);
                         }).collect(Collectors.toList());
@@ -212,17 +219,19 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
-    public Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData) {
+    public Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData, String userName) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put(KeycloakConstants.KYC_VERIFIED, "true");
         JsonObject aadhaarJson = new JsonObject();
+
         if (kycData != null && kycData.containsKey("Poi")) {
             JsonObject poi = kycData.getJsonObject("Poi");
             if (poi != null && poi.containsKey("name")) {
-                aadhaarJson.put("kycVerifiedUserName", poi.getString("name"));
+                aadhaarJson.put("kycVerifiedUserName", userName);
                 aadhaarJson.put("kycAuthenticationMethod", "DigiLocker");
                 aadhaarJson.put("kycVerifiedDate", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
                 aadhaarJson.put("kycStatus", "Active");
+                aadhaarJson.put("txn", kycData.getString("txn"));
             }
         }
         attributes.put(KeycloakConstants.AADHAAR_KYC_DATA, aadhaarJson.encode());

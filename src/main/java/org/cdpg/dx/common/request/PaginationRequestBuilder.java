@@ -203,6 +203,7 @@ public class PaginationRequestBuilder {
     allowedKeys.add("time");
     allowedKeys.add("endtime");
     allowedKeys.add("timerel");
+    allowedKeys.add("enabled");
 
     for (String timeField : allowedTimeFields) {
       allowedKeys.add(timeField + "_time");
