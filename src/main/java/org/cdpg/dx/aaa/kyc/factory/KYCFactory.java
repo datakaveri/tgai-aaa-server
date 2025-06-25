@@ -25,6 +25,6 @@ public class KYCFactory {
         KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
 
         KYCService kycService = new KYCServiceImpl(webClient, cacheService, keycloakUserService, config);
-        return new KYCHandler(kycService);
+        return new KYCHandler(kycService, keycloakUserService);
     }
 }

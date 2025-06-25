@@ -30,6 +30,9 @@ public class KYCController implements ApiController {
                 .operation("post-auth-v1-kyc-verify")
                 .handler(kycHandler::verifyKYC);
 
+        routerBuilder
+                .operation("post-auth-v1-kyc-revoke")
+                .handler(kycHandler::revokeKYC);
 
     }
 
