@@ -1,6 +1,7 @@
 package org.cdpg.dx.aaa.organization.handler;
 
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -86,10 +87,11 @@ public class OrganizationHandler {
     public void listAllOrganisations(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .apiToDbMap(API_TO_DB_ORG)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .allowedSortFields(API_TO_DB_ORG.keySet())
                 .build();
 
 
@@ -138,23 +140,53 @@ public class OrganizationHandler {
 
       PaginatedRequest request = PaginationRequestBuilder.from(ctx)
         .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST)
+              .apiToDbMap(API_TO_DB_ORG_JOIN_REQUEST)
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(REQUESTED_AT))
         .defaultTimeField(REQUESTED_AT)
         .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
-        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .allowedSortFields(API_TO_DB_ORG_JOIN_REQUEST.keySet())
         .build();
 
+    organizationService.getOrganizationPendingJoinRequests(request)
+      .compose(result -> {
+        List<Future<JsonObject>> enrichedFutures = result.data().stream()
+          .map(joinRequest -> userService.getUserInfoByID(joinRequest.userId())
+            .map(user -> {
+              JsonObject enriched = joinRequest.toJson();
+              enriched.put("roles", user.roles());
+              return enriched;
+            })
+            .recover(err -> {
+              System.out.println("In recover block!");
+              JsonObject enriched = joinRequest.toJson();
+              enriched.put("roles", List.of());
+              return Future.succeededFuture(enriched);
+            })
+          )
+          .toList();
 
-        organizationService.getOrganizationPendingJoinRequests(request)
-                .onSuccess(result -> {
-                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Pending Join Requests");
-                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, result.data(), result.paginationInfo());
-                })
-                .onFailure(ctx::fail);
-    }
+        return Future.all(enrichedFutures).map(cf -> {
+          List<JsonObject> enrichedList = new java.util.ArrayList<>();
+          for (int i = 0; i < cf.size(); i++) {
+            enrichedList.add((JsonObject) cf.resultAt(i));
+          }
+          return Map.entry(enrichedList, result.paginationInfo());
+        });
+      })
+      .onSuccess(entry -> {
+        List<JsonObject> enrichedList = entry.getKey();
+        PaginationInfo paginationInfo = entry.getValue();
+
+        AuditLog auditLog = AuditingHelper.createAuditLog(
+          ctx.user(), RoutingContextHelper.getRequestPath(ctx),
+          "GET", "Get Pending Join Requests");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
+
+        ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
+      })
+      .onFailure(ctx::fail);
+  }
 
     public void joinOrganisationRequest(RoutingContext ctx) {
 
@@ -211,10 +243,11 @@ public class OrganizationHandler {
     public void getOrganisationRequest(RoutingContext ctx) {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST)
+                .apiToDbMap(API_TO_DB_ORG_CREATE_REQUEST)
                 .allowedTimeFields(Set.of(CREATED_AT))
                 .defaultTimeField(CREATED_AT)
                 .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+                .allowedSortFields(API_TO_DB_ORG_CREATE_REQUEST.keySet())
                 .build();
 
 
@@ -308,11 +341,12 @@ public class OrganizationHandler {
 
       PaginatedRequest request = PaginationRequestBuilder.from(ctx)
         .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_USERS)
+              .apiToDbMap(API_TO_DB_ORG_USERS)
         .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
         .allowedTimeFields(Set.of(CREATED_AT))
         .defaultTimeField(CREATED_AT)
         .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-        .allowedSortFields(ALLOWED_SORT_FEILDS_ORG)
+        .allowedSortFields(API_TO_DB_ORG_USERS.keySet())
         .build();
 
       organizationService.getOrganizationUsers(request)
@@ -445,16 +479,31 @@ public class OrganizationHandler {
                             UUID orgId = orgUser.organizationId();
                             PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                                     .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
+                                    .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
                                     .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+                                    .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
                                     .build();
 
                             return organizationService.getAllPendingProviderRoleRequests(request);
                         }
                 ).compose(requests -> {
-                    List<Future<JsonObject>> enrichedFutures = requests.data().stream().map(req ->
-                            organizationService.getOrganizationUserInfo(req.userId())
-                                    .map(userInfo -> ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, userInfo))
-                    ).toList();
+            List<Future<JsonObject>> enrichedFutures = requests.data().stream()
+              .map(req ->
+                organizationService.getOrganizationUserInfo(req.userId())
+                  .compose(orgUser ->
+                    userService.getUserInfoByID(req.userId())
+                      .map(dxUser -> {
+                        JsonObject enriched = ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, orgUser);
+                        enriched.put("roles", dxUser.roles());
+                        return enriched;
+                      })
+                      .recover(err -> {
+                        JsonObject enriched = ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, orgUser);
+                        enriched.put("roles", List.of());
+                        return Future.succeededFuture(enriched);
+                      })
+                  )
+              ).toList();
                     return Future.all(enrichedFutures).map(cf -> {
                         List<JsonObject> resultList = new java.util.ArrayList<>();
                         for (int i = 0; i < cf.size(); i++) {

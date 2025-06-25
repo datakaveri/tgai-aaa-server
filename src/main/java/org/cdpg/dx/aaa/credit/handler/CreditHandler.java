@@ -1,7 +1,6 @@
 package org.cdpg.dx.aaa.credit.handler;
 
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
@@ -13,15 +12,14 @@ import org.cdpg.dx.aaa.credit.models.CreditTransaction;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
-import org.cdpg.dx.common.exception.DxNotFoundException;
+import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
+import org.cdpg.dx.common.util.PaginationInfo;
 import org.cdpg.dx.common.util.RequestHelper;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.cdpg.dx.aaa.organization.config.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
@@ -31,11 +29,13 @@ public class CreditHandler {
   private static final Logger LOGGER = LogManager.getLogger(CreditHandler.class);
     private final CreditService creditService;
     private final EmailComposer emailComposer;
+    private final UserService userService;
 
 
-  public CreditHandler(CreditService creditService,EmailComposer emailComposer) {
+  public CreditHandler(CreditService creditService, EmailComposer emailComposer, UserService userService) {
     this.creditService = creditService;
     this.emailComposer = emailComposer;
+    this.userService = userService;
   }
 
 
@@ -131,16 +131,46 @@ public class CreditHandler {
 
     PaginatedRequest request = PaginationRequestBuilder.from(ctx)
             .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+            .apiToDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
             .additionalFilters(Map.of())
             .allowedTimeFields(Set.of(CREATED_AT))
             .defaultTimeField(CREATED_AT)
             .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-            .allowedSortFields(ALLOWED_SORT_FIELDS_COMPUTE_ROLE)
+            .allowedSortFields(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE.keySet())
             .build();
 
     creditService.getAllComputeRequests(request)
-      .onSuccess(reqs -> {
-        ResponseBuilder.sendSuccess(ctx, reqs.data(), reqs.paginationInfo());
+      .compose(result->{
+        List<Future<JsonObject>> enrichedFutures =result.data().stream()
+          .map(computeRequest->userService.getUserInfoByID(computeRequest.userId())
+            .map(user->{
+              JsonObject enriched = computeRequest.toJson();
+              enriched.put("roles",user.roles());
+              enriched.put("account_enabled", user.account_enabled());
+              return enriched;
+            })
+            .recover(err->{
+              System.out.println("In recover block!");
+              JsonObject enriched = computeRequest.toJson();
+              enriched.put("roles", List.of());
+              return Future.succeededFuture(enriched);
+            })
+          )
+          .toList();
+
+
+        return Future.all(enrichedFutures).map(cf -> {
+          List<JsonObject> enrichedList = new ArrayList<>();
+          for (int i = 0; i < cf.size(); i++) {
+            enrichedList.add((JsonObject) cf.resultAt(i));
+          }
+          return Map.entry(enrichedList, result.paginationInfo());
+        });
+      })
+      .onSuccess(entry -> {
+        List<JsonObject> enrichedList = entry.getKey();
+        PaginationInfo paginationInfo = entry.getValue();
+        ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
       })
       .onFailure(ctx::fail);
 
@@ -157,7 +187,7 @@ public class CreditHandler {
 
     creditService.updateComputeRoleStatus( requestId, status, approvedBy)
             .onSuccess(updated -> {
-              ResponseBuilder.sendSuccess(ctx, "Updated Resquest ");
+              ResponseBuilder.sendSuccess(ctx, "Compute Role Status " + status.getStatus());
               if (updated) {
                 // Send email notification
                 Future<Void> future = emailComposer.sendUserEmailForComputeRoleApproval(requestId);

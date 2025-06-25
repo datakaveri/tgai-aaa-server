@@ -20,7 +20,7 @@ public interface KeycloakUserService {
     Future<Boolean> addRoleToUser(UUID userId, DxRole role);
     Future<Boolean> removeRoleFromUser(UUID userId, DxRole dxRole);
     Future<Boolean> setOrganisationDetails(UUID userId, UUID orgId, String orgName);
-    Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData);
+    Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData, String userName);
     Future<Boolean> setKycVerifiedFalse(UUID userId);
     Future<Boolean> updateUserPassword(UUID userId, String password);
 }
