@@ -27,7 +27,8 @@ public record DxUser(
         JsonObject kycData,
         String twitter_account,
         String linkedin_account,
-        String github_account// newly added field
+        String github_account,
+        Boolean account_enabled// newly added field
 ) {
     public JsonObject toJson() {
         String isoCreatedAt = createdAt != null
@@ -52,7 +53,8 @@ public record DxUser(
                 .put("kycInformation", kycData)
                 .put("twitter_account", twitter_account)
                 .put("linkedin_account", linkedin_account)
-                .put("github_account", github_account);
+                .put("github_account", github_account)
+        .put("account_enabled", account_enabled);
     }
 
     public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation) {
@@ -74,7 +76,8 @@ public record DxUser(
                 user.kycData(),
                 user.twitter_account(),
                 user.linkedin_account(),
-                user.github_account()// retain createdAt
+                user.github_account(),
+                user.account_enabled()// retain createdAt
         );
     }
 }

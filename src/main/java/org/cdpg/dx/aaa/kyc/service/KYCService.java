@@ -9,6 +9,6 @@ public interface KYCService {
 
     Future<JsonObject> getKYCData(UUID userId, String authCode, String codeVerifier);
 
-    Future<JsonObject> confirmKYCData(UUID userId, String codeVerifier);
+    Future<JsonObject> confirmKYCData(UUID userId, String codeVerifier, String userName);
 
 }
