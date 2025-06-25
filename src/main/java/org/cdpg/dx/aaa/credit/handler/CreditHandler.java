@@ -146,6 +146,7 @@ public class CreditHandler {
             .map(user->{
               JsonObject enriched = computeRequest.toJson();
               enriched.put("roles",user.roles());
+              enriched.put("account_enabled", user.account_enabled());
               return enriched;
             })
             .recover(err->{
@@ -186,7 +187,7 @@ public class CreditHandler {
 
     creditService.updateComputeRoleStatus( requestId, status, approvedBy)
             .onSuccess(updated -> {
-              ResponseBuilder.sendSuccess(ctx, "Updated Resquest ");
+              ResponseBuilder.sendSuccess(ctx, "Compute Role Status " + status.getStatus());
               if (updated) {
                 // Send email notification
                 Future<Void> future = emailComposer.sendUserEmailForComputeRoleApproval(requestId);
