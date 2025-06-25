@@ -11,6 +11,8 @@ import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.model.DxUser;
@@ -62,7 +64,10 @@ public class AdminHandler {
 
 
     public void getAllDxUsersKeycloak(RoutingContext ctx) {
-        keycloakUserService.getUsers(0, 1000)
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx).build();
+
+        keycloakUserService.getUsers(request.page(), request.size())
                 .compose(users -> {
                     List<Future> futures = new ArrayList<>();
                     for (DxUser user : users) {
