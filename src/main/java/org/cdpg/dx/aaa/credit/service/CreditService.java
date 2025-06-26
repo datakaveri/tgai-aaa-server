@@ -39,4 +39,6 @@ public interface CreditService {
   Future<Boolean> hasUserComputeAccess(UUID userId);
 
   Future<ComputeRole> getComputeRequestById(UUID requestId);
+
+  Future<CreditRequest> getCreditRequestById(UUID requestId);
 }
