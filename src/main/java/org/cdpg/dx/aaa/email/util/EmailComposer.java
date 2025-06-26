@@ -339,6 +339,56 @@ public class EmailComposer {
 
   }
 
+  public Future<Void> sendUserEmailForCreditApproval(UUID reqId)
+  {
+
+    return creditService.getCreditRequestById(reqId).compose(ar-> {
+
+      UUID userId = ar.userId();
+
+      if (userId == null) {
+        return Future.failedFuture("User ID is null for credit request with ID: " + reqId);
+      }
+
+      return userService.getUserInfoByID(userId).compose(userInfo -> {
+        String emailId = userInfo.email();
+        String userName = userInfo.name();
+        String subject = "Credit Request Approved";
+        String senderEmail = config.getString("emailSender");
+        String adminPortalUrl = config.getString("TGDxUrl");
+
+        Map<String, String> emailDetails = Map.of(
+          "USER_FIRST_NAME", userName,
+          "ADMIN_PORTAL_URL", adminPortalUrl,
+          "SENDER_NAME", "TGDeX Team",
+          "SUBJECT", subject);
+
+        String emailTemplate = loadTemplate("templates/approved-credit-request.html"); // Path to HTML template
+        String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+        MailMessage mailMessage = createMailMessage(
+          senderEmail,
+          emailId,
+          htmlBody,
+          subject
+        );
+
+        return emailService.sendEmail(mailMessage).onComplete(res -> {
+          if (res.succeeded()) {
+            LOGGER.info("Approved email sent to {}", emailId);
+          } else {
+            LOGGER.error("Failed to send approved email: {}", res.cause().getMessage());
+          }
+        }).recover(failure -> {
+          LOGGER.error("Failed to handle email for approval: {}", failure.getMessage());
+          return Future.failedFuture(failure);
+        });
+      });
+
+    });
+
+  }
+
   public Future<Void> sendUserEmailForProviderRoleApproval(UUID reqId) {
 
     return organizationService.getProviderRequestById(reqId).compose(ar-> {

@@ -86,6 +86,8 @@ public class CreditHandler {
     creditService.updateCreditRequestStatus( requestId, status, transactedBy)
       .onSuccess(transaction -> {
           ResponseBuilder.sendSuccess(ctx,  transaction);
+        // Send email notification
+        Future<Void> future = emailComposer.sendUserEmailForCreditApproval(requestId);
 
       }).onFailure(ctx::fail);
 
