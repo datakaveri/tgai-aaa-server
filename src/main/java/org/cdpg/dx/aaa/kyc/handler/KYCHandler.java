@@ -1,11 +1,15 @@
 package org.cdpg.dx.aaa.kyc.handler;
 
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.credit.models.Status;
+import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
+import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
@@ -17,11 +21,13 @@ public class KYCHandler {
     private static final Logger LOGGER = LogManager.getLogger(KYCHandler.class);
     private final KYCService kycService;
     private final KeycloakUserService keycloakUserService;
+    private final CreditService creditService;
 
 
-    public KYCHandler(KYCService kycService, KeycloakUserService keycloakService) {
+    public KYCHandler(KYCService kycService, KeycloakUserService keycloakService, CreditService creditService) {
         this.kycService = kycService;
         this.keycloakUserService = keycloakService;
+        this.creditService = creditService;
     }
 
     public void verifyKYC(RoutingContext ctx) {
@@ -69,13 +75,21 @@ public class KYCHandler {
     public void revokeKYC(RoutingContext ctx) {
         User user = ctx.user();
         keycloakUserService.setKycVerifiedFalse(UUID.fromString(user.subject()))
+                .compose(kyc -> {
+                    keycloakUserService.removeRoleFromUser(UUID.fromString(user.subject()), DxRole.COMPUTE);
+                    return creditService.getComputeRoleRequestByUserId(UUID.fromString(user.subject()))
+                            .compose(computeRoleRequest -> {
+                                if (computeRoleRequest != null) {
+                                    return creditService.updateComputeRoleStatus(computeRoleRequest.id(), Status.REJECTED, computeRoleRequest.approvedBy());
+                                } else {
+                                    return Future.succeededFuture();
+                                }
+                            });
+                })
                 .onSuccess(res -> {
                     ResponseBuilder.sendSuccess(ctx, "KYC revoked successfully");
                 })
-                .onFailure(err -> {
-                    LOGGER.error("Failed to revoke KYC: {}", err.getMessage(), err);
-                    ctx.fail(err);
-                });
+                .onFailure(ctx::fail);
     }
 
 

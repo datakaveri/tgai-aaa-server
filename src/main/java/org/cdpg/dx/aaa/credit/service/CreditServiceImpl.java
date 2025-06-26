@@ -220,6 +220,18 @@ public class CreditServiceImpl implements CreditService {
     return computeRoleDAO.getAll();
   }
 
+  @Override
+  public Future<ComputeRole> getComputeRoleRequestByUserId(UUID userId){
+    Map<String, Object> filter = Map.of(Constants.USER_ID, userId.toString());
+    return computeRoleDAO.getAllWithFilters(filter)
+            .compose(requests -> {
+                if (requests.isEmpty()) {
+                    return Future.failedFuture(new DxNotFoundException("No compute request found for userId: " + userId));
+                }
+                return Future.succeededFuture(requests.get(0)); // Return the first request
+            });
+  }
+
     @Override
     public Future<PaginatedResult<ComputeRole>> getAllComputeRequests(PaginatedRequest paginatedRequest) {
         return computeRoleDAO.getAll(paginatedRequest);
