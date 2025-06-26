@@ -71,7 +71,7 @@ public record ComputeRole(
     if  (userName!=null) map.put(Constants.USER_NAME, userName.toString());
     if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
     if (approvedBy != null) map.put(Constants.APPROVED_BY, approvedBy.toString());
-    if (additionalInfo != null) map.put(Constants.ADDITONAL_INFO, additionalInfo.encode());
+    if (additionalInfo != null) map.put(Constants.ADDITONAL_INFO, additionalInfo);
     if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
     if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
     return map;
