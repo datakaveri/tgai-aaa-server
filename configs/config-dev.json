@@ -1,0 +1,95 @@
+{
+  "version": "1.0",
+  "zookeepers": [
+    "127.0.0.1"
+  ],
+  "clusterId": "iudx-aaa-cluster",
+  "options":{
+    "postgresOptions": {
+      "databaseIP": "xxx.xxx.xxx.xxx",
+      "databasePort": 0,
+      "databaseName": "xxx",
+      "databaseSchema": "xxx",
+      "databaseUserName": "xxx",
+      "databasePassword": "xxx"
+    },
+    "commonOptions":{
+      "cosDomain":"xxx",
+      "cosAdminUserId": "xxx",
+      "initialCreditBalance": 1000,
+      "corsAllowedOrigin": ["xxx"]
+    },
+    "emailOptions": {
+      "emailSender": "xxx",
+      "senderName": "xxx",
+      "cosAdminEmailId": "xxx",
+      "TGDxUrl": "xxx"
+    },
+    "keycloakOptions":{
+      "keycloakRealm": "xxx",
+      "keycloakUrl": "xxx",
+      "keycloakAdminClientId": "xxx",
+      "keycloakAdminClientSecret": "xxx",
+      "keycloakAdminPoolSize": "xxx",
+      "keycloakJwtLeeway": 90,
+      "keycloakCertUrl": "xxx",
+      "iss": "xxx",
+      "jwtIgnoreExpiry": true,
+      "jwksRefreshIntervalMs": 21600000
+    },
+    "KYCOptions": {
+      "digilockerTokenUrl":"xxx",
+      "digilockerAadhaarUrl":"xxx",
+      "clientId" :"xxxxxx",
+      "clientSecret": "xxxxxxxxxxx",
+      "redirectUri":"xxxxx"
+    }
+  },
+  "modules": [
+    {
+      "id": "org.cdpg.dx.aaa.apiserver.ApiServerVerticle",
+      "verticleInstances": 1,
+      "httpPort":8443,
+      "required":["postgresOptions", "commonOptions", "keycloakOptions", "KYCOptions","emailOptions"],
+      "poolSize": "5",
+      "serverTimeoutMs": 30000,
+      "corsRegexString":"^https://.+\\.iudx\\.org\\.in$"
+    },
+    {
+      "id": "org.cdpg.dx.database.postgres.verticle.PostgresVerticle",
+      "verticleInstances": 1,
+      "required":["postgresOptions"],
+      "poolSize": 5
+    },{
+      "id": "org.cdpg.dx.email.verticle.EmailVerticle",
+      "verticleInstances": 1,
+      "emailHostName": "email-smtp.ap-south-1.amazonaws.com",
+      "emailPort": 2587,
+      "emailUserName": "xxx",
+      "emailPassword": "xxx",
+      "notifyByEmail": true,
+      "poolSize": 5
+    },
+    {
+      "id": "org.cdpg.dx.databroker.DataBrokerVerticle",
+      "isWorkerVerticle": false,
+      "verticleInstances": 1,
+      "dataBrokerIP": "xxx",
+      "dataBrokerPort": 24568,
+      "prodVhost": "xxx",
+      "internalVhost": "xxx",
+      "externalVhost": "xxx",
+      "dataBrokerUserName": "xxx",
+      "dataBrokerPassword": "xxx",
+      "dataBrokerManagementPort": 28042,
+      "connectionTimeout": 6000,
+      "requestedHeartbeat": 60,
+      "handshakeTimeout": 6000,
+      "requestedChannelMax": 5,
+      "networkRecoveryInterval": 500,
+      "automaticRecoveryEnabled": "xxx",
+      "brokerAmqpIp": "xxx",
+      "brokerAmqpPort": 24567
+    }
+  ]
+}
