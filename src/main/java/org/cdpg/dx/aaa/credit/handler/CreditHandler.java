@@ -116,7 +116,13 @@ public class CreditHandler {
     String userID = user.subject();
     String userName = user.principal().getString("name");
 
-    ComputeRole computeRoleRequest = ComputeRole.fromJson(new JsonObject().put("user_id", userID).put("user_name", userName));
+    JsonObject computeRoleJsonBody = ctx.body().asJsonObject();
+
+    JsonObject additionalInfo = computeRoleJsonBody.getJsonObject("additional_info");
+
+    System.out.println("Additional Info: " + additionalInfo.encodePrettily());
+
+    ComputeRole computeRoleRequest = ComputeRole.fromJson(new JsonObject().put("user_id", userID).put("user_name", userName).put("additional_info", additionalInfo));
 
     creditService.createComputeRoleRequest(computeRoleRequest)
       .onSuccess(requests -> {
