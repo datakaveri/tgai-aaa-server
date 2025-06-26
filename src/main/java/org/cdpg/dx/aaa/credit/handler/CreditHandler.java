@@ -119,20 +119,43 @@ public class CreditHandler {
     String userName = user.principal().getString("name");
 
     JsonObject computeRoleJsonBody = ctx.body().asJsonObject();
+      System.out.println("Additional Info: " + computeRoleJsonBody);
 
     JsonObject additionalInfo = computeRoleJsonBody.getJsonObject("additional_info");
 
-    System.out.println("Additional Info: " + additionalInfo.encodePrettily());
-
     ComputeRole computeRoleRequest = ComputeRole.fromJson(new JsonObject().put("user_id", userID).put("user_name", userName).put("additional_info", additionalInfo));
 
-    creditService.createComputeRoleRequest(computeRoleRequest)
-      .onSuccess(requests -> {
-        ResponseBuilder.sendSuccess(ctx, requests);
-        Future<Void> future = emailComposer.sendEmailForComputeRole(computeRoleRequest, user);
+    creditService.getComputeRoleRequestByUserId(UUID.fromString(userID))
+            .compose(existingComputeRole -> {
+                System.out.println("here in compose block");
+              if (existingComputeRole != null && existingComputeRole.status().equalsIgnoreCase(Status.REJECTED.getStatus())) {
+                return creditService.updateComputeRoleStatus(existingComputeRole.id(), Status.PENDING, existingComputeRole.approvedBy())
+                        .map(updated -> true);
+              } else {
+                // Otherwise, create a new compute role request
+                return Future.succeededFuture(false);
+              }
+            })
+            .compose(updated -> {
+                System.out.println("here in compose block after update" + updated);
+              if (!updated) {
+                return creditService.createComputeRoleRequest(computeRoleRequest)
+                        .onSuccess(requests -> {
+                          ResponseBuilder.sendSuccess(ctx, requests);
+                          emailComposer.sendEmailForComputeRole(computeRoleRequest, user);
+                        })
+                        .onFailure(ctx::fail)
+                        .mapEmpty();
+              } else {
+                return Future.succeededFuture();
+              }
+            })
+            .onSuccess(v -> {
+                System.out.println("here in onSuccess block");
+              ResponseBuilder.sendSuccess(ctx, "Compute Role Request created successfully");
+            })
+            .onFailure(ctx::fail);
 
-      })
-      .onFailure(ctx::fail);
   }
 
   public void getAllComputeRequests(RoutingContext ctx) {
