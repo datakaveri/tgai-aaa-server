@@ -140,7 +140,7 @@ public class CreditServiceImpl implements CreditService {
     }
 
     Double amount = creditTransaction.amount();
-    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt.toString());
+    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt.toString(),USER_ID, userId.toString());
 
     return creditTransactionDAO.getAllWithFilters(filter).compose(existing -> {
       if (existing != null && !existing.isEmpty()) {
