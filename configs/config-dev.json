@@ -6,40 +6,40 @@
   "clusterId": "iudx-aaa-cluster",
   "options":{
     "postgresOptions": {
-      "databaseIP": "localhost",
-      "databasePort": 5433,
-      "databaseName": "test",
-      "databaseSchema": "test",
-      "databaseUserName": "test-user",
-      "databasePassword": "test-password"
+      "databaseIP": "xxx.xxx.xxx.xxx",
+      "databasePort": 0,
+      "databaseName": "xxx",
+      "databaseSchema": "xxx",
+      "databaseUserName": "xxx",
+      "databasePassword": "xxx"
     },
     "commonOptions":{
-      "cosDomain":"asdasd",
-      "cosAdminUserId": "e59dfb08-66b2-49c3-891b-390f8f488c6d",
+      "cosDomain":"xxx",
+      "cosAdminUserId": "xxx",
       "initialCreditBalance": 1000,
-      "corsAllowedOrigin": ["*", "http://localhost:4001"]
+      "corsAllowedOrigin": ["xxx"]
     },
     "emailOptions": {
-      "emailSender": "no-reply.dev@iudx.io",
-      "senderName": "TGDEX",
-      "cosAdminEmailId": "admin.cos.tgdex@datakaveri.org",
-      "TGDxUrl": "https://staging.catalogue.tgdex.iudx.io/"
+      "emailSender": "xxx",
+      "senderName": "xxx",
+      "cosAdminEmailId": "xxx",
+      "TGDxUrl": "xxx"
     },
     "keycloakOptions":{
-      "keycloakRealm": "tgdex-pilot",
-      "keycloakUrl": "https://staging.keycloak.update.iudx.io/auth",
-      "keycloakAdminClientId": "admin-client",
-      "keycloakAdminClientSecret": "437O1pxcsHseXPjKPqoeg30GHUrpNmcx",
-      "keycloakAdminPoolSize": "10",
+      "keycloakRealm": "xxx",
+      "keycloakUrl": "xxx",
+      "keycloakAdminClientId": "xxx",
+      "keycloakAdminClientSecret": "xxx",
+      "keycloakAdminPoolSize": "xxx",
       "keycloakJwtLeeway": 90,
-      "keycloakCertUrl": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot/protocol/openid-connect/certs",
-      "iss": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot",
+      "keycloakCertUrl": "xxx",
+      "iss": "xxx",
       "jwtIgnoreExpiry": true,
       "jwksRefreshIntervalMs": 21600000
     },
     "KYCOptions": {
-      "digilockerTokenUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/1/token",
-      "digilockerAadhaarUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/3/xml/eaadhaar",
+      "digilockerTokenUrl":"xxx",
+      "digilockerAadhaarUrl":"xxx",
       "clientId" :"xxxxxx",
       "clientSecret": "xxxxxxxxxxx",
       "redirectUri":"xxxxx"
@@ -65,8 +65,8 @@
       "verticleInstances": 1,
       "emailHostName": "email-smtp.ap-south-1.amazonaws.com",
       "emailPort": 2587,
-      "emailUserName": "AKIAROAMFPEM2M4QITED",
-      "emailPassword": "BE6v8Dw3LC/snQ/JEJh4aKwo2gWkCGvtNPh9axF6F86r",
+      "emailUserName": "xxx",
+      "emailPassword": "xxx",
       "notifyByEmail": true,
       "poolSize": 5
     },
@@ -74,21 +74,21 @@
       "id": "org.cdpg.dx.databroker.DataBrokerVerticle",
       "isWorkerVerticle": false,
       "verticleInstances": 1,
-      "dataBrokerIP": "databroker.iudx.io",
+      "dataBrokerIP": "xxx",
       "dataBrokerPort": 24568,
-      "prodVhost": "IUDX",
-      "internalVhost": "IUDX-INTERNAL",
-      "externalVhost": "IUDX-EXTERNAL",
-      "dataBrokerUserName": "admin",
-      "dataBrokerPassword": "eDeOcxowwCuh4rI",
+      "prodVhost": "xxx",
+      "internalVhost": "xxx",
+      "externalVhost": "xxx",
+      "dataBrokerUserName": "xxx",
+      "dataBrokerPassword": "xxx",
       "dataBrokerManagementPort": 28042,
       "connectionTimeout": 6000,
       "requestedHeartbeat": 60,
       "handshakeTimeout": 6000,
       "requestedChannelMax": 5,
       "networkRecoveryInterval": 500,
-      "automaticRecoveryEnabled": "true",
-      "brokerAmqpIp": "databroker.iudx.io",
+      "automaticRecoveryEnabled": "xxx",
+      "brokerAmqpIp": "xxx",
       "brokerAmqpPort": 24567
     }
   ]
