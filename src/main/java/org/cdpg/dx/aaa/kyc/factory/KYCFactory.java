@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.cache.service.CacheService;
 import org.cdpg.dx.aaa.cache.service.CacheServiceImpl;
+import org.cdpg.dx.aaa.credit.service.CreditService;
+import org.cdpg.dx.aaa.credit.service.CreditServiceImpl;
 import org.cdpg.dx.aaa.kyc.handler.KYCHandler;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
 import org.cdpg.dx.aaa.kyc.service.KYCServiceImpl;
@@ -18,13 +20,13 @@ public class KYCFactory {
 
     private KYCFactory() {}
 
-    public static KYCHandler createHandler(Vertx vertx, JsonObject config) {
+    public static KYCHandler createHandler(Vertx vertx, JsonObject config, CreditService creditService) {
 
         WebClient webClient = WebClient.create(vertx);
         CacheService cacheService = new CacheServiceImpl();
         KeycloakUserService keycloakUserService = new KeycloakUserServiceImpl(config);
 
         KYCService kycService = new KYCServiceImpl(webClient, cacheService, keycloakUserService, config);
-        return new KYCHandler(kycService, keycloakUserService);
+        return new KYCHandler(kycService, keycloakUserService, creditService);
     }
 }
