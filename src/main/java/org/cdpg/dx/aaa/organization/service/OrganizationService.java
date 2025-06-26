@@ -41,6 +41,7 @@ public interface OrganizationService {
 
   Future<List<OrganizationJoinRequest>> getOrganizationJoinRequestsByUser(UUID userId);
 
+
   // ************ ORGANIZATION *********
   Future<Boolean> deleteOrganization(UUID orgId);
 

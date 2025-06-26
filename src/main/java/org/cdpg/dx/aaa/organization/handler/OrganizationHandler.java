@@ -204,16 +204,25 @@ public class OrganizationHandler {
 
         organizationJoinRequest = OrganizationJoinRequest.fromJson(OrgRequestJson);
 
-        organizationService.joinOrganizationRequest(organizationJoinRequest)
-                .onSuccess(createdRequest -> {
-                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                            RoutingContextHelper.getRequestPath(ctx), "POST", "Create Join Organization Request");
-                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, "Created Join request");
-                    Future<Void> future = emailComposer.sendEmailForJoiningOrg(organizationJoinRequest,user);
 
-                })
-                .onFailure(ctx::fail);
+        organizationService.getOrganizationJoinRequestsByUser(UUID.fromString(user.subject()))
+                .compose(joinRequests -> {
+                    for (OrganizationJoinRequest request : joinRequests) {
+                        if (request.organizationId().equals(orgId)) {
+                            return Future.failedFuture(new DxConflictException("User already has a pending/ granted join request for this organization"));
+                        }
+                    }
+                    return organizationService.joinOrganizationRequest(organizationJoinRequest)
+                            .onSuccess(createdRequest -> {
+                                AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                                        RoutingContextHelper.getRequestPath(ctx), "POST", "Create Join Organization Request");
+                                RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                                ResponseBuilder.sendSuccess(ctx, "Created Join request");
+                                Future<Void> future = emailComposer.sendEmailForJoiningOrg(organizationJoinRequest,user);
+
+                            })
+                            .onFailure(ctx::fail);
+                });
 
     }
 
