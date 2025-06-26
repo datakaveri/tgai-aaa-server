@@ -208,6 +208,7 @@ public class OrganizationHandler {
         organizationService.getOrganizationJoinRequestsByUser(UUID.fromString(user.subject()))
                 .compose(joinRequests -> {
                     for (OrganizationJoinRequest request : joinRequests) {
+
                         if (request.organizationId().equals(orgId)) {
                             return Future.failedFuture(new DxConflictException("User already has a pending/ granted join request for this organization"));
                         }
@@ -222,7 +223,8 @@ public class OrganizationHandler {
 
                             })
                             .onFailure(ctx::fail);
-                });
+                })
+                .onFailure(ctx::fail);
 
     }
 
@@ -274,34 +276,50 @@ public class OrganizationHandler {
     }
 
   public void createOrganisationRequest(RoutingContext ctx) {
-    JsonObject OrgRequestJson = ctx.body().asJsonObject();
+      JsonObject OrgRequestJson = ctx.body().asJsonObject();
 
-    User user = ctx.user();
+      User user = ctx.user();
 
-    OrgRequestJson.put("requested_by", user.subject());
-    OrgRequestJson.put("user_name", user.principal().getString("name"));
-    String orgName = OrgRequestJson.getString("name");
+      OrgRequestJson.put("requested_by", user.subject());
+      OrgRequestJson.put("user_name", user.principal().getString("name"));
+      String orgName = OrgRequestJson.getString("name");
 
-    OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
+      OrganizationCreateRequest organizationCreateRequest = OrganizationCreateRequest.fromJson(OrgRequestJson);
 
-      organizationService.getAllPendingGrantedOrganizationCreateRequests().
-        compose(requests -> {
-          for (OrganizationCreateRequest request : requests) {
-              System.out.println(request.name());
-            if (request.name().equalsIgnoreCase(orgName)) {
-              return Future.failedFuture(new DxConflictException("Organisation name already exists/ under review"));
-            }
-          }
-            return organizationService.createOrganizationRequest(organizationCreateRequest);
-        })
-      .onSuccess(requests -> {
-         AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                  RoutingContextHelper.getRequestPath(ctx), "POST", "Create Organisation Request");
-          RoutingContextHelper.setAuditingLog(ctx, auditLog);
-          ResponseBuilder.sendSuccess(ctx, requests);
-          Future<Void> future = emailComposer.sendEmailForCreatingOrg(organizationCreateRequest, user);
-      })
-      .onFailure(ctx::fail);
+      organizationService.getOrganizationCreateRequestsByUserId(UUID.fromString(user.subject()))
+              .compose(createRequests -> {
+                  for (OrganizationCreateRequest request : createRequests) {
+                      if (request.requestedBy().equals(UUID.fromString(user.subject()))) {
+                          return Future.failedFuture(new DxConflictException("Organisation create request already granted/ pending for this user"));
+                      }
+                  }
+                  return organizationService.getAllPendingGrantedOrganizationCreateRequests()
+                          .compose(requests -> {
+                              for (OrganizationCreateRequest request : requests) {
+                                  if (request.name().equalsIgnoreCase(orgName)) {
+                                      return Future.failedFuture(new DxConflictException("Organisation name already exists/ under review"));
+                                  }
+                              }
+                              return organizationService.getAllPendingGrantedOrganizationCreateRequests()
+                                        .compose(pendingRequests -> {
+                                            for (OrganizationCreateRequest request : requests) {
+                                                if (request.managerEmail().equalsIgnoreCase(organizationCreateRequest.managerEmail())) {
+                                                    return Future.failedFuture(new DxConflictException("Manager email is already in use for another organisation request"));
+                                                }
+                                            }
+                                            return organizationService.createOrganizationRequest(organizationCreateRequest);
+                                        }).onFailure(ctx::fail);
+                          }).onFailure(ctx::fail);
+
+              })
+              .onSuccess(requests -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                          RoutingContextHelper.getRequestPath(ctx), "POST", "Create Organisation Request");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                  ResponseBuilder.sendSuccess(ctx, requests);
+                  emailComposer.sendEmailForCreatingOrg(organizationCreateRequest, user);
+              })
+              .onFailure(ctx::fail);
   }
 
     public void deleteOrganisationUserById(RoutingContext ctx) {
@@ -477,8 +495,6 @@ public class OrganizationHandler {
             ctx.fail(new DxForbiddenException("User is not part any organisation"));
             return;
         }
-
-
 
         organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
                         orgUser -> {

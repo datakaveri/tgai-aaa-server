@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.cdpg.dx.aaa.credit.models.Status.*;
 import static org.cdpg.dx.aaa.credit.util.Constants.*;
 
 public class CreditServiceImpl implements CreditService {
@@ -47,7 +48,7 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<List<CreditRequest>> getAllPendingCreditRequests() {
-    Map<String, Object> conditionMap = Map.of(Constants.STATUS, Status.PENDING.getStatus());
+    Map<String, Object> conditionMap = Map.of(Constants.STATUS, PENDING.getStatus());
     return creditRequestDAO.getAllWithFilters(conditionMap);
   }
 
@@ -58,7 +59,7 @@ public class CreditServiceImpl implements CreditService {
                     Map.of(CREDIT_REQUEST_ID, requestId.toString()),
                     Map.of(STATUS, status.getStatus()))
             .compose(updated -> {
-              if (status != Status.GRANTED) {
+              if (status != GRANTED) {
                 return Future.succeededFuture(null); // No transaction needed
               }
               return processCreditGrant(requestId, transactedBy);
@@ -140,7 +141,7 @@ public class CreditServiceImpl implements CreditService {
     }
 
     Double amount = creditTransaction.amount();
-    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt.toString());
+    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt.toString(),USER_ID, userId.toString());
 
     return creditTransactionDAO.getAllWithFilters(filter).compose(existing -> {
       if (existing != null && !existing.isEmpty()) {
@@ -183,12 +184,52 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<ComputeRole> createComputeRoleRequest(ComputeRole computeRole) {
-    return computeRoleDAO.create(computeRole);
+    // check if there is a pending or granted request for the same user
+    // if yes then dont create a new request
+    // if status is rejected then only allow to create a new request
+
+    Map<String, Object> filterMap = Map.of(
+            Constants.USER_ID, computeRole.userId().toString());
+    return computeRoleDAO.getAllWithFilters(filterMap)
+      .compose(requests -> {
+        if (!requests.isEmpty()) {
+          // If there is a pending or granted request, do not create a new one
+          ComputeRole existingRequest = requests.get(0);
+          if (PENDING.getStatus().equals(existingRequest.status()) ||
+            GRANTED.getStatus().equals(existingRequest.status())) {
+            return Future.failedFuture(new DxConflictException("A pending or granted compute role request already exists for this user"));
+          }
+          else if( REJECTED.getStatus().equals(existingRequest.status())) {
+            // If the existing request is rejected, allow to create a new one
+            LOGGER.info("Existing request is rejected, allowing to create a new compute role request");
+            return computeRoleDAO.create(computeRole);
+          } else {
+            return Future.failedFuture(new DxConflictException("Provider role request is not in a state that allows creation of a new request"));
+          }
+        }
+        else {
+          // No existing requests found, proceed to create a new one
+          return computeRoleDAO.create(computeRole);
+        }
+      });
+
   }
 
   @Override
   public Future<List<ComputeRole>> getAllComputeRequests() {
     return computeRoleDAO.getAll();
+  }
+
+  @Override
+  public Future<ComputeRole> getComputeRoleRequestByUserId(UUID userId){
+    Map<String, Object> filter = Map.of(Constants.USER_ID, userId.toString());
+    return computeRoleDAO.getAllWithFilters(filter)
+            .compose(requests -> {
+                if (requests.isEmpty()) {
+                    return Future.failedFuture(new DxNotFoundException("No compute request found for userId: " + userId));
+                }
+                return Future.succeededFuture(requests.get(0)); // Return the first request
+            });
   }
 
     @Override
@@ -208,7 +249,7 @@ public class CreditServiceImpl implements CreditService {
       return computeRoleDAO.get(requestId).compose(req -> {
         UUID userId = req.userId();
 
-        if (Status.GRANTED.equals(status)) {
+        if (GRANTED.equals(status)) {
           //TODO Assigining 1000 when user get compute role
           return userCreditDAO.create(new UserCredit(null, userId, config.getInteger("initialCreditBalance"), LocalDateTime.now()))
                   .recover(dxEx -> {
@@ -226,7 +267,7 @@ public class CreditServiceImpl implements CreditService {
                     return Future.succeededFuture(true);
                   });
 
-        } else if (Status.REJECTED.equals(status)) {
+        } else if (REJECTED.equals(status)) {
           return keycloakUserService.removeRoleFromUser(userId, DxRole.COMPUTE)
                   .compose(success -> {
                     if (!success) {
@@ -298,7 +339,7 @@ public class CreditServiceImpl implements CreditService {
   @Override
   public Future<Boolean> hasPendingComputeRequest(UUID userId) {
     Map<String, Object> filter = Map.of(
-            Constants.STATUS, Status.PENDING.getStatus(),
+            Constants.STATUS, PENDING.getStatus(),
             Constants.USER_ID, userId.toString()
     );
 
