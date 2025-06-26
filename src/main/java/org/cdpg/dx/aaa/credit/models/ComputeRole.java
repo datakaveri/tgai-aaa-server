@@ -40,7 +40,7 @@ public record ComputeRole(
         json.getString(Constants.APPROVED_BY) != null
           ? UUID.fromString(json.getString(Constants.APPROVED_BY))
           : null,
-        json.getJsonObject(Constants.ADDITONAL_INFO, new JsonObject()),
+        json.getJsonObject(Constants.ADDITONAL_INFO),
         parseDateTime(json.getString(Constants.CREATED_AT)),
         parseDateTime(json.getString(Constants.UPDATED_AT))
       );
