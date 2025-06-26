@@ -271,8 +271,29 @@ public class CreditServiceImpl implements CreditService {
   @Override
   public Future<ComputeRole> getComputeRequestById(UUID requestId)
   {
-    return computeRoleDAO.get(requestId);
+    return computeRoleDAO.get(requestId)
+            .recover(err -> {
+              BaseDxException dxEx = BaseDxException.from(err);
+              if (dxEx instanceof NoRowFoundException) {
+                return Future.failedFuture(new DxNotFoundException("No matching requestId found in computeRole table", dxEx));
+              }
+              return Future.failedFuture(dxEx);
+            });
   }
+
+  @Override
+  public Future<CreditRequest> getCreditRequestById(UUID requestId)
+  {
+    return creditRequestDAO.get(requestId)
+            .recover(err -> {
+              BaseDxException dxEx = BaseDxException.from(err);
+              if (dxEx instanceof NoRowFoundException) {
+                return Future.failedFuture(new DxNotFoundException("No matching requestId found in creditRequest table", dxEx));
+              }
+              return Future.failedFuture(dxEx);
+            });
+  }
+
 
   @Override
   public Future<Boolean> hasPendingComputeRequest(UUID userId) {
