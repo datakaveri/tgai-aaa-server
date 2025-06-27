@@ -16,11 +16,13 @@ public interface CreditService {
 
   Future<List<CreditRequest>> getAllPendingCreditRequests();
 
-  Future<CreditTransaction> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy); //done -> on approval will create a new entry in userCredit table
+  Future<CreditTransaction> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy,Double amount); //done -> on approval will create a new entry in userCredit table
 
   // ************ USER CREDIT *********
 
   Future<CreditTransaction> deductCredits(CreditTransaction creditTransaction);
+
+  Future<CreditTransaction> addCredits(CreditTransaction creditTransaction);
 
   Future<Double> getBalance(UUID userId);
 

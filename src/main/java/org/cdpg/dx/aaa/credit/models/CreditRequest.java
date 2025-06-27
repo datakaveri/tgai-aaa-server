@@ -19,7 +19,7 @@ public record CreditRequest(
   UUID id,
   UUID userId,
   String userName,
-  double amount,
+  JsonObject additionalInfo,
   String status,
   LocalDateTime requestedAt,
   LocalDateTime processedAt
@@ -33,7 +33,7 @@ public record CreditRequest(
           : null,
         UUID.fromString(requireNonNull(json.getString(Constants.USER_ID), Constants.USER_ID)),
         requireNonNull(json.getString(Constants.USER_NAME),Constants.USER_NAME),
-        Double.parseDouble(requireNonNull(json.getString(Constants.AMOUNT), Constants.AMOUNT)),
+        json.getJsonObject(Constants.ADDITONAL_INFO),
         json.getString(Constants.STATUS) != null
           ? json.getString(Constants.STATUS)
           : Status.PENDING.getStatus(),
@@ -52,7 +52,7 @@ public record CreditRequest(
     if (id != null) json.put(Constants.CREDIT_REQUEST_ID, id.toString());
     json.put(Constants.USER_ID, userId.toString());
     json.put(Constants.USER_NAME, userName.toString());
-    json.put(Constants.AMOUNT, amount);
+    if (additionalInfo != null) json.put(Constants.ADDITONAL_INFO, additionalInfo); // <-- new field
     if (status != null && !status.isEmpty()) json.put(Constants.STATUS, status);
     if (requestedAt != null) json.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
     if (processedAt != null) json.put(Constants.PROCESSED_AT, processedAt.format(FORMATTER));
@@ -67,7 +67,7 @@ public record CreditRequest(
     if (id != null) map.put(Constants.CREDIT_REQUEST_ID, id.toString());
     map.put(Constants.USER_ID, userId.toString());
     map.put(Constants.USER_NAME, userName.toString());
-    map.put(Constants.AMOUNT, amount);
+    if (additionalInfo != null) map.put(Constants.ADDITONAL_INFO, additionalInfo);
     if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
     if (requestedAt != null) map.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
     if (processedAt != null) map.put(Constants.PROCESSED_AT, processedAt.format(FORMATTER));
