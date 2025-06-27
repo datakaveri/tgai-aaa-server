@@ -63,8 +63,15 @@ public class CreditController implements ApiController {
       .handler(creditHandler::updateComputeRoleStatus);
 
     routerBuilder
+            .operation("get-auth-v1-admin-user-credit-balance")
+            .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
+            .handler(creditHandler::getBalanceofUser);
+
+    routerBuilder
       .operation("get-auth-v1-user-credit-balance")
+            .handler(AuthorizationHandler.forRoles(DxRole.COMPUTE))
       .handler(AuthorizationHandler.requireKycVerified())
+
       .handler(creditHandler::getBalance);
   }
 }

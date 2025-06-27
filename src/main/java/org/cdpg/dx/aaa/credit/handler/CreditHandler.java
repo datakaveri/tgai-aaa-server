@@ -86,6 +86,15 @@ public class CreditHandler {
       .onFailure(ctx::fail);
   }
 
+    public void getBalanceofUser(RoutingContext ctx) {
+        UUID userId = RequestHelper.getPathParamAsUUID(ctx, "id");
+        creditService.getBalance(userId)
+                .onSuccess(balance -> {
+                    ResponseBuilder.sendSuccess(ctx,new JsonObject(Map.of("user_id", userId, "balance", balance)));
+                })
+                .onFailure(ctx::fail);
+    }
+
 
   public void updateCreditRequestStatus(RoutingContext ctx) {
 
