@@ -142,6 +142,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         request.jobTitle(),
                                         request.empId(),
                                         request.orgManagerphoneNo(),
+                                        request.managerEmail(),
                                         null,
                                         null
                                 );
@@ -250,6 +251,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         joinRequest.jobTitle(),
                                         joinRequest.empId(),
                                         null,
+                                        joinRequest.officialEmail(),
                                         null,
                                         null
                                 );
