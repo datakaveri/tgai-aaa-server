@@ -24,6 +24,7 @@ import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.PaginationInfo;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,7 @@ public class OrganizationHandler {
     private final EmailComposer emailComposer;
 
 
-
-  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer ) {
+  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer) {
         this.organizationService = organizationService;
         this.userService = userService;
         this.emailComposer = emailComposer;
@@ -158,7 +158,7 @@ public class OrganizationHandler {
               return enriched;
             })
             .recover(err -> {
-              System.out.println("In recover block!");
+              //TODO remove this
               JsonObject enriched = joinRequest.toJson();
               enriched.put("roles", List.of());
               return Future.succeededFuture(enriched);
@@ -376,12 +376,20 @@ public class OrganizationHandler {
         .allowedSortFields(API_TO_DB_ORG_USERS.keySet())
         .build();
 
-      organizationService.getOrganizationUsers(request)
-                .onSuccess(res -> {
-                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Organisation Users by OrgID");
+      AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                RoutingContextHelper.getRequestPath(ctx), "GET", "Get Organisation Users by OrgID");
+      
+        organizationService.getOrganizationUsers(request)
+                .compose(res ->
+                        userService.enrichWithUserRoles(
+                                res.data(),
+                                OrganizationUser::userId,
+                                OrganizationUser::toJson
+                        ).map(enriched -> Map.entry(enriched, res.paginationInfo()))
+                )
+                .onSuccess(entry -> {
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx,res.data(), res.paginationInfo());
+                    ResponseBuilder.sendSuccess(ctx, entry.getKey(), entry.getValue());
                 })
                 .onFailure(ctx::fail);
 

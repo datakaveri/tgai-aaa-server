@@ -10,11 +10,6 @@ import java.util.UUID;
 
 public final class Constants {
 
-  private Constants()
-  {
-
-  }
-
   public static final String ORGANIZATION_TABLE="organizations";
   public static final String ORG_ID = "id";
   public static final String ORG_NAME = "name";
@@ -31,6 +26,8 @@ public final class Constants {
   public static final String STATUS = "status";
   public static final String REQUESTED_AT = "requested_at";
   public static final String PROCESSED_AT = "processed_at";
+  public static final String OFFICIAL_EMAIL = "official_email";
+
 
   public static final String ORG_USER_ID="id";
   public static final String ROLE="role";

@@ -142,6 +142,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         request.jobTitle(),
                                         request.empId(),
                                         request.orgManagerphoneNo(),
+                                        request.managerEmail(),
                                         null,
                                         null
                                 );
@@ -250,6 +251,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         joinRequest.jobTitle(),
                                         joinRequest.empId(),
                                         null,
+                                        joinRequest.officialEmail(),
                                         null,
                                         null
                                 );
@@ -325,7 +327,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Future<Boolean> deleteOrganizationUser(UUID orgId, UUID userId) {
-        return orgUserDAO.deleteUserByOrgId(orgId, userId);
+        return orgUserDAO.deleteUserByOrgId(orgId, userId)
+                .compose(deleted -> {
+                    if (deleted) {
+                        return keycloakUserService.updateUserAttributes(userId, Map.of(
+                                        "organisation_id", "",
+                                        "organisation_name", ""
+                                ))
+                                .onFailure(err -> LOGGER.error("Failed to update user attributes in Keycloak after deleting organization user", err))
+                                .map(v -> true);
+                    } else {
+                        return Future.succeededFuture(false);
+                    }
+                });
     }
 
 
