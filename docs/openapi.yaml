@@ -1786,11 +1786,19 @@ paths:
           description: User credit record not found
         '500':
           description: Internal server error
-  '/auth/v1/user/credit/add':
-    put:
-      operationId: put-auth-v1-user-credit-add
-      summary: Add credits to user's balance amount
-      description: Adds credits to the specified user's balance.
+  '/auth/v1/admin/user/credit/balance/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: UUID of the User
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: get-auth-v1-admin-user-credit-balance
+      summary: Get the specified user's credit balance
+      description: Returns the credit balance for the specified user (KYC-verified).
       tags:
         - Credit
       parameters:
@@ -1802,76 +1810,23 @@ paths:
             type: string
       security:
         - authorization: [ ]
-#      requestBody:
-#        required: true
-#        content:
-#          application/json:
-#            schema:
-#              type: object
-#              properties:
-#                amount:
-#                  type: number
-#                  format: double
-#                userId:
-#                  type: string
-#                  format: uuid
-#                requestedAt:
-#                  type: string
-#                  format: date-time
-#              required:
-#                - amount
-#                - userId
-#                - requestedAt
       responses:
         '200':
-          description: OK
+          description: User credit balance retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  type:
-                    type: string
-                  title:
-                    type: string
-                  result:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      userId:
-                        type: string
-                      amount:
-                        type: integer
-                      transactedBy:
-                        type: string
-                      transactionStatus:
-                        type: string
-                      transactionType:
-                        type: string
-                      createdAt:
-                        type: string
-                      requestedAt:
-                        type: string
-                      updatedBalance:
-                        type: integer
-                      tableName:
-                        type: string
-              x-examples:
-                Example 1:
-                  type: 'urn:dx:aaa:success'
-                  title: Success
-                  result:
-                    id: bbc203ba-b7e2-43aa-9533-da2dee243bc7
-                    userId: 436cb796-5826-458b-a914-a54721f70997
-                    amount: 50
-                    transactedBy: a2899137-8458-40a6-9be8-084cfd1890e5
-                    transactionStatus: success
-                    transactionType: credit
-                    createdAt: '2025-06-04T10:51:42.343373'
-                    requestedAt: '2025-05-29T19:07:00'
-                    updatedBalance: 19950
-                    tableName: credit_transactions
+                  balance:
+                    type: number
+                    format: double
+        '401':
+          description: Unauthorized or KYC not verified
+        '404':
+          description: User credit record not found
+        '500':
+          description: Internal server error
 
   /auth/v1/credit/request:
     get:
@@ -2258,6 +2213,92 @@ paths:
           description: Keycloak issued token
       security:
         - authorization: []
+  /auth/v1/admin/user/credit/add:
+    put:
+      operationId: put-auth-v1-user-credit-add
+      summary: Add credits to user's balance amount
+      description: Adds credits to the specified user's balance.
+      tags:
+        - Credit
+      parameters:
+        - name: Authorization
+          in: header
+          description: Keycloak Issued Token
+          required: true
+          schema:
+            type: string
+      security:
+        - authorization: [ ]
+      #      requestBody:
+      #        required: true
+      #        content:
+      #          application/json:
+      #            schema:
+      #              type: object
+      #              properties:
+      #                amount:
+      #                  type: number
+      #                  format: double
+      #                userId:
+      #                  type: string
+      #                  format: uuid
+      #                requestedAt:
+      #                  type: string
+      #                  format: date-time
+      #              required:
+      #                - amount
+      #                - userId
+      #                - requestedAt
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      amount:
+                        type: integer
+                      transactedBy:
+                        type: string
+                      transactionStatus:
+                        type: string
+                      transactionType:
+                        type: string
+                      createdAt:
+                        type: string
+                      requestedAt:
+                        type: string
+                      updatedBalance:
+                        type: integer
+                      tableName:
+                        type: string
+              x-examples:
+                Example 1:
+                  type: 'urn:dx:aaa:success'
+                  title: Success
+                  result:
+                    id: bbc203ba-b7e2-43aa-9533-da2dee243bc7
+                    userId: 436cb796-5826-458b-a914-a54721f70997
+                    amount: 50
+                    transactedBy: a2899137-8458-40a6-9be8-084cfd1890e5
+                    transactionStatus: success
+                    transactionType: credit
+                    createdAt: '2025-06-04T10:51:42.343373'
+                    requestedAt: '2025-05-29T19:07:00'
+                    updatedBalance: 19950
+                    tableName: credit_transactions
   /auth/v1/compute/requests:
     get:
       summary: Get All Pending ComputeRole Requests
