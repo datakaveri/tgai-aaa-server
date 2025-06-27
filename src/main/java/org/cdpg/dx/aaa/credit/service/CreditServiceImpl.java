@@ -53,7 +53,7 @@ public class CreditServiceImpl implements CreditService {
   }
 
   @Override
-  public Future<CreditTransaction> updateCreditRequestStatus(UUID requestId, Status status, UUID transactedBy) {
+  public Future<CreditTransaction> updateCreditRequestStatus(UUID requestId, Status status, UUID transactedBy,Double amount) {
     LOGGER.info("Updating credit request status for requestId: {} to: {}", requestId, status);
     return creditRequestDAO.update(
                     Map.of(CREDIT_REQUEST_ID, requestId.toString()),
@@ -62,7 +62,7 @@ public class CreditServiceImpl implements CreditService {
               if (status != GRANTED) {
                 return Future.succeededFuture(null); // No transaction needed
               }
-              return processCreditGrant(requestId, transactedBy);
+              return processCreditGrant(requestId, transactedBy,amount);
             })
             .recover(err -> {
               BaseDxException dxEx = BaseDxException.from(err);
@@ -73,10 +73,9 @@ public class CreditServiceImpl implements CreditService {
             });
   }
 
-  private Future<CreditTransaction> processCreditGrant(UUID requestId, UUID transactedBy) {
+  private Future<CreditTransaction> processCreditGrant(UUID requestId, UUID transactedBy,Double amount) {
     return creditRequestDAO.get(requestId).compose(cr -> {
       UUID userId = cr.userId();
-      double amount = cr.amount();
       LocalDateTime requestedAt = cr.requestedAt();
 
       return userCreditDAO.get(userId)
@@ -106,25 +105,55 @@ public class CreditServiceImpl implements CreditService {
                           return creditTransactionDAO.create(transaction);
                         });
               });
-    }).recover(err -> {
-        BaseDxException dxEx = BaseDxException.from(err);
-       if (dxEx instanceof BaseDxException) {
-        LOGGER.warn("No user_credit entry found for requestId: {}, attempting to create...", requestId);
+    });
+  }
 
-        return creditRequestDAO.get(requestId).compose(cr -> {
-          UserCredit newCredit = new UserCredit(null, cr.userId(), cr.amount(), LocalDateTime.now());
+  @Override
+  public Future<CreditTransaction> addCredits(CreditTransaction creditTransaction)
+  {
+    LocalDateTime reqAt = creditTransaction.requestedAt();
+    System.out.println("Request at: " + reqAt);
+    UUID userId = creditTransaction.userId();
 
-          return userCreditDAO.create(newCredit)
-                  .recover(createErr -> {
-                    BaseDxException createDxEx = BaseDxException.from(createErr);
-                    if (createDxEx instanceof UniqueConstraintViolationException) {
-                      LOGGER.info("UserCredit already exists, proceeding with balance update.");
-                      return Future.succeededFuture(); // Already exists, proceed
-                    }
-                    return Future.failedFuture(createDxEx);
-                  })
-                  .compose(v -> processCreditGrant(requestId, transactedBy)); // retry credit grant after creation
+    if (creditTransaction.amount() == null) {
+      return Future.failedFuture(new DxBadRequestException("Amount is missing in CreditTransaction"));
+    }
+
+    Double amount = creditTransaction.amount();
+    Map<String, Object> filter = Map.of(REQUESTED_AT, reqAt.toString(), USER_ID, userId.toString());
+
+    return creditTransactionDAO.getAllWithFilters(filter).compose(existing -> {
+      if (existing != null && !existing.isEmpty()) {
+        return Future.failedFuture(new DxConflictException("Duplicate transaction request"));
+      }
+
+      return userCreditDAO.get(userId).compose(userCredit -> {
+        double updatedBalance = userCredit.balance() + amount;
+
+        Map<String, Object> conditionMap = Map.of(USER_ID, userId.toString());
+        Map<String, Object> updatedMap = Map.of(BALANCE, updatedBalance);
+
+        return userCreditDAO.update(conditionMap, updatedMap).compose(v -> {
+          CreditTransaction transaction = new CreditTransaction(
+            null,
+            userId,
+            amount,
+            creditTransaction.transactedBy(),
+            TransactionStatus.SUCCESS.getStatus(),
+            TransactionType.CREDIT.getType(),
+            null,
+            reqAt,
+            updatedBalance
+          );
+
+          return creditTransactionDAO.create(transaction);
+
         });
+  });
+    }).recover(err -> {
+      BaseDxException dxEx = BaseDxException.from(err);
+      if (dxEx instanceof NoRowFoundException) {
+        return Future.failedFuture(new DxNotFoundException("User entry not found", dxEx));
       }
       return Future.failedFuture(dxEx);
     });
@@ -184,35 +213,7 @@ public class CreditServiceImpl implements CreditService {
 
   @Override
   public Future<ComputeRole> createComputeRoleRequest(ComputeRole computeRole) {
-    // check if there is a pending or granted request for the same user
-    // if yes then dont create a new request
-    // if status is rejected then only allow to create a new request
-
-    Map<String, Object> filterMap = Map.of(
-            Constants.USER_ID, computeRole.userId().toString());
-    return computeRoleDAO.getAllWithFilters(filterMap)
-      .compose(requests -> {
-        if (!requests.isEmpty()) {
-          // If there is a pending or granted request, do not create a new one
-          ComputeRole existingRequest = requests.get(0);
-          if (PENDING.getStatus().equals(existingRequest.status()) ||
-            GRANTED.getStatus().equals(existingRequest.status())) {
-            return Future.failedFuture(new DxConflictException("A pending or granted compute role request already exists for this user"));
-          }
-          else if( REJECTED.getStatus().equals(existingRequest.status())) {
-            // If the existing request is rejected, allow to create a new one
-            LOGGER.info("Existing request is rejected, allowing to create a new compute role request");
-            return computeRoleDAO.create(computeRole);
-          } else {
-            return Future.failedFuture(new DxConflictException("Provider role request is not in a state that allows creation of a new request"));
-          }
-        }
-        else {
-          // No existing requests found, proceed to create a new one
-          return computeRoleDAO.create(computeRole);
-        }
-      });
-
+    return computeRoleDAO.create(computeRole);
   }
 
   @Override
