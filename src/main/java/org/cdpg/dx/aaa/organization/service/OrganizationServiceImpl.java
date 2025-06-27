@@ -12,10 +12,13 @@ import org.cdpg.dx.keycloak.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map;
+
+import static org.cdpg.dx.common.util.DateTimeHelper.FORMATTER;
 
 public class OrganizationServiceImpl implements OrganizationService {
 
@@ -400,7 +403,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Constants.ORG_CREATE_ID, requestId.toString()
         );
         Map<String, Object> updateDataMap = Map.of(
-                Constants.STATUS, status.getStatus()
+                Constants.STATUS, status.getStatus(),
+                Constants.UPDATED_AT, FORMATTER.format(LocalDateTime.now())
         );
 
         return providerRequestDAO.update(conditionMap, updateDataMap)
