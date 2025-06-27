@@ -378,7 +378,7 @@ public class OrganizationHandler {
 
       AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                 RoutingContextHelper.getRequestPath(ctx), "GET", "Get Organisation Users by OrgID");
-      
+
         organizationService.getOrganizationUsers(request)
                 .compose(res ->
                         userService.enrichWithUserRoles(
@@ -514,6 +514,9 @@ public class OrganizationHandler {
                                     .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
                                     .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
                                     .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+                                    .allowedTimeFields(Set.of(CREATED_AT))
+                                    .defaultTimeField(CREATED_AT)
+                                    .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
                                     .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
                                     .build();
 
