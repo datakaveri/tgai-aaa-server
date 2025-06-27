@@ -13,7 +13,10 @@ import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.common.HttpStatusCode;
+import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
+import org.cdpg.dx.common.exception.DxValidationException;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
@@ -71,6 +74,19 @@ public class CreditHandler {
   }
 
 
+  public void getBalance(RoutingContext ctx) {
+
+    User user = ctx.user();
+    UUID userId = UUID.fromString(user.subject());
+
+    creditService.getBalance(userId)
+      .onSuccess(balance -> {
+        ResponseBuilder.sendSuccess(ctx,new JsonObject(Map.of("balance", balance)));
+      })
+      .onFailure(ctx::fail);
+  }
+
+
   public void updateCreditRequestStatus(RoutingContext ctx) {
 
     JsonObject creditRequestJson = ctx.body().asJsonObject();
@@ -83,8 +99,16 @@ public class CreditHandler {
     Status status = Status.fromString(creditRequestJson.getString("status"));
     UUID requestId = UUID.fromString(creditRequestJson.getString("id"));
 
+    Double amount = null;
 
-    creditService.updateCreditRequestStatus( requestId, status, transactedBy)
+    if (status == Status.GRANTED && creditRequestJson.getValue("amount") == null) {
+      throw new DxBadRequestException("Amount is required for GRANTED status");
+    }
+
+
+    amount = creditRequestJson.getDouble("amount");
+
+    creditService.updateCreditRequestStatus( requestId, status, transactedBy,amount)
       .onSuccess(transaction -> {
           ResponseBuilder.sendSuccess(ctx,  transaction);
         // Send email notification
@@ -107,6 +131,24 @@ public class CreditHandler {
     // pass userId and userName from json
     CreditTransaction creditTransaction = CreditTransaction.fromJson(creditDeductionJson);
     creditService.deductCredits(creditTransaction)
+      .onSuccess(res -> {
+        ResponseBuilder.sendSuccess(ctx, res);
+      })
+      .onFailure(ctx::fail);
+  }
+
+  public void addCredits(RoutingContext ctx) {
+    JsonObject creditAdditionJson = ctx.body().asJsonObject();
+
+    User user = ctx.user();
+    UUID transactedBy = UUID.fromString(user.subject());
+    creditAdditionJson.put("transacted_by", transactedBy.toString());
+
+    JsonObject responseObject = creditAdditionJson.copy();
+
+    // pass userId and userName from json
+    CreditTransaction creditTransaction = CreditTransaction.fromJson(creditAdditionJson);
+    creditService.addCredits(creditTransaction)
       .onSuccess(res -> {
         ResponseBuilder.sendSuccess(ctx, res);
       })

@@ -47,6 +47,7 @@ paths:
                         empId: EMP12345
                         jobTitle: Manager
                         orgManagerphoneNo: +91-9876543210
+                        managerEmail: manager@gmail.com
                         orgDocuments: null
                         createdAt: '2025-06-03T16:01:59.532782'
                         updatedAt: '2025-06-03T16:01:59.532782'
@@ -92,6 +93,8 @@ paths:
                         jobTitle:
                           type: string
                         orgManagerphoneNo:
+                          type: string
+                        managerEmail:
                           type: string
                         orgDocuments:
                           type: string
@@ -152,6 +155,7 @@ paths:
                         empId: EMP12345
                         jobTitle: Manager
                         orgManagerphoneNo: +91-9876543210
+                        managerEmail: manager@gmail.com
                         orgDocuments: null
                         createdAt: '2025-06-03T16:01:59.532782'
                         updatedAt: '2025-06-03T16:01:59.532782'
@@ -289,6 +293,8 @@ paths:
                         type: string
                       orgManagerphoneNo:
                         type: string
+                      managerEmail:
+                        type: string
                       orgDocuments:
                         type: string
                       createdAt:
@@ -318,6 +324,7 @@ paths:
                       empId: EMP12345
                       jobTitle: Manager
                       orgManagerphoneNo: +91-9876543210
+                      managerEmail: manager@gmail.com
                       orgDocuments: null
                       createdAt: '2025-06-03T16:25:25.167724'
                       updatedAt: '2025-06-03T16:25:25.167724'
@@ -344,6 +351,7 @@ paths:
                       empId: EMP12345
                       jobTitle: Manager
                       orgManagerphoneNo: +91-9876543210
+                      managerEmail: manager@gmail.com
                       orgDocuments: null
                       createdAt: '2025-06-03T16:25:25.167724'
                       updatedAt: '2025-06-03T16:25:25.167724'
@@ -425,6 +433,10 @@ paths:
                   type: string
                 phone_no:
                   type: string
+                organisation_documents:
+                    type: string
+                manager_email:
+                    type: string
               x-examples:
                 Example 1:
                   name: Quantum Labs
@@ -438,6 +450,8 @@ paths:
                   emp_id: EMP98765
                   job_title: Operations Lead
                   phone_no: +91-9123456789
+                  organisation_documents: /docs/organisations/quantum_docs.zip
+                  manager_email:  manager@gmail.com
       parameters:
         - schema:
             type: string
@@ -608,8 +622,10 @@ paths:
                         status: pending
                         jobTitle: Employee
                         empId: EMP8790
+                        officialEmail: member@gmail.com
                         requestedAt: '2025-06-03T16:35:48.404509'
                         processedAt: '2025-06-03T16:35:48.404509'
+                        roles: []
                         tableName: organization_join_requests
                 properties:
                   type:
@@ -635,10 +651,14 @@ paths:
                           type: string
                         empId:
                           type: string
+                        officialEmail:
+                          type: string
                         requestedAt:
                           type: string
                         processedAt:
                           type: string
+                        roles:
+                          type: object
                         tableName:
                           type: string
                   paginationInfo:
@@ -683,9 +703,14 @@ paths:
                         status: pending
                         jobTitle: Employee
                         empId: EMP8790
+                        officialEmail: member@gmail.com
                         requestedAt: '2025-06-03T16:35:48.404509'
                         processedAt: '2025-06-03T16:35:48.404509'
                         tableName: organization_join_requests
+                        roles:
+                          - consumer
+                          - default-roles-tgdex-pilot
+                          - provider
                     paginationInfo:
                       page: 1
                       size: 1
@@ -1429,9 +1454,12 @@ paths:
                         jobTitle: Manager
                         empId: EMP12345
                         orgManagerPhoneNo: +91-9876543210
+                        officialEmail: user@gmail.com
                         createdAt: '2025-06-03T16:28:24.852025'
                         updatedAt: '2025-06-03T16:28:24.852025'
+                        roles: []
                         tableName: organization_users
+                        accountEnabled: true
                 properties:
                   type:
                     type: string
@@ -1458,10 +1486,16 @@ paths:
                           type: string
                         orgManagerPhoneNo:
                           type: string
+                        officialEmail:
+                          type: string
                         createdAt:
                           type: string
                         updatedAt:
                           type: string
+                        roles:
+                          type: object
+                        accountEnabled:
+                          type: boolean
                         tableName:
                           type: string
                   paginationInfo:
@@ -1509,6 +1543,9 @@ paths:
                         orgManagerPhoneNo: +91-9876543210
                         createdAt: '2025-06-03T16:28:24.852025'
                         updatedAt: '2025-06-03T16:28:24.852025'
+                        roles:
+                          - consumer
+                        accountEnabled: true
                         tableName: organization_users
                     paginationInfo:
                       page: 1
@@ -1716,6 +1753,126 @@ paths:
           required: true
       security:
         - authorization: []
+  '/auth/v1/user/credit/balance':
+    get:
+      operationId: get-auth-v1-user-credit-balance
+      summary: Get the specified user's credit balance
+      description: Returns the credit balance for the specified user (KYC-verified).
+      tags:
+        - Credit
+      parameters:
+        - name: Authorization
+          in: header
+          description: Keycloak Issued Token
+          required: true
+          schema:
+            type: string
+      security:
+        - authorization: [ ]
+      responses:
+        '200':
+          description: User credit balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: double
+        '401':
+          description: Unauthorized or KYC not verified
+        '404':
+          description: User credit record not found
+        '500':
+          description: Internal server error
+  '/auth/v1/user/credit/add':
+    put:
+      operationId: put-auth-v1-user-credit-add
+      summary: Add credits to user's balance amount
+      description: Adds credits to the specified user's balance.
+      tags:
+        - Credit
+      parameters:
+        - name: Authorization
+          in: header
+          description: Keycloak Issued Token
+          required: true
+          schema:
+            type: string
+      security:
+        - authorization: [ ]
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              properties:
+#                amount:
+#                  type: number
+#                  format: double
+#                userId:
+#                  type: string
+#                  format: uuid
+#                requestedAt:
+#                  type: string
+#                  format: date-time
+#              required:
+#                - amount
+#                - userId
+#                - requestedAt
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      amount:
+                        type: integer
+                      transactedBy:
+                        type: string
+                      transactionStatus:
+                        type: string
+                      transactionType:
+                        type: string
+                      createdAt:
+                        type: string
+                      requestedAt:
+                        type: string
+                      updatedBalance:
+                        type: integer
+                      tableName:
+                        type: string
+              x-examples:
+                Example 1:
+                  type: 'urn:dx:aaa:success'
+                  title: Success
+                  result:
+                    id: bbc203ba-b7e2-43aa-9533-da2dee243bc7
+                    userId: 436cb796-5826-458b-a914-a54721f70997
+                    amount: 50
+                    transactedBy: a2899137-8458-40a6-9be8-084cfd1890e5
+                    transactionStatus: success
+                    transactionType: credit
+                    createdAt: '2025-06-04T10:51:42.343373'
+                    requestedAt: '2025-05-29T19:07:00'
+                    updatedBalance: 19950
+                    tableName: credit_transactions
+
   /auth/v1/credit/request:
     get:
       summary: Get all credit requests by status
@@ -2684,7 +2841,7 @@ paths:
     put:
       summary: (User) Change Password
       description: |
-        Allows the logged-in user to change their password. 
+        Allows the logged-in user to change their password.
         Only the new password needs to be provided.
       tags:
         - Role APIs
@@ -2818,11 +2975,11 @@ paths:
                       sub: a2899137-8458-40a6-9be8-084cfd1890e5
                       emailVerified: false
                       kycVerified: false
-                      name: Srishti Mittal
-                      preferredUsername: srishti
-                      givenName: Srishti
-                      familyName: Mittal
-                      email: srishti@gmail.com
+                      name: User user
+                      preferredUsername: user
+                      givenName: User
+                      familyName: user
+                      email: user@gmail.com
                       pendingRoles: []
                       organisation: {}
                       createdAt: '2025-05-21T09:33:12.073'
