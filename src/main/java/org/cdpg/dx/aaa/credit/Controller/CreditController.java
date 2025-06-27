@@ -8,6 +8,7 @@ import org.cdpg.dx.aaa.credit.handler.CreditHandler;
 import org.cdpg.dx.auditing.handler.AuditingHandler;
 import org.cdpg.dx.auth.authorization.handler.AuthorizationHandler;
 import org.cdpg.dx.auth.authorization.model.DxRole;
+import org.checkerframework.checker.units.qual.A;
 
 public class CreditController implements ApiController {
   private static final Logger LOGGER = LogManager.getLogger(CreditController.class);
@@ -41,6 +42,11 @@ public class CreditController implements ApiController {
       .handler(creditHandler::deductCredits);
 
     routerBuilder
+      .operation("put-auth-v1-user-credit-add")
+      .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
+      .handler(creditHandler::addCredits);
+
+    routerBuilder
       .operation("post-auth-v1-compute-role-request")
       .handler(AuthorizationHandler.requireKycVerified())
       .handler(creditHandler::createComputeRoleRequest);
@@ -56,7 +62,10 @@ public class CreditController implements ApiController {
       .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
       .handler(creditHandler::updateComputeRoleStatus);
 
-
+    routerBuilder
+      .operation("get-auth-v1-user-credit-balance")
+      .handler(AuthorizationHandler.requireKycVerified())
+      .handler(creditHandler::getBalance);
   }
 }
 
