@@ -13,6 +13,7 @@ import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.common.exception.DxNotFoundException;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
@@ -126,6 +127,13 @@ public class CreditHandler {
     ComputeRole computeRoleRequest = ComputeRole.fromJson(new JsonObject().put("user_id", userID).put("user_name", userName).put("additional_info", additionalInfo));
 
     creditService.getComputeRoleRequestByUserId(UUID.fromString(userID))
+            .recover(err -> {
+                if (err instanceof DxNotFoundException) {
+                    return Future.succeededFuture(null);
+                }
+                // For other errors, propagate
+                return Future.failedFuture(err);
+            })
             .compose(existingComputeRole -> {
                 System.out.println("here in compose block");
               if (existingComputeRole != null && existingComputeRole.status().equalsIgnoreCase(Status.REJECTED.getStatus())) {
