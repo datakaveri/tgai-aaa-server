@@ -23,6 +23,7 @@ public record OrganizationUser(
         String jobTitle,
         String empId,
         String orgManagerPhoneNo,
+        String officialEmail,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) implements BaseEntity<OrganizationUser> {
@@ -40,9 +41,10 @@ public record OrganizationUser(
                     requireNonNull(json.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
                     requireNonNull(json.getString(Constants.EMP_ID), Constants.EMP_ID),
                     json.getString(Constants.PHONE_NO),
+                    requireNonNull(json.getString(Constants.OFFICIAL_EMAIL), Constants.OFFICIAL_EMAIL),
                     parseDateTime(json.getString(Constants.CREATED_AT)),
-                    parseDateTime(json.getString(Constants.UPDATED_AT))
-            );
+                    parseDateTime(json.getString(Constants.UPDATED_AT)
+                    ));
         } catch (IllegalArgumentException e) {
             throw new DxValidationException("Missing or invalid required field: " + e.getMessage());
         }
@@ -61,6 +63,7 @@ public record OrganizationUser(
         json.put(Constants.EMP_ID, empId);
         if (orgManagerPhoneNo != null && !orgManagerPhoneNo.isEmpty())
             json.put(Constants.PHONE_NO, orgManagerPhoneNo);
+        json.put(Constants.OFFICIAL_EMAIL, officialEmail);
         if (createdAt != null) json.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
         if (updatedAt != null) json.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 
@@ -80,6 +83,7 @@ public record OrganizationUser(
         if (!empId.isEmpty()) map.put(Constants.EMP_ID, empId);
         if (orgManagerPhoneNo != null && !orgManagerPhoneNo.isEmpty())
             map.put(Constants.PHONE_NO, orgManagerPhoneNo);
+        map.put(Constants.OFFICIAL_EMAIL, officialEmail);
         if (createdAt != null) map.put(Constants.CREATED_AT, createdAt.format(FORMATTER));
         if (updatedAt != null) map.put(Constants.UPDATED_AT, updatedAt.format(FORMATTER));
 

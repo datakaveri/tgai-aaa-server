@@ -23,6 +23,7 @@ public record OrganizationJoinRequest(
   String status,
   String jobTitle,
   String empId,
+  String officialEmail,
   LocalDateTime requestedAt,
   LocalDateTime processedAt
 ) implements BaseEntity<OrganizationJoinRequest> {
@@ -39,6 +40,7 @@ public record OrganizationJoinRequest(
         Optional.ofNullable(orgJoinRequest.getString(Constants.STATUS)).orElse(Status.PENDING.getStatus()),
         requireNonNull(orgJoinRequest.getString(Constants.JOB_TITLE), Constants.JOB_TITLE),
         requireNonNull(orgJoinRequest.getString(Constants.EMP_ID), Constants.EMP_ID),
+        requireNonNull(orgJoinRequest.getString(Constants.OFFICIAL_EMAIL), Constants.OFFICIAL_EMAIL),
         parseDateTime(orgJoinRequest.getString(Constants.REQUESTED_AT)),
         parseDateTime(orgJoinRequest.getString(Constants.PROCESSED_AT))
       );
@@ -58,6 +60,7 @@ public record OrganizationJoinRequest(
     json.put(Constants.STATUS, status);
     json.put(Constants.JOB_TITLE, jobTitle);
     json.put(Constants.EMP_ID, empId);
+    json.put(Constants.OFFICIAL_EMAIL, officialEmail);
     if (requestedAt != null) json.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
     if (processedAt != null) json.put(Constants.PROCESSED_AT, processedAt.format(FORMATTER));
 
@@ -74,6 +77,7 @@ public record OrganizationJoinRequest(
     json.put("status", status);
     json.put("jobTitle", jobTitle);
     json.put("empId", empId);
+    json.put("officialEmail", officialEmail);
     if (requestedAt != null) json.put("requestedAt", requestedAt.format(FORMATTER));
     if (processedAt != null) json.put("processedAt", processedAt.format(FORMATTER));
 
@@ -91,6 +95,7 @@ public record OrganizationJoinRequest(
     if (status != null && !status.isEmpty()) map.put(Constants.STATUS, status);
     if (jobTitle != null && !jobTitle.isEmpty()) map.put(Constants.JOB_TITLE, jobTitle);
     if (empId != null && !empId.isEmpty()) map.put(Constants.EMP_ID, empId);
+    map.put(Constants.OFFICIAL_EMAIL, officialEmail);
     if (requestedAt != null) map.put(Constants.REQUESTED_AT, requestedAt.format(FORMATTER));
     if (processedAt != null) map.put(Constants.PROCESSED_AT, processedAt.format(FORMATTER));
 
