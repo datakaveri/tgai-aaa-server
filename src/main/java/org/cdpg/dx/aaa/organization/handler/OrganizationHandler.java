@@ -24,6 +24,7 @@ import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.PaginationInfo;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
+import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,7 @@ public class OrganizationHandler {
     private final EmailComposer emailComposer;
 
 
-
-  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer ) {
+  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer) {
         this.organizationService = organizationService;
         this.userService = userService;
         this.emailComposer = emailComposer;

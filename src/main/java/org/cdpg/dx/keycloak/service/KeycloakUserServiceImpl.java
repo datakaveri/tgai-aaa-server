@@ -62,13 +62,13 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
-    public Future<List<DxUser>> getUsers(int page, int size) {
+    public Future<List<DxUser>> getUsers(int page, int size, String name) {
         return BlockingExecutionUtil.runBlocking(() -> {
             try {
                 //System.out.println("Fetching users from Keycloak: page=" + page + ", size=" + size + ", enabled=" + enabled);
                 List<UserRepresentation> reps = usersResource().search(
-                        null,          // search string
-                        page * size,   // first (offset)
+                        name,          // search string
+                        (page-1) * size,   // first (offset)
                         size,          // max
                         true// filter by enabled/disabled
                 );

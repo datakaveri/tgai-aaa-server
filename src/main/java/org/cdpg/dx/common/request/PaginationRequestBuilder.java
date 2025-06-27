@@ -89,7 +89,7 @@ public class PaginationRequestBuilder {
     }
 
     int page = parseIntOrDefault(ctx.queryParam("page"), 1);
-    int size = parseIntOrDefault(ctx.queryParam("size"), 1000);
+    int size = parseIntOrDefault(ctx.queryParam("size"), 10);
 
     Map<String, Object> mappedFilters = new HashMap<>();
 
@@ -203,7 +203,7 @@ public class PaginationRequestBuilder {
     allowedKeys.add("time");
     allowedKeys.add("endtime");
     allowedKeys.add("timerel");
-    allowedKeys.add("enabled");
+    allowedKeys.add("search_term");
 
     for (String timeField : allowedTimeFields) {
       allowedKeys.add(timeField + "_time");

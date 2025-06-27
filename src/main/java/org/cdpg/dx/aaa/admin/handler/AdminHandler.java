@@ -66,8 +66,9 @@ public class AdminHandler {
     public void getAllDxUsersKeycloak(RoutingContext ctx) {
 
         PaginatedRequest request = PaginationRequestBuilder.from(ctx).build();
+        String name = ctx.queryParam("search_term").stream().findFirst().orElse(null);
 
-        keycloakUserService.getUsers(request.page(), request.size())
+        keycloakUserService.getUsers(request.page(), request.size(), name)
                 .compose(users -> {
                     List<Future> futures = new ArrayList<>();
                     for (DxUser user : users) {
