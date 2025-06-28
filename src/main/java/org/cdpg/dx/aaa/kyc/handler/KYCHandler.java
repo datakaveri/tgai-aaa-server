@@ -6,12 +6,15 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.audit.util.AuditingHelper;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.kyc.service.KYCService;
+import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.response.ResponseBuilder;
+import org.cdpg.dx.common.util.RoutingContextHelper;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 import java.util.UUID;
@@ -48,6 +51,9 @@ public class KYCHandler {
         }
         kycService.getKYCData(userId, code, codeVerifier)
                 .onSuccess(res -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "POST", "Verify KYC Data");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, res);
                 })
                 .onFailure(ctx::fail);
@@ -67,6 +73,9 @@ public class KYCHandler {
 
         kycService.confirmKYCData(userId, codeVerifier, user.principal().getString("name"))
                 .onSuccess(res -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "GET", "Confirm KYC Data");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, res);
                 })
                 .onFailure(ctx::fail);
@@ -74,19 +83,31 @@ public class KYCHandler {
 
     public void revokeKYC(RoutingContext ctx) {
         User user = ctx.user();
-        keycloakUserService.setKycVerifiedFalse(UUID.fromString(user.subject()))
-                .compose(kyc -> {
-                    keycloakUserService.removeRoleFromUser(UUID.fromString(user.subject()), DxRole.COMPUTE);
-                    return creditService.getComputeRoleRequestByUserId(UUID.fromString(user.subject()))
-                            .compose(computeRoleRequest -> {
-                                if (computeRoleRequest != null) {
-                                    return creditService.updateComputeRoleStatus(computeRoleRequest.id(), Status.REJECTED, computeRoleRequest.approvedBy());
-                                } else {
+        UUID userId = UUID.fromString(user.subject());
+
+        keycloakUserService.setKycVerifiedFalse(userId)
+                .compose(kyc ->
+                        keycloakUserService.removeRoleFromUser(userId, DxRole.COMPUTE)
+                                .compose(v -> creditService.getComputeRoleRequestByUserId(userId))
+                                .compose(computeRoleRequest -> {
+                                    if (computeRoleRequest != null) {
+                                        return creditService.updateComputeRoleStatus(
+                                                computeRoleRequest.id(), Status.REJECTED, computeRoleRequest.approvedBy());
+                                    } else {
+                                        return Future.succeededFuture();
+                                    }
+                                })
+                                .recover(err -> {
+                                    // Log and ignore any failure from getComputeRoleRequestByUserId or update
+                                    //
+                                    LOGGER.warn("Failed to process compute role revocation: {}", err.getMessage());
                                     return Future.succeededFuture();
-                                }
-                            });
-                })
+                                })
+                )
                 .onSuccess(res -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "POST", "KYC revoked");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "KYC revoked successfully");
                 })
                 .onFailure(ctx::fail);
