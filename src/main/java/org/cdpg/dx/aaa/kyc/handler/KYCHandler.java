@@ -83,22 +83,31 @@ public class KYCHandler {
 
     public void revokeKYC(RoutingContext ctx) {
         User user = ctx.user();
-        keycloakUserService.setKycVerifiedFalse(UUID.fromString(user.subject()))
-                .compose(kyc -> {
-                    keycloakUserService.removeRoleFromUser(UUID.fromString(user.subject()), DxRole.COMPUTE);
-                    return creditService.getComputeRoleRequestByUserId(UUID.fromString(user.subject()))
-                            .compose(computeRoleRequest -> {
-                                if (computeRoleRequest != null) {
-                                    return creditService.updateComputeRoleStatus(computeRoleRequest.id(), Status.REJECTED, computeRoleRequest.approvedBy());
-                                } else {
+        UUID userId = UUID.fromString(user.subject());
+
+        keycloakUserService.setKycVerifiedFalse(userId)
+                .compose(kyc ->
+                        keycloakUserService.removeRoleFromUser(userId, DxRole.COMPUTE)
+                                .compose(v -> creditService.getComputeRoleRequestByUserId(userId))
+                                .compose(computeRoleRequest -> {
+                                    if (computeRoleRequest != null) {
+                                        return creditService.updateComputeRoleStatus(
+                                                computeRoleRequest.id(), Status.REJECTED, computeRoleRequest.approvedBy());
+                                    } else {
+                                        return Future.succeededFuture();
+                                    }
+                                })
+                                .recover(err -> {
+                                    // Log and ignore any failure from getComputeRoleRequestByUserId or update
+                                    //
+                                    LOGGER.warn("Failed to process compute role revocation: {}", err.getMessage());
                                     return Future.succeededFuture();
-                                }
-                            });
-                })
+                                })
+                )
                 .onSuccess(res -> {
-                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                    RoutingContextHelper.getRequestPath(ctx), "POST", "KYC revoked");
-                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                            RoutingContextHelper.getRequestPath(ctx), "POST", "KYC revoked");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "KYC revoked successfully");
                 })
                 .onFailure(ctx::fail);
