@@ -68,7 +68,7 @@ public class OrganizationController implements ApiController {
         routerBuilder
                 .operation("delete-auth-v1-organisations-id")
                 .handler(auditingHandler::handleApiAudit)
-                .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
+                .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN, DxRole.ORG_ADMIN))
                 .handler(organizationHandler::deleteOrganisationById);
 
         routerBuilder
