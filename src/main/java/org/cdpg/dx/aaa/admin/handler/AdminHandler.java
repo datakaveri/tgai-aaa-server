@@ -8,14 +8,17 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.audit.util.AuditingHelper;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.model.DxUser;
+import org.cdpg.dx.common.util.RoutingContextHelper;
 import org.cdpg.dx.keycloak.config.KeycloakConstants;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
@@ -43,7 +46,12 @@ public class AdminHandler {
 
         userService.getUserInfoByID(UUID.fromString(user.subject()))
                 .compose(userService::getUserInfo)
-                .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
+                .onSuccess(response -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "GET", "Get DxUser Info");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                  ResponseBuilder.sendSuccess(ctx, response);
+                })
                 .onFailure(err -> {
                     LOGGER.error("Failed to get DxUser info: {}", err.getMessage(), err);
                     ctx.fail(err);
@@ -55,7 +63,12 @@ public class AdminHandler {
 
         userService.getUserInfoByID(userId)
                 .compose(userService::getUserInfo)
-                .onSuccess(response -> ResponseBuilder.sendSuccess(ctx, response))
+                .onSuccess( response -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "GET", "Get User Info by ID");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
+                  ResponseBuilder.sendSuccess(ctx, response);
+                })
                 .onFailure(err -> {
                     LOGGER.error("Failed to get DxUser info: {}", err.getMessage(), err);
                     ctx.fail(err);
@@ -84,6 +97,9 @@ public class AdminHandler {
                             });
                 })
                 .onSuccess(response -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "GET", "Get All DxUsers");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, response);
                 })
                 .onFailure(err -> {
@@ -113,6 +129,9 @@ public class AdminHandler {
 
         keycloakUserService.updateUserAttributes(UUID.fromString(user.subject()), attributes, firstName, lastName)
                 .onSuccess(response -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "POST", "Update User Info");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "User info updated successfully");
                 })
                 .onFailure(err -> {
@@ -129,6 +148,9 @@ public class AdminHandler {
 
         keycloakUserService.updateUserPassword(UUID.fromString(user.subject()), newPassword)
                 .onSuccess(response -> {
+                  AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "POST", "Update User Password");
+                  RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "User password updated successfully");
                 })
                 .onFailure(err -> {
@@ -142,6 +164,9 @@ public class AdminHandler {
 
         keycloakUserService.disableUser(UUID.fromString(user.subject()))
                 .onSuccess(response -> {
+                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                    RoutingContextHelper.getRequestPath(ctx), "POST", "Deactivate User");
+                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "User deactivated successfully");
                 })
                 .onFailure(err -> {
