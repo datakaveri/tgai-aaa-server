@@ -80,9 +80,6 @@ public class EmailComposer {
       "USER_FIRST_NAME", userName,
       "USER_EMAIL_ID", emailId,
       "ORGANIZATION_NAME", orgName,
-      "ORGANIZATION_SECTOR", orgSector,
-      "ORGANIZATION_ENTITY_TYPE" , orgEntityType,
-      "ORGANIZATION_WEBSITE" ,orgWebsite,
       "ADMIN_FIRST_NAME", "Admin",
       "ADMIN_LAST_NAME", "",
       "ADMIN_PORTAL_URL", adminPortalUrl,
@@ -128,8 +125,6 @@ public class EmailComposer {
       "ADMIN_LAST_NAME", "",
       "USER_FIRST_NAME", userName,
       "USER_EMAIL_ID", emailId,
-      "EMPLOYEE_ID", employeeId,
-      "JOB_TITLE", jobTitle,
       "ADMIN_PORTAL_URL", adminPortalUrl,
       "SENDER_NAME", "TGDeX Team"
     );
@@ -172,7 +167,6 @@ public class EmailComposer {
       "ADMIN_LAST_NAME", "",
       "USER_FIRST_NAME", userName,
       "USER_EMAIL_ID", emailId,
-      "USER_ID", userId.toString(),
       "ADMIN_PORTAL_URL", adminPortalUrl,
       "SENDER_NAME", "TGDeX Team"
     );
@@ -215,8 +209,6 @@ public class EmailComposer {
       "ADMIN_LAST_NAME", "",
       "USER_FIRST_NAME", userName,
       "USER_EMAIL_ID", emailId,
-      "USER_ID", userId.toString(),
-      "ORG_ID", orgId.toString(),
       "ADMIN_PORTAL_URL", adminPortalUrl,
       "SENDER_NAME", "TGDeX Team"
     );
@@ -248,7 +240,6 @@ public class EmailComposer {
 
       String userName = ar.userName();
       UUID userId = ar.userId();
-      UUID orgId = ar.organizationId();
 
       return userService.getUserInfoByID(userId).compose(userInfo-> {
         String emailId = userInfo.email();
@@ -260,7 +251,6 @@ public class EmailComposer {
             "USER_FIRST_NAME", userName,
             "ADMIN_PORTAL_URL", adminPortalUrl,
             "SENDER_NAME", "TGDeX Team",
-            "ORGANIZATION_ID", orgId.toString(),
             "SUBJECT", subject);
 
 
@@ -287,6 +277,45 @@ public class EmailComposer {
       });
     });
 
+  }
+
+  public Future<Void> sendEmailForCreditRequest(User user)
+  {
+    String userName = user.principal().getString("name");
+    String emailId = user.principal().getString("email");
+
+    String senderEmail = config.getString("emailSender"); // no-org-reply
+    String emailTemplate = loadTemplate("templates/request-credit.html");
+    String adminPortalUrl = config.getString("TGDxUrl");
+
+    Map<String, String> emailDetails = Map.of(
+      "ADMIN_FIRST_NAME", "Admin",
+      "ADMIN_LAST_NAME", "",
+      "USER_FIRST_NAME", userName,
+      "USER_EMAIL_ID", emailId,
+      "ADMIN_PORTAL_URL", adminPortalUrl,
+      "SENDER_NAME", "TGDeX Team"
+    );
+
+    String htmlBody = getHtmlBody(emailTemplate, emailDetails);
+
+    MailMessage mailMessage = createMailMessage(
+      senderEmail,
+      emailId,
+      htmlBody,
+      "Credit Request"
+    );
+
+    return emailService.sendEmail(mailMessage).onComplete(res -> {
+          if (res.succeeded()) {
+            LOGGER.info("Credit request email sent to {}", emailId);
+          } else {
+            LOGGER.error("Failed to send credit request email: {}", res.cause().getMessage());
+          }
+        }).recover(failure -> {
+          LOGGER.error("Failed to handle email for credit request: {}", failure.getMessage());
+          return Future.failedFuture(failure);
+        });
   }
 
   public Future<Void> sendUserEmailForComputeRoleApproval(UUID reqId)
@@ -407,7 +436,6 @@ public class EmailComposer {
           "USER_FIRST_NAME", userName,
           "ADMIN_PORTAL_URL", adminPortalUrl,
           "SENDER_NAME", "TGDeX Team",
-          "ORGANIZATION_ID", orgId.toString(),
           "SUBJECT", subject);
 
 

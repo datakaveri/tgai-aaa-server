@@ -6,6 +6,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdpg.dx.aaa.audit.util.AuditingHelper;
 import org.cdpg.dx.aaa.credit.models.ComputeRole;
 import org.cdpg.dx.aaa.credit.models.CreditRequest;
 import org.cdpg.dx.aaa.credit.models.CreditTransaction;
@@ -13,6 +14,7 @@ import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.user.service.UserService;
+import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.HttpStatusCode;
 import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.exception.DxNotFoundException;
@@ -22,6 +24,7 @@ import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.PaginationInfo;
 import org.cdpg.dx.common.util.RequestHelper;
+import org.cdpg.dx.common.util.RoutingContextHelper;
 
 import java.util.*;
 
@@ -56,8 +59,15 @@ public class CreditHandler {
     creditRequest = CreditRequest.fromJson(creditRequestJson);
 
     creditService.createCreditRequest(creditRequest)
-      .onSuccess(requests -> {
+      .onSuccess(requests ->
+      {
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "POST", "Credit Request Created");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
         ResponseBuilder.sendSuccess(ctx, requests);
+        Future<Void> future = emailComposer.sendEmailForCreditRequest(user);
+
+
 
       })
       .onFailure(ctx::fail);
@@ -67,6 +77,9 @@ public class CreditHandler {
 
     creditService.getAllPendingCreditRequests()
       .onSuccess(orgs -> {
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Pending Credit Requests");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
         ResponseBuilder.sendSuccess(ctx, orgs);
       })
       .onFailure(ctx::fail);
@@ -119,8 +132,10 @@ public class CreditHandler {
 
     creditService.updateCreditRequestStatus( requestId, status, transactedBy,amount)
       .onSuccess(transaction -> {
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "PUT", "Credit Request Status Updated");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
           ResponseBuilder.sendSuccess(ctx,  transaction);
-        // Send email notification
         Future<Void> future = emailComposer.sendUserEmailForCreditApproval(requestId);
 
       }).onFailure(ctx::fail);
@@ -141,6 +156,9 @@ public class CreditHandler {
     CreditTransaction creditTransaction = CreditTransaction.fromJson(creditDeductionJson);
     creditService.deductCredits(creditTransaction)
       .onSuccess(res -> {
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "PUT", "Credits Deducted");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
         ResponseBuilder.sendSuccess(ctx, res);
       })
       .onFailure(ctx::fail);
@@ -159,6 +177,9 @@ public class CreditHandler {
     CreditTransaction creditTransaction = CreditTransaction.fromJson(creditAdditionJson);
     creditService.addCredits(creditTransaction)
       .onSuccess(res -> {
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "PUT", "Credits Added");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
         ResponseBuilder.sendSuccess(ctx, res);
       })
       .onFailure(ctx::fail);
@@ -211,6 +232,9 @@ public class CreditHandler {
             })
             .onSuccess(v -> {
                 System.out.println("here in onSuccess block");
+              AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                RoutingContextHelper.getRequestPath(ctx), "POST", "Compute Role Request Created");
+              RoutingContextHelper.setAuditingLog(ctx, auditLog);
               ResponseBuilder.sendSuccess(ctx, "Compute Role Request created successfully");
             })
             .onFailure(ctx::fail);
@@ -260,6 +284,9 @@ public class CreditHandler {
       .onSuccess(entry -> {
         List<JsonObject> enrichedList = entry.getKey();
         PaginationInfo paginationInfo = entry.getValue();
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Compute Requests");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
         ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
       })
       .onFailure(ctx::fail);
@@ -277,6 +304,9 @@ public class CreditHandler {
 
     creditService.updateComputeRoleStatus( requestId, status, approvedBy)
             .onSuccess(updated -> {
+              AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                RoutingContextHelper.getRequestPath(ctx), "PUT", "Compute Role Status Updated");
+              RoutingContextHelper.setAuditingLog(ctx, auditLog);
               ResponseBuilder.sendSuccess(ctx, "Compute Role Status " + status.getStatus());
               if (updated) {
                 // Send email notification
@@ -293,6 +323,9 @@ public class CreditHandler {
 
     creditService.hasUserComputeAccess(userId)
       .onSuccess(requests -> {
+        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx), "GET", "Check User Compute Access");
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
         ResponseBuilder.sendSuccess(ctx, requests);
 
       })
