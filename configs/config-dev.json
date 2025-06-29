@@ -6,40 +6,42 @@
   "clusterId": "iudx-aaa-cluster",
   "options":{
     "postgresOptions": {
-      "databaseIP": "xxx.xxx.xxx.xxx",
-      "databasePort": 0,
-      "databaseName": "xxx",
-      "databaseSchema": "xxx",
-      "databaseUserName": "xxx",
-      "databasePassword": "xxx"
+      "databaseIP": "localhost",
+      "databasePort": 5433,
+      "databaseName": "test",
+      "databaseSchema": "test",
+      "databaseUserName": "test-user",
+      "databasePassword": "test-password"
     },
-    "commonOptions":{
-      "cosDomain":"xxx",
-      "cosAdminUserId": "xxx",
+    "commonOptions": {
+      "cosDomain": "asdasd",
+      "cosAdminUserId": "e59dfb08-66b2-49c3-891b-390f8f488c6d",
       "initialCreditBalance": 1000,
-      "corsAllowedOrigin": ["xxx"]
+      "corsAllowedOrigin": [
+        "*"
+      ]
     },
     "emailOptions": {
-      "emailSender": "xxx",
-      "senderName": "xxx",
-      "cosAdminEmailId": "xxx",
-      "TGDxUrl": "xxx"
+      "emailSender": "no-reply.dev@iudx.io",
+      "senderName": "TGDEX",
+      "cosAdminEmailId": "srishti.mittal413@gmail.com",
+      "TGDxUrl": "https://staging.catalogue.tgdex.iudx.io/"
     },
     "keycloakOptions":{
-      "keycloakRealm": "xxx",
-      "keycloakUrl": "xxx",
-      "keycloakAdminClientId": "xxx",
-      "keycloakAdminClientSecret": "xxx",
-      "keycloakAdminPoolSize": "xxx",
+      "keycloakRealm": "tgdex-pilot",
+      "keycloakUrl": "https://staging.keycloak.update.iudx.io/auth",
+      "keycloakAdminClientId": "admin-client",
+      "keycloakAdminClientSecret": "CLO9ux9MYDx9hEZoJy9nFz5uemtlcpIv",
+      "keycloakAdminPoolSize": "10",
       "keycloakJwtLeeway": 90,
-      "keycloakCertUrl": "xxx",
-      "iss": "xxx",
+      "keycloakCertUrl": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot/protocol/openid-connect/certs",
+      "iss": "https://staging.keycloak.update.iudx.io/auth/realms/tgdex-pilot",
       "jwtIgnoreExpiry": true,
       "jwksRefreshIntervalMs": 21600000
     },
     "KYCOptions": {
-      "digilockerTokenUrl":"xxx",
-      "digilockerAadhaarUrl":"xxx",
+      "digilockerTokenUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/1/token",
+      "digilockerAadhaarUrl":"https://digilocker.meripehchaan.gov.in/public/oauth2/3/xml/eaadhaar",
       "clientId" :"xxxxxx",
       "clientSecret": "xxxxxxxxxxx",
       "redirectUri":"xxxxx"
@@ -58,38 +60,25 @@
     {
       "id": "org.cdpg.dx.database.postgres.verticle.PostgresVerticle",
       "verticleInstances": 1,
-      "required":["postgresOptions"],
-      "poolSize": 5
-    },{
-      "id": "org.cdpg.dx.email.verticle.EmailVerticle",
-      "verticleInstances": 1,
-      "emailHostName": "email-smtp.ap-south-1.amazonaws.com",
-      "emailPort": 2587,
-      "emailUserName": "xxx",
-      "emailPassword": "xxx",
-      "notifyByEmail": true,
+      "required": [
+        "postgresOptions"
+      ],
       "poolSize": 5
     },
     {
-      "id": "org.cdpg.dx.databroker.DataBrokerVerticle",
-      "isWorkerVerticle": false,
+      "id": "org.cdpg.dx.email.verticle.EmailVerticle",
+      "isWorkerVerticle": true,
+      "threadPoolName": "emailVerticleThreadPool",
+      "threadPoolSize": 10,
       "verticleInstances": 1,
-      "dataBrokerIP": "xxx",
-      "dataBrokerPort": 24568,
-      "prodVhost": "xxx",
-      "internalVhost": "xxx",
-      "externalVhost": "xxx",
-      "dataBrokerUserName": "xxx",
-      "dataBrokerPassword": "xxx",
-      "dataBrokerManagementPort": 28042,
-      "connectionTimeout": 6000,
-      "requestedHeartbeat": 60,
-      "handshakeTimeout": 6000,
-      "requestedChannelMax": 5,
-      "networkRecoveryInterval": 500,
-      "automaticRecoveryEnabled": "xxx",
-      "brokerAmqpIp": "xxx",
-      "brokerAmqpPort": 24567
+      "emailHostName": "email-smtp.ap-south-1.amazonaws.com",
+      "emailPort": 587,
+      "emailUserName": "AKIAROAMFPEMQ6AEQNDT",
+      "emailPassword": "BM8oMPa2v8iD8e9dghhKAOkbM5pSXtZKWfJaxwITuVD7",
+      "notifyByEmail": true,
+      "required": [
+        "commonOptions"
+      ]
     }
   ]
 }
