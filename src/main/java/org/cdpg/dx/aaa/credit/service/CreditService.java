@@ -14,7 +14,7 @@ public interface CreditService {
   // ************ CREDIT REQUEST *********
   Future<CreditRequest> createCreditRequest(CreditRequest creditRequest); // done -> creates a new entry in credit request table
 
-  Future<List<CreditRequest>> getAllPendingCreditRequests();
+  Future<PaginatedResult<CreditRequest>> getAllCreditRequests(PaginatedRequest paginatedRequest);
 
   Future<CreditTransaction> updateCreditRequestStatus(UUID requestId, Status status,UUID transactedBy,Double amount); //done -> on approval will create a new entry in userCredit table
 
