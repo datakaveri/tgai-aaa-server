@@ -20,5 +20,6 @@ public class DxErrorCodes {
     public static final int KEYCLOAK_SERVICE_ERROR = 12100;
 
     public static final int CONFLICT = 409;
+    public static final int CSV_STREAM_ERROR = 80000;
 
 }

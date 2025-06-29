@@ -68,7 +68,7 @@ public class OrganizationController implements ApiController {
         routerBuilder
                 .operation("delete-auth-v1-organisations-id")
                 .handler(auditingHandler::handleApiAudit)
-                .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN))
+                .handler(AuthorizationHandler.forRoles(DxRole.COS_ADMIN, DxRole.ORG_ADMIN))
                 .handler(organizationHandler::deleteOrganisationById);
 
         routerBuilder
@@ -127,6 +127,27 @@ public class OrganizationController implements ApiController {
                 .operation("get-auth-v1-organisations-id")
                 .handler(auditingHandler::handleApiAudit)
                 .handler(organizationHandler::getOrganizationById);
+
+        routerBuilder
+                .operation("get-auth-v1-organisations-requests-report")
+                .handler(organizationHandler::getOrganizationCreateReport);
+
+        routerBuilder
+                .operation("get-auth-v1-organisations-report")
+                .handler(organizationHandler::getOrganizationReport);
+
+        routerBuilder
+                .operation("get-auth-v1-organisations-join_requests-report")
+                .handler(organizationHandler::getOrganizationJoinReport);
+
+        routerBuilder
+                .operation("get-auth-v1-compute-requests-report")
+                .handler(organizationHandler::getComputeRoleReport);
+
+        routerBuilder
+                .operation("get-auth-v1-organization-user-provider_role-requests-report")
+                .handler(organizationHandler::getProviderRequestReport);
+
 
 
 

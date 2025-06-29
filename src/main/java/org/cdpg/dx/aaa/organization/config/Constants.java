@@ -200,6 +200,16 @@ public final class Constants {
           "updatedAt", UPDATED_AT
   );
 
+  public static final Map<String, String> API_TO_DB_COMPUTE_ROLE_REQUEST = Map.ofEntries(
+          Map.entry("userId", USER_ID),
+          Map.entry("userName", USER_NAME),
+          Map.entry("status", STATUS),
+          Map.entry("approvedBy", "approved_by"),
+            Map.entry("additionalInfo", "additional_info"),
+          Map.entry("createdAt", CREATED_AT),
+          Map.entry("updatedAt", UPDATED_AT)
+  );
+
   public static final Set<String> ALLOWED_SORT_FIELDS_COMPUTE_ROLE = Set.of("createdAt", "updatedAt");
 
 }
