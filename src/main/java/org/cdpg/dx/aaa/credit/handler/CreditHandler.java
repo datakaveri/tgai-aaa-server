@@ -32,7 +32,6 @@ import static org.cdpg.dx.aaa.credit.util.Constants.*;
 import static org.cdpg.dx.aaa.credit.models.Status.GRANTED;
 import static org.cdpg.dx.aaa.credit.util.Constants.ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE;
 import static org.cdpg.dx.aaa.credit.util.Constants.CREATED_AT;
-import static org.cdpg.dx.aaa.organization.config.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 public class CreditHandler {
@@ -83,8 +82,8 @@ public class CreditHandler {
               .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
               .apiToDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
               .allowedTimeFields(Set.of(CREATED_AT))
-              .defaultTimeField(CREATED_AT)
-              .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+              .defaultTimeField(REQUESTED_AT)
+              .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
               .allowedSortFields(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST.keySet())
               .build();
 
