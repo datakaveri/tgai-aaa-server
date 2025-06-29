@@ -128,6 +128,27 @@ public class OrganizationController implements ApiController {
                 .handler(auditingHandler::handleApiAudit)
                 .handler(organizationHandler::getOrganizationById);
 
+        routerBuilder
+                .operation("get-auth-v1-organisations-requests-report")
+                .handler(organizationHandler::getOrganizationCreateReport);
+
+        routerBuilder
+                .operation("get-auth-v1-organisations-report")
+                .handler(organizationHandler::getOrganizationReport);
+
+        routerBuilder
+                .operation("get-auth-v1-organisations-join_requests-report")
+                .handler(organizationHandler::getOrganizationJoinReport);
+
+        routerBuilder
+                .operation("get-auth-v1-compute-requests-report")
+                .handler(organizationHandler::getComputeRoleReport);
+
+        routerBuilder
+                .operation("get-auth-v1-organization-user-provider_role-requests-report")
+                .handler(organizationHandler::getProviderRequestReport);
+
+
 
 
     }

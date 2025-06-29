@@ -3,6 +3,8 @@ package org.cdpg.dx.aaa.organization.handler;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
@@ -13,6 +15,7 @@ import org.cdpg.dx.aaa.email.util.EmailComposer;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.organization.util.ProviderRoleRequestMapper;
+import org.cdpg.dx.aaa.report.service.OrganizationCreateReportService;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.exception.DxConflictException;
@@ -42,12 +45,14 @@ public class OrganizationHandler {
     private final OrganizationService organizationService;
     private final UserService userService;
     private final EmailComposer emailComposer;
+    private final OrganizationCreateReportService organizationCreateReportService;
 
 
-  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer) {
+  public OrganizationHandler(OrganizationService organizationService, UserService userService , EmailComposer emailComposer, OrganizationCreateReportService organizationCreateReportService) {
         this.organizationService = organizationService;
         this.userService = userService;
         this.emailComposer = emailComposer;
+        this.organizationCreateReportService = organizationCreateReportService;
     }
 
     public void updateOrganisationById(RoutingContext ctx) {
@@ -597,5 +602,222 @@ public class OrganizationHandler {
                     }
                 });
     }
+
+    public void getOrganizationCreateReport(RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
+        response
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
+                .putHeader("Content-Type", "text/csv")
+                .putHeader("Content-Disposition", "attachment; filename=\"org_create_request_report.csv\"")
+                .setChunked(true);
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_CREATE_REQUEST)
+                .apiToDbMap(API_TO_DB_ORG_CREATE_REQUEST)
+                .allowedTimeFields(Set.of(CREATED_AT))
+                .defaultTimeField(CREATED_AT)
+                .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+                .allowedSortFields(API_TO_DB_ORG_CREATE_REQUEST.keySet())
+                .build();
+
+        organizationCreateReportService
+                .streamAdminCsvBatchedCreateRequest(request)
+                .onSuccess(
+                        csvStream -> {
+                            if (csvStream == null) {
+                                response.end();
+                                return;
+                            }
+                            csvStream
+                                    .exceptionHandler(
+                                            err -> {
+                                                LOGGER.error("Failed to stream CSV", err);
+                                                ctx.fail(err);
+                                            })
+                                    .handler(buffer -> response.write(buffer))
+                                    .endHandler(v -> response.end());
+                        })
+                .onFailure(
+                        err -> {
+                            LOGGER.error("Failed to stream CSV", err);
+                            ctx.fail(err);
+                        });
+    }
+
+    public void getOrganizationJoinReport(RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
+        response
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
+                .putHeader("Content-Type", "text/csv")
+                .putHeader("Content-Disposition", "attachment; filename=\"org_create_request_report.csv\"")
+                .setChunked(true);
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST)
+                .apiToDbMap(API_TO_DB_ORG_JOIN_REQUEST)
+                .allowedTimeFields(Set.of("requested_at"))
+                .defaultTimeField("requested_at")
+                .defaultSort("requested_at", DEFAULT_SORTING_ORDER)
+                .allowedSortFields(API_TO_DB_ORG_JOIN_REQUEST.keySet())
+                .build();
+
+        organizationCreateReportService
+                .streamAdminCsvBatchedJoinRequest(request)
+                .onSuccess(
+                        csvStream -> {
+                            if (csvStream == null) {
+                                response.end();
+                                return;
+                            }
+                            csvStream
+                                    .exceptionHandler(
+                                            err -> {
+                                                LOGGER.error("Failed to stream CSV", err);
+                                                ctx.fail(err);
+                                            })
+                                    .handler(buffer -> response.write(buffer))
+                                    .endHandler(v -> response.end());
+                        })
+                .onFailure(
+                        err -> {
+                            LOGGER.error("Failed to stream CSV", err);
+                            ctx.fail(err);
+                        });
+    }
+
+    public void getOrganizationReport(RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
+        response
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
+                .putHeader("Content-Type", "text/csv")
+                .putHeader("Content-Disposition", "attachment; filename=\"org_create_request_report.csv\"")
+                .setChunked(true);
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG)
+                .apiToDbMap(API_TO_DB_ORG_USERS)
+                .allowedTimeFields(Set.of(CREATED_AT))
+                .defaultTimeField(CREATED_AT)
+                .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+                .allowedSortFields(API_TO_DB_ORG_USERS.keySet())
+                .build();
+
+        organizationCreateReportService
+                .streamAdminCsvBatchedOrganization(request)
+                .onSuccess(
+                        csvStream -> {
+                            if (csvStream == null) {
+                                response.end();
+                                return;
+                            }
+                            csvStream
+                                    .exceptionHandler(
+                                            err -> {
+                                                LOGGER.error("Failed to stream CSV", err);
+                                                ctx.fail(err);
+                                            })
+                                    .handler(buffer -> response.write(buffer))
+                                    .endHandler(v -> response.end());
+                        })
+                .onFailure(
+                        err -> {
+                            LOGGER.error("Failed to stream CSV", err);
+                            ctx.fail(err);
+                        });
+    }
+
+    public void getProviderRequestReport(RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
+        response
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
+                .putHeader("Content-Type", "text/csv")
+                .putHeader("Content-Disposition", "attachment; filename=\"org_create_request_report.csv\"")
+                .setChunked(true);
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
+                .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
+                .allowedTimeFields(Set.of(CREATED_AT))
+                .defaultTimeField(CREATED_AT)
+                .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+                .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
+                .build();
+
+        organizationCreateReportService
+                .streamAdminCsvBatchedProviderRequest(request)
+                .onSuccess(
+                        csvStream -> {
+                            if (csvStream == null) {
+                                response.end();
+                                return;
+                            }
+                            csvStream
+                                    .exceptionHandler(
+                                            err -> {
+                                                LOGGER.error("Failed to stream CSV", err);
+                                                ctx.fail(err);
+                                            })
+                                    .handler(buffer -> response.write(buffer))
+                                    .endHandler(v -> response.end());
+                        })
+                .onFailure(
+                        err -> {
+                            LOGGER.error("Failed to stream CSV", err);
+                            ctx.fail(err);
+                        });
+    }
+
+    public void getComputeRoleReport(RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
+        response
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
+                .putHeader("Content-Type", "text/csv")
+                .putHeader("Content-Disposition", "attachment; filename=\"org_create_request_report.csv\"")
+                .setChunked(true);
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE)
+                .apiToDbMap(API_TO_DB_COMPUTE_ROLE_REQUEST)
+                .allowedTimeFields(Set.of(CREATED_AT))
+                .defaultTimeField(CREATED_AT)
+                .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+                .allowedSortFields(API_TO_DB_COMPUTE_ROLE_REQUEST.keySet())
+                .build();
+
+        organizationCreateReportService
+                .streamAdminCsvBatchedComputeRequest(request)
+                .onSuccess(
+                        csvStream -> {
+                            if (csvStream == null) {
+                                response.end();
+                                return;
+                            }
+                            csvStream
+                                    .exceptionHandler(
+                                            err -> {
+                                                LOGGER.error("Failed to stream CSV", err);
+                                                ctx.fail(err);
+                                            })
+                                    .handler(buffer -> response.write(buffer))
+                                    .endHandler(v -> response.end());
+                        })
+                .onFailure(
+                        err -> {
+                            LOGGER.error("Failed to stream CSV", err);
+                            ctx.fail(err);
+                        });
+    }
+
+
 
 }
