@@ -28,7 +28,7 @@ import org.cdpg.dx.common.util.RoutingContextHelper;
 
 import java.util.*;
 
-import static org.cdpg.dx.aaa.organization.config.Constants.*;
+import static org.cdpg.dx.aaa.credit.util.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 public class CreditHandler {
@@ -75,12 +75,22 @@ public class CreditHandler {
 
   public void getAllPendingCreditRequests(RoutingContext ctx) {
 
-    creditService.getAllPendingCreditRequests()
-      .onSuccess(orgs -> {
-        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-          RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Pending Credit Requests");
+      PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+              .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
+              .apiToDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
+              .allowedTimeFields(Set.of(CREATED_AT))
+              .defaultTimeField(CREATED_AT)
+              .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+              .allowedSortFields(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST.keySet())
+              .build();
+
+      AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+              RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Credit Requests");
+
+    creditService.getAllCreditRequests(request)
+      .onSuccess(result -> {
         RoutingContextHelper.setAuditingLog(ctx, auditLog);
-        ResponseBuilder.sendSuccess(ctx, orgs);
+        ResponseBuilder.sendSuccess(ctx,  result.data(), result.paginationInfo());
       })
       .onFailure(ctx::fail);
 

@@ -1,6 +1,7 @@
 package org.cdpg.dx.aaa.credit.util;
 
 import java.util.List;
+import java.util.Map;
 
 public class Constants {
 
@@ -13,15 +14,6 @@ public class Constants {
   public static final String REQUESTED_AT = "requested_at";
   public static final String PROCESSED_AT = "processed_at";
   public static final String USER_NAME = "user_name";
-
-
-  public static final List<String> ALL_CREDIT_REQUEST_FIELDS = List.of(
-    USER_ID,
-    AMOUNT,
-    STATUS,
-    REQUESTED_AT,
-    PROCESSED_AT
-  );
 
 
   // USER CREDIT TABLE
@@ -45,4 +37,21 @@ public class Constants {
   public static final String UPDATED_BALANCE="updated_balance";
 
   public static final String ADDITONAL_INFO= "additional_info";
+
+  public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST = Map.of(
+          "userName", USER_NAME,
+          "status", STATUS,
+          "processedAT", PROCESSED_AT,
+          "createdAt", CREATED_AT
+  );
+
+
+  public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE = Map.of(
+          "userName", USER_NAME,
+          "status", STATUS,
+          "approvedBy", "approved_by",
+          "createdAt", CREATED_AT,
+          "updatedAt", UPDATED_AT
+  );
+
 }
