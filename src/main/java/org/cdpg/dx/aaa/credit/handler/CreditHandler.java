@@ -32,7 +32,6 @@ import static org.cdpg.dx.aaa.credit.util.Constants.*;
 import static org.cdpg.dx.aaa.credit.models.Status.GRANTED;
 import static org.cdpg.dx.aaa.credit.util.Constants.ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE;
 import static org.cdpg.dx.aaa.credit.util.Constants.CREATED_AT;
-import static org.cdpg.dx.aaa.organization.config.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 public class CreditHandler {
