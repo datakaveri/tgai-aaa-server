@@ -128,9 +128,8 @@ public class OrganizationHandler {
                                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Approved Join Request");
                         RoutingContextHelper.setAuditingLog(ctx, auditLog);
                         ResponseBuilder.sendSuccess(ctx,  "Approved Organisation Join Request");
-                      if(status.equals(Status.GRANTED)) {
-                        Future<Void> future = emailComposer.sendUserEmailForOrgJoinRequestApproval(requestId);
-                      }
+                        Future<Void> future = emailComposer.sendUserEmailForOrgJoinRequestApproval(requestId,status);
+
                     } else {
                         ctx.fail(new DxNotFoundException("Request Not Found"));
                     }
@@ -248,10 +247,8 @@ public class OrganizationHandler {
                             RoutingContextHelper.getRequestPath(ctx), "PUT", "Approve Create Organisation Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Updated Sucessfully");
+                    Future<Void> future = emailComposer.sendUserEmailForOrgCreateRequestApproval(requestId,status);
 
-                  if(status.equals(Status.GRANTED)) {
-                        Future<Void> future = emailComposer.sendUserEmailForOrgCreateRequestApproval(requestId);
-                    }
                 })
                 .onFailure(ctx::fail);
     }
@@ -478,9 +475,7 @@ public class OrganizationHandler {
                             RoutingContextHelper.getRequestPath(ctx), "PUT", "Update Provider Role Request");
                     RoutingContextHelper.setAuditingLog(ctx, auditLog);
                     ResponseBuilder.sendSuccess(ctx, "Provider role updated");
-                  if(status.equals(Status.GRANTED)) {
-                    Future<Void> future = emailComposer.sendUserEmailForProviderRoleApproval(reqId);
-                  }
+                    Future<Void> future = emailComposer.sendUserEmailForProviderRoleApproval(reqId,status);
 
                 })
                 .onFailure(ctx::fail);
