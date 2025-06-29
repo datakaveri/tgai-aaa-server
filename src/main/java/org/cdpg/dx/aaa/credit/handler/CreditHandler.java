@@ -79,8 +79,8 @@ public class CreditHandler {
               .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
               .apiToDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
               .allowedTimeFields(Set.of(CREATED_AT))
-              .defaultTimeField(CREATED_AT)
-              .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+              .defaultTimeField(REQUESTED_AT)
+              .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
               .allowedSortFields(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST.keySet())
               .build();
 
