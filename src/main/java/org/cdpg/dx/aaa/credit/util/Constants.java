@@ -41,8 +41,8 @@ public class Constants {
   public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST = Map.of(
           "userName", USER_NAME,
           "status", STATUS,
-          "processedAT", PROCESSED_AT,
-          "createdAt", CREATED_AT
+          "processedAt", PROCESSED_AT,
+          "requestedAt", REQUESTED_AT
   );
 
 
@@ -51,7 +51,7 @@ public class Constants {
           "status", STATUS,
           "approvedBy", "approved_by",
           "createdAt", CREATED_AT,
-          "updatedAt", UPDATED_AT
+          "requested_at", UPDATED_AT
   );
 
 }
