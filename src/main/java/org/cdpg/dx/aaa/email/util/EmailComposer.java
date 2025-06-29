@@ -7,6 +7,7 @@ import io.vertx.ext.mail.MailMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.models.ComputeRole;
+import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.models.*;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
@@ -134,7 +135,7 @@ public class EmailComposer {
       String htmlBody = getHtmlBody(emailTemplate, emailDetails);
       LOGGER.info("Org Admin Email Id is : {}", orgAdminEmail);
 
-      MailMessage mailMessage = createMailMessage(senderEmail, orgAdminEmail, htmlBody,"Join Organization Request");
+      MailMessage mailMessage = createMailMessage(senderEmail, "srishti.mittal413@gmail.com", htmlBody,"Join Organization Request");
       return emailService.sendEmail(mailMessage).onComplete(res -> {
         if (res.succeeded()) {
           LOGGER.info("Email sent successfully to {}", orgAdminEmail);
@@ -204,6 +205,7 @@ public class EmailComposer {
     String emailTemplate = loadTemplate("templates/request-provider-role.html");
     String adminPortalUrl = config.getString("TGDxUrl");
 
+
     Map<String, String> emailDetails = Map.of(
       "ADMIN_FIRST_NAME", "Admin",
       "ADMIN_LAST_NAME", "",
@@ -213,11 +215,12 @@ public class EmailComposer {
       "SENDER_NAME", "TGDeX Team"
     );
 
+
     return getOrgAdminEmail(orgId).compose(orgAdminEmail -> {
       String htmlBody = getHtmlBody(emailTemplate, emailDetails);
       LOGGER.info("Org Admin Email Id is : {}", orgAdminEmail);
 
-      MailMessage mailMessage = createMailMessage(senderEmail, orgAdminEmail, htmlBody,"Provider Role Request");
+      MailMessage mailMessage = createMailMessage(senderEmail, "srishti.mittal413@gmail.com", htmlBody,"Provider Role Request");
       return emailService.sendEmail(mailMessage).onComplete(res -> {
         if (res.succeeded()) {
           LOGGER.info("Email sent successfully to {}", orgAdminEmail);
@@ -234,7 +237,7 @@ public class EmailComposer {
 
   //**** APPROVAL EMAILS ****//
 
-  public Future<Void> sendUserEmailForOrgJoinRequestApproval(UUID reqId) {
+  public Future<Void> sendUserEmailForOrgJoinRequestApproval(UUID reqId, org.cdpg.dx.aaa.organization.models.Status status) {
 
     return organizationService.getOrganizationJoinRequestById(reqId).compose(ar-> {
 
@@ -247,10 +250,17 @@ public class EmailComposer {
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
+        String approvedMessage=null;
+        if(status.equals(org.cdpg.dx.aaa.organization.models.Status.GRANTED)) {
+          approvedMessage = "You can now access and use the Telangana Data Exchange (TGDeX) platform as an Organization Member.\n\n ";
+        }
+
       Map<String, String> emailDetails = Map.of(
             "USER_FIRST_NAME", userName,
             "ADMIN_PORTAL_URL", adminPortalUrl,
             "SENDER_NAME", "TGDeX Team",
+            "STATUS", status.getStatus(),
+            "APPROVED_MESSAGE", approvedMessage,
             "SUBJECT", subject);
 
 
@@ -259,7 +269,7 @@ public class EmailComposer {
 
           MailMessage mailMessage = createMailMessage(
           senderEmail,
-          emailId,
+          "srishti.mittal413@gmail.com",
           htmlBody,
           subject
         );
@@ -301,7 +311,7 @@ public class EmailComposer {
 
     MailMessage mailMessage = createMailMessage(
       senderEmail,
-      emailId,
+      "srishti.mittal413@gmail.com",
       htmlBody,
       "Credit Request"
     );
@@ -318,7 +328,7 @@ public class EmailComposer {
         });
   }
 
-  public Future<Void> sendUserEmailForComputeRoleApproval(UUID reqId)
+  public Future<Void> sendUserEmailForComputeRoleApproval(UUID reqId,Status status)
   {
 
     return creditService.getComputeRequestById(reqId).compose(ar-> {
@@ -336,10 +346,17 @@ public class EmailComposer {
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
+        String approvedMessage=null;
+        if(status.equals(Status.GRANTED)) {
+          approvedMessage = "You can now access the system and use your compute privileges in the Telangana Data Exchange (TGDeX) platform.\n\n ";
+        }
+
         Map<String, String> emailDetails = Map.of(
           "USER_FIRST_NAME", userName,
           "ADMIN_PORTAL_URL", adminPortalUrl,
           "SENDER_NAME", "TGDeX Team",
+          "STATUS", status.getStatus(),
+          "APPROVED_MESSAGE", approvedMessage,
           "SUBJECT", subject);
 
         String emailTemplate = loadTemplate("templates/approved-compute-role.html"); // Path to HTML template
@@ -347,7 +364,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          emailId,
+          "srishti.mittal413@gmail.com",
           htmlBody,
           subject
         );
@@ -368,7 +385,7 @@ public class EmailComposer {
 
   }
 
-  public Future<Void> sendUserEmailForCreditApproval(UUID reqId)
+  public Future<Void> sendUserEmailForCreditApproval(UUID reqId, Status status)
   {
 
     return creditService.getCreditRequestById(reqId).compose(ar-> {
@@ -386,10 +403,18 @@ public class EmailComposer {
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
-        Map<String, String> emailDetails = Map.of(
+        String approvedMessage=null;
+        if(status.equals(Status.GRANTED)) {
+          approvedMessage = "You can now access the Telangana Data Exchange (TGDeX) platform with the credits.\n ";
+        }
+
+
+          Map<String, String> emailDetails = Map.of(
           "USER_FIRST_NAME", userName,
           "ADMIN_PORTAL_URL", adminPortalUrl,
           "SENDER_NAME", "TGDeX Team",
+          "STATUS", status.getStatus(),
+          "APPROVED_MESSAGE", approvedMessage,
           "SUBJECT", subject);
 
         String emailTemplate = loadTemplate("templates/approved-credit-request.html"); // Path to HTML template
@@ -397,7 +422,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          emailId,
+          "srishti.mittal413@gmail.com",
           htmlBody,
           subject
         );
@@ -418,7 +443,7 @@ public class EmailComposer {
 
   }
 
-  public Future<Void> sendUserEmailForProviderRoleApproval(UUID reqId) {
+  public Future<Void> sendUserEmailForProviderRoleApproval(UUID reqId, org.cdpg.dx.aaa.organization.models.Status status) {
 
     return organizationService.getProviderRequestById(reqId).compose(ar-> {
 
@@ -432,10 +457,18 @@ public class EmailComposer {
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
+        String approvedMessage=null;
+        if(status.equals(org.cdpg.dx.aaa.organization.models.Status.GRANTED)) {
+          approvedMessage = " You can now access and use the Telangana Data Exchange (TGDeX) platform as a Provider.\n\n ";
+        }
+
+
         Map<String, String> emailDetails = Map.of(
           "USER_FIRST_NAME", userName,
           "ADMIN_PORTAL_URL", adminPortalUrl,
           "SENDER_NAME", "TGDeX Team",
+          "STATUS", status.getStatus(),
+          "APPROVED_MESSAGE", approvedMessage,
           "SUBJECT", subject);
 
 
@@ -444,7 +477,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          emailId,
+          "srishti.mittal413@gmail.com",
           htmlBody,
           subject
         );
@@ -464,14 +497,15 @@ public class EmailComposer {
 
   }
 
-  public Future<Void> sendUserEmailForOrgCreateRequestApproval(UUID reqId) {
+  public Future<Void> sendUserEmailForOrgCreateRequestApproval(UUID reqId, org.cdpg.dx.aaa.organization.models.Status status) {
 
-    return organizationService.getOrganizationCreateRequestById(reqId).compose(ar-> {
+      System.out.println("Inside sendUserEmailForOrgCreateRequestApproval method");
+
+      return organizationService.getOrganizationCreateRequestById(reqId).compose(ar-> {
 
       UUID requestedBy = ar.requestedBy();
       String userName = ar.userName();
       String orgName = ar.name();
-
 
       return userService.getUserInfoByID(requestedBy).compose(userInfo-> {
         String emailId = userInfo.email();
@@ -479,20 +513,26 @@ public class EmailComposer {
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl"); // Admin portal URL
 
-        Map<String, String> emailDetails = Map.of(
+        String approvedMessage=null;
+        if(status.equals(org.cdpg.dx.aaa.organization.models.Status.GRANTED)) {
+          approvedMessage = "You can now manage your organisation and users in the Telangana Data Exchange (TGDeX) platform.\n ";
+        }
+
+          Map<String, String> emailDetails = Map.of(
           "USER_FIRST_NAME", userName,
           "ORGANIZATION_NAME", orgName,
           "ADMIN_PORTAL_URL", adminPortalUrl,
           "SENDER_NAME", "TGDeX Team",
+          "STATUS", status.getStatus(),
+          "APPROVED_MESSAGE", approvedMessage,
           "SUBJECT", subject);
 
-
-        String emailTemplate = loadTemplate("templates/approved-create-organization.html"); // Path to HTML template
+          String emailTemplate = loadTemplate("templates/approved-create-organization.html"); // Path to HTML template
         String htmlBody = getHtmlBody(emailTemplate, emailDetails);
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          emailId,
+          "srishti.mittal413@gmail.com",
           htmlBody,
           subject
         );
