@@ -29,6 +29,10 @@ import org.cdpg.dx.common.util.RoutingContextHelper;
 import java.util.*;
 
 import static org.cdpg.dx.aaa.credit.util.Constants.*;
+import static org.cdpg.dx.aaa.credit.models.Status.GRANTED;
+import static org.cdpg.dx.aaa.credit.util.Constants.ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE;
+import static org.cdpg.dx.aaa.credit.util.Constants.CREATED_AT;
+import static org.cdpg.dx.aaa.organization.config.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
 public class CreditHandler {
@@ -146,8 +150,7 @@ public class CreditHandler {
           RoutingContextHelper.getRequestPath(ctx), "PUT", "Credit Request Status Updated");
         RoutingContextHelper.setAuditingLog(ctx, auditLog);
           ResponseBuilder.sendSuccess(ctx,  transaction);
-        Future<Void> future = emailComposer.sendUserEmailForCreditApproval(requestId);
-
+        Future<Void> future = emailComposer.sendUserEmailForCreditApproval(requestId,status);
       }).onFailure(ctx::fail);
 
   }
@@ -318,10 +321,7 @@ public class CreditHandler {
                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Compute Role Status Updated");
               RoutingContextHelper.setAuditingLog(ctx, auditLog);
               ResponseBuilder.sendSuccess(ctx, "Compute Role Status " + status.getStatus());
-              if (updated) {
-                // Send email notification
-                Future<Void> future = emailComposer.sendUserEmailForComputeRoleApproval(requestId);
-              }
+                Future<Void> future = emailComposer.sendUserEmailForComputeRoleApproval(requestId,status);
             })
             .onFailure(ctx::fail);
   }
