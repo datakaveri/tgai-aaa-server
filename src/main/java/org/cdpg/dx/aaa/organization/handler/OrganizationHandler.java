@@ -129,7 +129,7 @@ public class OrganizationHandler {
                         AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                                 RoutingContextHelper.getRequestPath(ctx), "PUT", "Approved Join Request");
                         RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                        ResponseBuilder.sendSuccess(ctx,  "Approved Organisation Join Request");
+                        ResponseBuilder.sendSuccess(ctx,  "Updated Organisation Join Request");
                         Future<Void> future = emailComposer.sendUserEmailForOrgJoinRequestApproval(requestId,status);
 
                     } else {
