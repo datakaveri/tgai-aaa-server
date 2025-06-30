@@ -1,7 +1,5 @@
 package org.cdpg.dx.auth.authorization.handler;
 
-
-
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -23,10 +21,12 @@ public class AuthorizationHandler {
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
 
+        boolean isOnlyCompute = roles.length == 1 && roles[0] == DxRole.COMPUTE;
+        
         return ctx -> {
             User user = ctx.user();
             if (user == null) {
-                ctx.fail(new DxUnauthorizedException("No User Found")); // Unauthorized
+                ctx.fail(new DxUnauthorizedException("User not authenticated.")); // HTTP 401
                 return;
             }
 
@@ -34,7 +34,7 @@ public class AuthorizationHandler {
             JsonObject realmAccess = principal.getJsonObject("realm_access");
 
             if (realmAccess == null || !realmAccess.containsKey("roles")) {
-                ctx.fail(new DxForbiddenException("User don't have any assigned")); // Forbidden
+                ctx.fail(new DxForbiddenException("No roles assigned to the user.")); // HTTP 403
                 return;
             }
 
@@ -48,7 +48,11 @@ public class AuthorizationHandler {
             if (allowedRole) {
                 ctx.next();
             } else {
-                ctx.fail(new DxForbiddenException("User don't sufficient role")); // Forbidden
+                if (isOnlyCompute) {
+                    ctx.fail(new DxForbiddenException("Please upgrade your role to access GPU-based compute.")); // HTTP 403
+                } else {
+                    ctx.fail(new DxForbiddenException("User does not have the required role.")); // HTTP 403
+                }
             }
         };
     }
@@ -57,20 +61,20 @@ public class AuthorizationHandler {
         return ctx -> {
             User user = ctx.user();
             if (user == null) {
-                ctx.fail(new DxUnauthorizedException("No User Found")); // HTTP 401
+                ctx.fail(new DxUnauthorizedException("User not authenticated.")); // HTTP 401
                 return;
             }
 
             JsonObject principal = user.principal();
 
             if (principal == null || !principal.containsKey("kyc_verified")) {
-                ctx.fail(new DxForbiddenException("KYC verification status missing")); // HTTP 403
+                ctx.fail(new DxForbiddenException("Missing KYC verification status.")); // HTTP 403
                 return;
             }
 
             boolean isKycVerified = principal.getBoolean("kyc_verified", false);
             if (!isKycVerified) {
-                ctx.fail(new DxForbiddenException("User's KYC is not verified")); // HTTP 403
+                ctx.fail(new DxForbiddenException("User's KYC is not verified.")); // HTTP 403
                 return;
             }
 
