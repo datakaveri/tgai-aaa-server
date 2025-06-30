@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdpg.dx.aaa.credit.dao.ComputeRoleDAO;
 import org.cdpg.dx.aaa.credit.dao.CreditDAOFactory;
+import org.cdpg.dx.aaa.credit.dao.CreditRequestDAO;
 import org.cdpg.dx.aaa.organization.dao.*;
 import org.cdpg.dx.aaa.report.helper.*;
 import org.cdpg.dx.common.request.PaginatedRequest;
@@ -24,7 +25,9 @@ public class OrganizationCreateRequestReportServiceImpl implements OrganizationC
     private final CsvGeneratorOrg csvGeneratorOrg;
     private final CsvGeneratorProvider csvGeneratorProvider;
     private final CsvGeneratorCompute csvGeneratorCompute;
+    private final CsvGeneratorCredit csvGeneratorCredit;
     private final ComputeRoleDAO computeRoleDAO;
+    private final CreditRequestDAO creditRequestDAO;
 
   private final Vertx vertx;
 
@@ -34,6 +37,7 @@ public class OrganizationCreateRequestReportServiceImpl implements OrganizationC
     this.joinRequestDAO = factory.organizationJoinRequestDAO();
     this.providerRequestDAO = factory.providerRoleRequestDAO();
     this.computeRoleDAO = creditDAOFactory.computeRoleDAO();
+    this.creditRequestDAO = creditDAOFactory.creditRequestDAO();
 
     this.vertx = vertx;
     csvGenerator = new CsvGenerator();
@@ -41,6 +45,7 @@ public class OrganizationCreateRequestReportServiceImpl implements OrganizationC
     csvGeneratorOrg = new CsvGeneratorOrg();
     csvGeneratorProvider = new CsvGeneratorProvider();
     csvGeneratorCompute = new CsvGeneratorCompute();
+    csvGeneratorCredit = new CsvGeneratorCredit();
   }
 
   @Override
@@ -83,5 +88,12 @@ public class OrganizationCreateRequestReportServiceImpl implements OrganizationC
     LOGGER.info("Inside streamAdminCsvBatched method");
     return Future.succeededFuture(
             new BatchedCsvReadStreamOrg(orgDAO, csvGeneratorOrg, vertx, request));
+  }
+
+  @Override
+  public Future<ReadStream<Buffer>> streamAdminCsvBatchedCredit(PaginatedRequest request) {
+    LOGGER.info("Inside streamAdminCsvBatched method");
+    return Future.succeededFuture(
+            new BatchedCsvReadStreamCredit(creditRequestDAO, csvGeneratorCredit, vertx, request));
   }
 }

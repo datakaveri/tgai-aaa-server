@@ -3324,7 +3324,7 @@ paths:
       operationId: get-auth-v1-organisations-report
       security:
         - authorization: []
-  /auth/v1/organisations/join_requests/report:
+  '/auth/v1/organisations/{id}/join_requests/report':
     get:
       summary: Your GET endpoint
       tags: []
@@ -3334,6 +3334,13 @@ paths:
       operationId: get-auth-v1-organisations-join_requests-report
       security:
         - authorization: []
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: UUID of the organisation
   /auth/v1/compute/requests/report:
     get:
       summary: Your GET endpoint
@@ -3352,6 +3359,16 @@ paths:
         '200':
           description: OK
       operationId: get-auth-v1-organization-user-provider_role-requests-report
+      security:
+        - authorization: []
+  /auth/v1/credit/request/report:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+      operationId: get-auth-v1-credit-request-report
       security:
         - authorization: []
 components:

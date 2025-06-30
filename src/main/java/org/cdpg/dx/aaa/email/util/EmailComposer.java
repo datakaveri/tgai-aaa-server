@@ -135,7 +135,7 @@ public class EmailComposer {
       String htmlBody = getHtmlBody(emailTemplate, emailDetails);
       LOGGER.info("Org Admin Email Id is : {}", orgAdminEmail);
 
-      MailMessage mailMessage = createMailMessage(senderEmail, "srishti.mittal413@gmail.com", htmlBody,"Join Organization Request");
+      MailMessage mailMessage = createMailMessage(senderEmail, orgAdminEmail, htmlBody,"Join Organization Request");
       return emailService.sendEmail(mailMessage).onComplete(res -> {
         if (res.succeeded()) {
           LOGGER.info("Email sent successfully to {}", orgAdminEmail);
@@ -220,7 +220,7 @@ public class EmailComposer {
       String htmlBody = getHtmlBody(emailTemplate, emailDetails);
       LOGGER.info("Org Admin Email Id is : {}", orgAdminEmail);
 
-      MailMessage mailMessage = createMailMessage(senderEmail, "srishti.mittal413@gmail.com", htmlBody,"Provider Role Request");
+      MailMessage mailMessage = createMailMessage(senderEmail, orgAdminEmail, htmlBody,"Provider Role Request");
       return emailService.sendEmail(mailMessage).onComplete(res -> {
         if (res.succeeded()) {
           LOGGER.info("Email sent successfully to {}", orgAdminEmail);
@@ -269,7 +269,7 @@ public class EmailComposer {
 
           MailMessage mailMessage = createMailMessage(
           senderEmail,
-          "srishti.mittal413@gmail.com",
+          emailId,
           htmlBody,
           subject
         );
@@ -311,7 +311,7 @@ public class EmailComposer {
 
     MailMessage mailMessage = createMailMessage(
       senderEmail,
-      "srishti.mittal413@gmail.com",
+      emailId,
       htmlBody,
       "Credit Request"
     );
@@ -364,7 +364,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          "srishti.mittal413@gmail.com",
+          emailId,
           htmlBody,
           subject
         );
@@ -422,7 +422,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          "srishti.mittal413@gmail.com",
+          emailId,
           htmlBody,
           subject
         );
@@ -477,7 +477,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          "srishti.mittal413@gmail.com",
+          emailId,
           htmlBody,
           subject
         );
@@ -532,7 +532,7 @@ public class EmailComposer {
 
         MailMessage mailMessage = createMailMessage(
           senderEmail,
-          "srishti.mittal413@gmail.com",
+          emailId,
           htmlBody,
           subject
         );
