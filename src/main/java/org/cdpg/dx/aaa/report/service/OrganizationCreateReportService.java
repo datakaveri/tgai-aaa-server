@@ -20,4 +20,6 @@ public interface OrganizationCreateReportService {
 
   Future<ReadStream<Buffer>> streamAdminCsvBatchedOrganization(PaginatedRequest request);
 
+  Future<ReadStream<Buffer>> streamAdminCsvBatchedCredit(PaginatedRequest request);
+
 }
