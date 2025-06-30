@@ -246,11 +246,11 @@ public class EmailComposer {
 
       return userService.getUserInfoByID(userId).compose(userInfo-> {
         String emailId = userInfo.email();
-        String subject = "Organization Join Request Approved";
+        String subject = "Organization Join Request Status Update";
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
-        String approvedMessage=null;
+        String approvedMessage="";
         if(status.equals(org.cdpg.dx.aaa.organization.models.Status.GRANTED)) {
           approvedMessage = "You can now access and use the Telangana Data Exchange (TGDeX) platform as an Organization Member.\n\n ";
         }
@@ -342,11 +342,11 @@ public class EmailComposer {
       return userService.getUserInfoByID(userId).compose(userInfo -> {
         String emailId = userInfo.email();
         String userName = userInfo.name();
-        String subject = "Compute Role Request Approved";
+        String subject = "Compute Role Request Status Update";
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
-        String approvedMessage=null;
+        String approvedMessage="";
         if(status.equals(Status.GRANTED)) {
           approvedMessage = "You can now access the system and use your compute privileges in the Telangana Data Exchange (TGDeX) platform.\n\n ";
         }
@@ -399,11 +399,11 @@ public class EmailComposer {
       return userService.getUserInfoByID(userId).compose(userInfo -> {
         String emailId = userInfo.email();
         String userName = userInfo.name();
-        String subject = "Credit Request Approved";
+        String subject = "Credit Request Status Update";
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
-        String approvedMessage=null;
+        String approvedMessage="";
         if(status.equals(Status.GRANTED)) {
           approvedMessage = "You can now access the Telangana Data Exchange (TGDeX) platform with the credits.\n ";
         }
@@ -453,11 +453,11 @@ public class EmailComposer {
       return userService.getUserInfoByID(userId).compose(userInfo-> {
         String emailId = userInfo.email();
         String userName = userInfo.name();
-        String subject = "Provider Role Request Approved";
+        String subject = "Provider Role Request Status Update";
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl");
 
-        String approvedMessage=null;
+        String approvedMessage="";
         if(status.equals(org.cdpg.dx.aaa.organization.models.Status.GRANTED)) {
           approvedMessage = " You can now access and use the Telangana Data Exchange (TGDeX) platform as a Provider.\n\n ";
         }
@@ -509,11 +509,11 @@ public class EmailComposer {
 
       return userService.getUserInfoByID(requestedBy).compose(userInfo-> {
         String emailId = userInfo.email();
-        String subject = "Organization Creation Request Approved";
+        String subject = "Organization Creation Status Update";
         String senderEmail = config.getString("emailSender");
         String adminPortalUrl = config.getString("TGDxUrl"); // Admin portal URL
 
-        String approvedMessage=null;
+        String approvedMessage="";
         if(status.equals(org.cdpg.dx.aaa.organization.models.Status.GRANTED)) {
           approvedMessage = "You can now manage your organisation and users in the Telangana Data Exchange (TGDeX) platform.\n ";
         }
