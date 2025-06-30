@@ -45,6 +45,15 @@ public class Constants {
           "requestedAt", REQUESTED_AT
   );
 
+  public static final Map<String, String> API_TO_DB_CREDIT_REQUEST = Map.of(
+          "userName", USER_NAME,
+          "additionalInfo", ADDITONAL_INFO,
+          "userId", USER_ID,
+          "status", STATUS,
+          "processedAt", PROCESSED_AT,
+          "requestedAt", REQUESTED_AT
+  );
+
 
   public static final Map<String, String> ALLOWED_FILTER_MAP_FOR_COMPUTE_ROLE = Map.of(
           "userName", USER_NAME,
