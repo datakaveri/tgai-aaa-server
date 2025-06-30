@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.cdpg.dx.aaa.credit.util.Constants.ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST;
+import static org.cdpg.dx.aaa.credit.util.Constants.API_TO_DB_CREDIT_REQUEST;
 import static org.cdpg.dx.aaa.organization.config.Constants.*;
 import static org.cdpg.dx.database.postgres.util.Constants.DEFAULT_SORTING_ORDER;
 
@@ -643,6 +645,8 @@ public class OrganizationHandler {
 
     public void getOrganizationJoinReport(RoutingContext ctx) {
         HttpServerResponse response = ctx.response();
+        UUID orgId = RequestHelper.getPathParamAsUUID(ctx, "id");
+
         response
                 .putHeader("Access-Control-Allow-Origin", "*")
                 .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -654,6 +658,7 @@ public class OrganizationHandler {
         PaginatedRequest request = PaginationRequestBuilder.from(ctx)
                 .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_ORG_JOIN_REQUEST)
                 .apiToDbMap(API_TO_DB_ORG_JOIN_REQUEST)
+                .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
                 .allowedTimeFields(Set.of("requested_at"))
                 .defaultTimeField("requested_at")
                 .defaultSort("requested_at", DEFAULT_SORTING_ORDER)
@@ -791,6 +796,49 @@ public class OrganizationHandler {
 
         organizationCreateReportService
                 .streamAdminCsvBatchedComputeRequest(request)
+                .onSuccess(
+                        csvStream -> {
+                            if (csvStream == null) {
+                                response.end();
+                                return;
+                            }
+                            csvStream
+                                    .exceptionHandler(
+                                            err -> {
+                                                LOGGER.error("Failed to stream CSV", err);
+                                                ctx.fail(err);
+                                            })
+                                    .handler(buffer -> response.write(buffer))
+                                    .endHandler(v -> response.end());
+                        })
+                .onFailure(
+                        err -> {
+                            LOGGER.error("Failed to stream CSV", err);
+                            ctx.fail(err);
+                        });
+    }
+
+    public void getCreditRequestReport(RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
+        response
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .putHeader("Access-Control-Allow-Methods", "GET, POST,PUT, DELETE, OPTIONS")
+                .putHeader("Content-Type", "text/csv")
+                .putHeader("Content-Disposition", "attachment; filename=\"credit_request_report.csv\"")
+                .setChunked(true);
+
+        PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+                .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_CREDIT_REQUEST)
+                .apiToDbMap(API_TO_DB_CREDIT_REQUEST)
+                .allowedTimeFields(Set.of(REQUESTED_AT))
+                .defaultTimeField(REQUESTED_AT)
+                .defaultSort(REQUESTED_AT, DEFAULT_SORTING_ORDER)
+                .allowedSortFields(API_TO_DB_CREDIT_REQUEST.keySet())
+                .build();
+
+        organizationCreateReportService
+                .streamAdminCsvBatchedCredit(request)
                 .onSuccess(
                         csvStream -> {
                             if (csvStream == null) {

@@ -148,6 +148,10 @@ public class OrganizationController implements ApiController {
                 .operation("get-auth-v1-organization-user-provider_role-requests-report")
                 .handler(organizationHandler::getProviderRequestReport);
 
+        routerBuilder
+                .operation("get-auth-v1-credit-request-report")
+                .handler(organizationHandler::getCreditRequestReport);
+
 
 
 
