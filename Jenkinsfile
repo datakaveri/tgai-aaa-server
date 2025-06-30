@@ -7,9 +7,9 @@ pipeline {
     registryCredential = 'datakaveri-ghcr'
     GIT_HASH = GIT_COMMIT.take(7)
   }
-  agent { 
+  agent {
     node {
-      label 'slave1' 
+      label 'slave1'
     }
   }
   stages {
@@ -50,9 +50,10 @@ pipeline {
         stage('Docker Swarm deployment') {
           steps {
             script {
+              sh 'mkdir -p configs'
               sh "ssh azureuser@docker-swarm 'docker service update auth-tgdex_auth-tgdex --image ghcr.io/datakaveri/aaa-depl:tgdex-5.6.0-${env.GIT_HASH}'"
               sh 'sleep 15'
-              sh '''#!/bin/bash 
+              sh '''#!/bin/bash
               response_code=$(curl -s -o /dev/null -w \'%{http_code}\\n\' --connect-timeout 5 --retry 5 --retry-connrefused -XGET https://authvertx.iudx.io/apis)
 
               if [[ "$response_code" -ne "200" ]]
@@ -63,7 +64,7 @@ pipeline {
                 echo "Health check complete; Server is up."
                 exit 0
               fi
-              '''                
+              '''
             }
           }
           post{
