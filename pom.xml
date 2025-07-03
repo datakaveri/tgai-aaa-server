@@ -30,7 +30,7 @@
         <keycloak.version>24.0.4</keycloak.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <exec.mainClass>org.cdpg.dx.deploy.Deployer</exec.mainClass>
-        <exec.mainClassDev>org.cdpg.dx.deploy.DeployerDev
+        <exec.mainClassDev>org.cdpg.dx.deploy.Deployer
         </exec.mainClassDev>
         <skipUnitTests>false</skipUnitTests>
     </properties>
@@ -563,7 +563,7 @@
                     <execution>
                         <id>aaa-server</id>
                         <configuration>
-                            <mainClass>org.cdpg.dx.deploy.DeployerDev</mainClass>
+                            <mainClass>org.cdpg.dx.deploy.Deployer</mainClass>
                             <systemProperties>
                                 <systemProperty>
                                     <key>vertx.logger-delegate-factory-class-name</key>
@@ -575,7 +575,7 @@
                                 <argument>{project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
                                 </argument>
                                 <argument>-c</argument>
-                                <argument>./configs/config-dev.json</argument>
+                                <argument>./configs/secrets/config.json</argument>
                             </arguments>
                         </configuration>
                     </execution>
