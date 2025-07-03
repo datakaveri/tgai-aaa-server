@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
  *       deploy every verticle
  * </ul>
  *
- * <p>e.g. <i>java -jar ./fatjar.jar -c configs/config.json -C false -i localhost -m
+ * <p>e.g. <i>java -jar ./fatjar.jar -c configs/secrets/config.json -C false -i localhost -m
  * iudx.aaa.server.admin.AdminVerticle,iudx.aaa.server.token.TokenVerticle
  * ,iudx.aaa.server.registration.RegistrationVerticle,iudx.aaa.server.auditing.AuditingVerticle</i>
  */

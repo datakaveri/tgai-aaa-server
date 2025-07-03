@@ -13,7 +13,6 @@ hs_err_pid*
 ## Maven
 ##############################
 target/
-configs/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -111,4 +110,5 @@ nb-configuration.xml
 *.jks
 *.p12
 
-/configs/*
+
+/configs/secrets/*

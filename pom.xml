@@ -574,7 +574,7 @@
                                 <argument>{project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
                                 </argument>
                                 <argument>-c</argument>
-                                <argument>./configs/config.json</argument>
+                                <argument>./configs/secrets/config.json</argument>
                             </arguments>
                         </configuration>
                     </execution>
