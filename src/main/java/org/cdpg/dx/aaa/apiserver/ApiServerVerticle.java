@@ -6,10 +6,7 @@ import static org.cdpg.dx.aaa.apiserver.config.ApiConstants.*;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -129,6 +126,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                                             HttpServerResponse response = routingContext.response();
                                             response.sendFile("docs/apidoc.html");
                                         });
+                        router.get("/health/live").handler(ctx -> {
+                            ctx.response()
+                                    .setStatusCode(200)
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
+                                    .end("Alive");
+                        });
+
                         setServerOptions(serverOptions);
                         server = vertx.createHttpServer(serverOptions);
                         server
