@@ -110,3 +110,4 @@ nb-configuration.xml
 *.jks
 *.p12
 
+/configs/*

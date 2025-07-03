@@ -93,7 +93,7 @@ The Keycloak URL and realm information along with the client IDs and client secr
 4. Modify the `docker-compose.yml` file to map the config file you just created
 5. Start the server in production (prod) or development (dev) mode using docker-compose 
    ` docker-compose up prod `
-6. The server will be up on port **8080**. To change the port, add `httpPort:<desired_port_number>` to the config in the `ApiServerVerticle` module. See [configs/config-example.json](configs/config-example.json) for an example.
+6. The server will be up on port **8080**. To change the port, add `httpPort:<desired_port_number>` to the config in the `ApiServerVerticle` module. See [configs/config-example.json](example-config/config-example.json) for an example.
 
 ### Maven based
 1. Install java 11 and maven
@@ -104,7 +104,7 @@ export LOG_LEVEL=INFO
 ```
 3. Use the maven exec plugin based starter to start the server 
    `mvn clean compile exec:java@aaa-server`
-4. The server will be up on port **8080**. To change the port, add `httpPort:<desired_port_number>` to the config in the `ApiServerVerticle` module. See [configs/config-example.json](configs/config-example.json) for an example.
+4. The server will be up on port **8080**. To change the port, add `httpPort:<desired_port_number>` to the config in the `ApiServerVerticle` module. See [configs/config-example.json](example-config/config-example.json) for an example.
 
 ### JAR based
 1. Install java 11 and maven

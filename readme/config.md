@@ -1,6 +1,6 @@
 # Configuration
 
-Please refer to [config-example.json](/configs/config-example.json) for a sample configuration file.
+Please refer to [config-example.json](/example-config/config-example.json) for a sample configuration file.
 
 ## Main Values
 
