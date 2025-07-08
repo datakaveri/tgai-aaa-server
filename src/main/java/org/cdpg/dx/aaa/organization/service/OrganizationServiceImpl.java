@@ -337,7 +337,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         "organisation_id", "",
                                         "organisation_name", ""
                                 ))
-                                .onFailure(err -> LOGGER.error("Failed to update user attributes in Keycloak after deleting organization user", err))
+                          .compose(v->keycloakUserService.removeRoleFromUser(userId, DxRole.PROVIDER))
+                          .onFailure(err -> LOGGER.error("Failed to update user attributes in Keycloak after deleting organization user", err))
                                 .map(v -> true);
                     } else {
                         return Future.succeededFuture(false);
