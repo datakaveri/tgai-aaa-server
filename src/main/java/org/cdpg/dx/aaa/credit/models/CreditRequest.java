@@ -75,8 +75,8 @@ public record CreditRequest(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.CREDIT_REQUEST_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.CREDIT_REQUEST_TABLE;
+//  }
 }

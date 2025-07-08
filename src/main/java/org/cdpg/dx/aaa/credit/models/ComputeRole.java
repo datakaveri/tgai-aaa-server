@@ -77,8 +77,8 @@ public record ComputeRole(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.COMPUTE_ROLE_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.COMPUTE_ROLE_TABLE;
+//  }
 }

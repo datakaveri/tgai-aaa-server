@@ -27,6 +27,7 @@ import org.cdpg.dx.common.response.ResponseBuilder;
 import org.cdpg.dx.common.util.PaginationInfo;
 import org.cdpg.dx.common.util.RequestHelper;
 import org.cdpg.dx.common.util.RoutingContextHelper;
+import org.cdpg.dx.database.postgres.models.Join;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 
 import java.util.List;
@@ -154,44 +155,23 @@ public class OrganizationHandler {
         .allowedSortFields(API_TO_DB_ORG_JOIN_REQUEST.keySet())
         .build();
 
-    organizationService.getOrganizationPendingJoinRequests(request)
-      .compose(result -> {
-        List<Future<JsonObject>> enrichedFutures = result.data().stream()
-          .map(joinRequest -> userService.getUserInfoByID(joinRequest.userId())
-            .map(user -> {
-              JsonObject enriched = joinRequest.toJson();
-              enriched.put("roles", user.roles());
-              return enriched;
-            })
-            .recover(err -> {
-              //TODO remove this
-              JsonObject enriched = joinRequest.toJson();
-              enriched.put("roles", List.of());
-              return Future.succeededFuture(enriched);
-            })
-          )
-          .toList();
+      organizationService.getOrganizationPendingJoinRequests(request)
+        .compose(result ->
+          userService.enrichWithUserRoles(
+            result.data(),
+            OrganizationJoinRequest::userId,
+            OrganizationJoinRequest::toJson
+          ).map(enrichedList -> Map.entry(enrichedList, result.paginationInfo()))
+        )
+        .onSuccess(entry -> {
+          AuditLog auditLog = AuditingHelper.createAuditLog(
+            ctx.user(), RoutingContextHelper.getRequestPath(ctx),
+            "GET", "Get Pending Join Requests");
+          RoutingContextHelper.setAuditingLog(ctx, auditLog);
 
-        return Future.all(enrichedFutures).map(cf -> {
-          List<JsonObject> enrichedList = new java.util.ArrayList<>();
-          for (int i = 0; i < cf.size(); i++) {
-            enrichedList.add((JsonObject) cf.resultAt(i));
-          }
-          return Map.entry(enrichedList, result.paginationInfo());
-        });
-      })
-      .onSuccess(entry -> {
-        List<JsonObject> enrichedList = entry.getKey();
-        PaginationInfo paginationInfo = entry.getValue();
-
-        AuditLog auditLog = AuditingHelper.createAuditLog(
-          ctx.user(), RoutingContextHelper.getRequestPath(ctx),
-          "GET", "Get Pending Join Requests");
-        RoutingContextHelper.setAuditingLog(ctx, auditLog);
-
-        ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
-      })
-      .onFailure(ctx::fail);
+          ResponseBuilder.sendSuccess(ctx, entry.getKey(), entry.getValue());
+        })
+        .onFailure(ctx::fail);
   }
 
     public void joinOrganisationRequest(RoutingContext ctx) {
@@ -486,82 +466,62 @@ public class OrganizationHandler {
     public void getProviderRequest(RoutingContext ctx) {
 
 
-        User user = ctx.user();
-        LOGGER.debug("User: {}", user);
-        if (user == null || user.subject() == null || user.principal() == null) {
-            ctx.fail(new DxForbiddenException("User not found"));
-            return;
+      User user = ctx.user();
+      LOGGER.debug("User: {}", user);
+      if (user == null || user.subject() == null || user.principal() == null) {
+        ctx.fail(new DxForbiddenException("User not found"));
+        return;
+      }
+
+      String userId = user.subject();
+      String orgID = user.principal().getString("organisation_id");
+
+      if (userId == null || userId.isEmpty()) {
+        ctx.fail(new DxForbiddenException("User not found"));
+        return;
+      }
+
+      if (orgID == null || orgID.isEmpty()) {
+        ctx.fail(new DxForbiddenException("User is not part any organisation"));
+        return;
+      }
+
+      organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
+        orgUser -> {
+          if (orgUser == null || orgUser.role() != Role.ADMIN) {
+            return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
+          }
+          UUID orgId = orgUser.organizationId();
+          PaginatedRequest request = PaginationRequestBuilder.from(ctx)
+            .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
+            .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
+            .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
+            .allowedTimeFields(Set.of(CREATED_AT))
+            .defaultTimeField(CREATED_AT)
+            .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
+            .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
+            .build();
+
+          return organizationService.getAllPendingProviderRoleRequests(request);
         }
+      ).compose(requests ->
+        userService.enrichWithUserRoles(
+          requests.data(),
+          ProviderRoleRequest::userId,
+          ProviderRoleRequest::toJson
+        ).map(enrichedList -> Map.entry(enrichedList, requests.paginationInfo()))
+      ).onSuccess(entry -> {
+        AuditLog auditLog = AuditingHelper.createAuditLog(
+          ctx.user(),
+          RoutingContextHelper.getRequestPath(ctx),
+          "GET",
+          "Get Provider Role Requests"
+        );
+        RoutingContextHelper.setAuditingLog(ctx, auditLog);
+        ResponseBuilder.sendSuccess(ctx, entry.getKey(), entry.getValue());
+      }).onFailure(ctx::fail);
 
-        String userId = user.subject();
-        String orgID = user.principal().getString("organisation_id");
-
-        if (userId == null || userId.isEmpty()) {
-            ctx.fail(new DxForbiddenException("User not found"));
-            return;
-        }
-
-        if (orgID == null || orgID.isEmpty()) {
-            ctx.fail(new DxForbiddenException("User is not part any organisation"));
-            return;
-        }
-
-        organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
-                        orgUser -> {
-                            if (orgUser == null || orgUser.role() != Role.ADMIN) {
-                                return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
-                            }
-                            UUID orgId = orgUser.organizationId();
-                            PaginatedRequest request = PaginationRequestBuilder.from(ctx)
-                                    .allowedFiltersDbMap(ALLOWED_FILTER_MAP_FOR_PROVIDER_ROLE_REQUEST)
-                                    .apiToDbMap(API_TO_DB_PROVIDER_ROLE_REQUEST)
-                                    .additionalFilters(Map.of(ORGANIZATION_ID, orgId.toString()))
-                                    .allowedTimeFields(Set.of(CREATED_AT))
-                                    .defaultTimeField(CREATED_AT)
-                                    .defaultSort(CREATED_AT, DEFAULT_SORTING_ORDER)
-                                    .allowedSortFields(API_TO_DB_PROVIDER_ROLE_REQUEST.keySet())
-                                    .build();
-
-                            return organizationService.getAllPendingProviderRoleRequests(request);
-                        }
-                ).compose(requests -> {
-            List<Future<JsonObject>> enrichedFutures = requests.data().stream()
-              .map(req ->
-                organizationService.getOrganizationUserInfo(req.userId())
-                  .compose(orgUser ->
-                    userService.getUserInfoByID(req.userId())
-                      .map(dxUser -> {
-                        JsonObject enriched = ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, orgUser);
-                        enriched.put("roles", dxUser.roles());
-                        return enriched;
-                      })
-                      .recover(err -> {
-                        JsonObject enriched = ProviderRoleRequestMapper.toJsonWithOrganisationUser(req, orgUser);
-                        enriched.put("roles", List.of());
-                        return Future.succeededFuture(enriched);
-                      })
-                  )
-              ).toList();
-                    return Future.all(enrichedFutures).map(cf -> {
-                        List<JsonObject> resultList = new java.util.ArrayList<>();
-                        for (int i = 0; i < cf.size(); i++) {
-                            resultList.add(cf.resultAt(i));
-                        }
-                        return Map.of(
-                                "data", resultList,
-                                "paginationInfo", requests.paginationInfo()
-                        );
-                    });
-                })
-                .onSuccess(enrichedRequests -> {
-                    AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-                            RoutingContextHelper.getRequestPath(ctx), "GET", "Get Provider Role Requests");
-                    RoutingContextHelper.setAuditingLog(ctx, auditLog);
-                    ResponseBuilder.sendSuccess(ctx, enrichedRequests.get("data"), (PaginationInfo) enrichedRequests.get("paginationInfo"));
-                })
-                .onFailure(ctx::fail);
     }
-
   public void createProviderRole(RoutingContext ctx) {
     JsonObject providerRequestJson = ctx.body().asJsonObject();
 

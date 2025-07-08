@@ -13,6 +13,7 @@ import org.cdpg.dx.aaa.credit.models.CreditTransaction;
 import org.cdpg.dx.aaa.credit.models.Status;
 import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.email.util.EmailComposer;
+import org.cdpg.dx.aaa.organization.models.ProviderRoleRequest;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.model.AuditLog;
 import org.cdpg.dx.common.HttpStatusCode;
@@ -266,44 +267,25 @@ public class CreditHandler {
             .build();
 
     creditService.getAllComputeRequests(request)
-      .compose(result->{
-        List<Future<JsonObject>> enrichedFutures =result.data().stream()
-          .map(computeRequest->userService.getUserInfoByID(computeRequest.userId())
-            .map(user->{
-              JsonObject enriched = computeRequest.toJson();
-              enriched.put("roles",user.roles());
-              enriched.put("account_enabled", user.account_enabled());
-              return enriched;
-            })
-            .recover(err->{
-              System.out.println("In recover block!");
-              JsonObject enriched = computeRequest.toJson();
-              enriched.put("roles", List.of());
-              return Future.succeededFuture(enriched);
-            })
-          )
-          .toList();
+      .compose(result->
+        userService.enrichWithUserRoles(
+            result.data(),
+            ComputeRole::userId,
+            ComputeRole::toJson
+          ).map(enrichedList -> Map.entry(enrichedList, result.paginationInfo()))
+      )
+          .onSuccess(entry -> {
+            AuditLog auditLog = AuditingHelper.createAuditLog(
+              ctx.user(),
+              RoutingContextHelper.getRequestPath(ctx),
+              "GET",
+              "Get Compute Role Requests"
+            );
+            RoutingContextHelper.setAuditingLog(ctx, auditLog);
+            ResponseBuilder.sendSuccess(ctx, entry.getKey(), entry.getValue());
+          }).onFailure(ctx::fail);
 
-
-        return Future.all(enrichedFutures).map(cf -> {
-          List<JsonObject> enrichedList = new ArrayList<>();
-          for (int i = 0; i < cf.size(); i++) {
-            enrichedList.add((JsonObject) cf.resultAt(i));
-          }
-          return Map.entry(enrichedList, result.paginationInfo());
-        });
-      })
-      .onSuccess(entry -> {
-        List<JsonObject> enrichedList = entry.getKey();
-        PaginationInfo paginationInfo = entry.getValue();
-        AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
-          RoutingContextHelper.getRequestPath(ctx), "GET", "Get All Compute Requests");
-        RoutingContextHelper.setAuditingLog(ctx, auditLog);
-        ResponseBuilder.sendSuccess(ctx, enrichedList, paginationInfo);
-      })
-      .onFailure(ctx::fail);
-
-  }
+      }
 
   public void updateComputeRoleStatus(RoutingContext ctx) {
 

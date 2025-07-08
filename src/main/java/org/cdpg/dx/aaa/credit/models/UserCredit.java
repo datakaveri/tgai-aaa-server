@@ -56,8 +56,8 @@ public record UserCredit(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.USER_CREDIT_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.USER_CREDIT_TABLE;
+//  }
 }
