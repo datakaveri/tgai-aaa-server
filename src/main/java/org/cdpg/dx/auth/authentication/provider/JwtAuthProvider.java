@@ -33,7 +33,6 @@ public class JwtAuthProvider {
     }
 
     private static Future<JWTAuth> refresh(Vertx vertx, JsonObject config, JwksClient jwksClient) {
-        LOGGER.debug("config" + config.encodePrettily());
         return jwksClient.fetchJwkKeys().compose(jwk -> {
             List<JsonObject> keys = jwk.getJsonArray("keys").stream()
                     .map(obj -> (JsonObject) obj)

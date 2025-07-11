@@ -9,6 +9,15 @@
 *.nar
 hs_err_pid*
 
+
+### DX ###
+config.properties
+secrets/all-verticles-configs/*.json
+secrets/one-verticle-configs/*.json
+secrets/*.jks
+/configs/
+
+
 ##############################
 ## Maven
 ##############################
