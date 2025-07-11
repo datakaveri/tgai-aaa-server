@@ -218,22 +218,20 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
         return updateUserAttributes(userId, attributes);
     }
 
+// 4 -
+
     @Override
-    public Future<Boolean> setKycVerifiedTrueWithData(UUID userId, JsonObject kycData, String userName) {
+    public Future<Boolean> setKycVerifiedTrueWithData(UUID userId, String userName,String txn) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put(KeycloakConstants.KYC_VERIFIED, "true");
         JsonObject aadhaarJson = new JsonObject();
 
-        if (kycData != null && kycData.containsKey("Poi")) {
-            JsonObject poi = kycData.getJsonObject("Poi");
-            if (poi != null && poi.containsKey("name")) {
                 aadhaarJson.put("kycVerifiedUserName", userName);
                 aadhaarJson.put("kycAuthenticationMethod", "DigiLocker");
                 aadhaarJson.put("kycVerifiedDate", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
                 aadhaarJson.put("kycStatus", "Active");
-                aadhaarJson.put("txn", kycData.getString("txn"));
-            }
-        }
+                aadhaarJson.put("txn", txn);
+
         attributes.put(KeycloakConstants.AADHAAR_KYC_DATA, aadhaarJson.encode());
         System.out.println("attributes = " + attributes);
         return updateUserAttributes(userId, attributes);
