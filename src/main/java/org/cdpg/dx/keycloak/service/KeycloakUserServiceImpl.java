@@ -74,9 +74,9 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
                 );
                 return reps.stream()
                         .map(user -> {
-                            System.out.println("User ID: " + user.getId());
+                            UserRepresentation user_with_attr = usersResource().get(user.getId()).toRepresentation();
                             List<RoleRepresentation> roles = usersResource().get(user.getId()).roles().realmLevel().listEffective();
-                            return DxUserMapper.fromUserRepresentation(user, roles);
+                            return DxUserMapper.fromUserRepresentation(user_with_attr, roles);
                         }).collect(Collectors.toList());
             } catch (Exception e) {
                 throw new KeycloakServiceException("Failed to retrieve users from Keycloak", e);

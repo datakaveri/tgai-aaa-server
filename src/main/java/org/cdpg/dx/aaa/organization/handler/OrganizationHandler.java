@@ -509,7 +509,7 @@ public class OrganizationHandler {
         organizationService.getOrganizationUserInfo(UUID.fromString(user.subject())).compose(
                         orgUser -> {
                             if (orgUser == null || orgUser.role() != Role.ADMIN) {
-                                return Future.failedFuture(new DxForbiddenException("User not found or not a admin"));
+                                return Future.failedFuture(new DxForbiddenException("User not found or not an admin"));
                             }
                             UUID orgId = orgUser.organizationId();
                             PaginatedRequest request = PaginationRequestBuilder.from(ctx)
