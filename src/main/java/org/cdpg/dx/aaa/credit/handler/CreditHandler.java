@@ -101,7 +101,7 @@ public class CreditHandler {
   }
 
 
-  public void getBalance(RoutingContext ctx) {
+  public void getBalance(RoutingContext ctx) {  //user
 
     User user = ctx.user();
     UUID userId = UUID.fromString(user.subject());
@@ -113,7 +113,7 @@ public class CreditHandler {
       .onFailure(ctx::fail);
   }
 
-    public void getBalanceofUser(RoutingContext ctx) {
+    public void getBalanceofUser(RoutingContext ctx) { //cosadmin
         UUID userId = RequestHelper.getPathParamAsUUID(ctx, "id");
         creditService.getBalance(userId)
                 .onSuccess(balance -> {
@@ -220,7 +220,6 @@ public class CreditHandler {
                 return Future.failedFuture(err);
             })
             .compose(existingComputeRole -> {
-                System.out.println("here in compose block");
               if (existingComputeRole != null && existingComputeRole.status().equalsIgnoreCase(Status.REJECTED.getStatus())) {
                 return creditService.updateComputeRoleStatus(existingComputeRole.id(), Status.PENDING, existingComputeRole.approvedBy())
                         .map(updated -> true);
@@ -230,12 +229,10 @@ public class CreditHandler {
               }
             })
             .compose(updated -> {
-                System.out.println("here in compose block after update" + updated);
               if (!updated) {
                 return creditService.createComputeRoleRequest(computeRoleRequest)
                         .onSuccess(requests -> {
                           ResponseBuilder.sendSuccess(ctx, requests);
-                          emailComposer.sendEmailForComputeRole(computeRoleRequest, user);
                         })
                         .onFailure(ctx::fail)
                         .mapEmpty();
@@ -244,11 +241,11 @@ public class CreditHandler {
               }
             })
             .onSuccess(v -> {
-                System.out.println("here in onSuccess block");
-              AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+                AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
                 RoutingContextHelper.getRequestPath(ctx), "POST", "Compute Role Request Created");
               RoutingContextHelper.setAuditingLog(ctx, auditLog);
               ResponseBuilder.sendSuccess(ctx, "Compute Role Request created successfully");
+              emailComposer.sendEmailForComputeRole(computeRoleRequest, user);
             })
             .onFailure(ctx::fail);
 
