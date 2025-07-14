@@ -47,7 +47,7 @@ public class ControllerFactory {
     EmailComposer emailComposer = new EmailComposer(emailService, keycloakUserService, config, organizationService, userService, creditService);
 
     ApiController creditApiController =  CreditControllerFactory.create(creditService,emailComposer,userService);
-    KYCHandler kycHandler = KYCFactory.createHandler(vertx, config, creditService);
+    KYCHandler kycHandler = KYCFactory.createHandler(vertx, config, creditService,pgService);
     ApiController kycController = new KYCController(kycHandler);
     ApiController organizationController = OrganizationControllerFactory.create(organizationService, userService, auditingHandler , emailComposer, vertx, pgService);
 

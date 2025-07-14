@@ -87,8 +87,8 @@ public record CreditTransaction(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.CREDIT_TRANSACTION_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.CREDIT_TRANSACTION_TABLE;
+//  }
 }

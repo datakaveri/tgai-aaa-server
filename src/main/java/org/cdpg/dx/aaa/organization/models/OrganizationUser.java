@@ -90,9 +90,9 @@ public record OrganizationUser(
         return map;
     }
 
-    @Override
-    public String getTableName() {
-        return Constants.ORG_USER_TABLE;
-    }
+//    @Override
+//    public String getTableName() {
+//        return Constants.ORG_USER_TABLE;
+//    }
 }
 

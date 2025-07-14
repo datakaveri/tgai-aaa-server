@@ -8,5 +8,5 @@ public interface BaseEntity<T> {
 
   JsonObject toJson();
 
-  String getTableName();
+  //String getTableName();
 }
