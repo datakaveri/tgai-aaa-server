@@ -5,7 +5,9 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import org.cdpg.dx.aaa.cache.service.CacheService;
+import org.cdpg.dx.aaa.kyc.dao.KYCTransactionDAO;
+import org.cdpg.dx.aaa.kyc.model.KYCTransaction;
+import org.cdpg.dx.aaa.kyc.util.Constants;
 import org.cdpg.dx.common.exception.DxValidationException;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 import org.json.JSONObject;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,16 +32,16 @@ public class KYCServiceImpl implements KYCService {
     private static final String CONFIG_REDIRECT_URI = "redirectUri";
 
     private final WebClient webClient;
-    private final CacheService cacheService;
+    private final KYCTransactionDAO kycTransactionDAO;
     private final KeycloakUserService keycloakUserService;
     private final JsonObject config;
 
     public KYCServiceImpl(WebClient webClient,
-                          CacheService cacheService,
+                          KYCTransactionDAO kycTransactionDAO,
                           KeycloakUserService keycloakUserService,
                           JsonObject config) {
         this.webClient = webClient;
-        this.cacheService = cacheService;
+        this.kycTransactionDAO = kycTransactionDAO;
         this.keycloakUserService = keycloakUserService;
         this.config = config;
     }
@@ -74,77 +77,137 @@ public class KYCServiceImpl implements KYCService {
         return fetchAadhaarDetails(accessToken, userId, codeVerifier);
     }
 
-    private Future<JsonObject> fetchAadhaarDetails(String accessToken, String userId, String codeVerifier) {
-        return webClient.getAbs(config.getString(CONFIG_AADHAAR_URL))
-                .bearerTokenAuthentication(accessToken)
-                .send()
-                .compose(response -> {
-                    if (response.statusCode() != 200) {
-                        LOGGER.error("Failed to fetch Aadhaar details: statusCode={}, body={}",
-                                response.statusCode(), response.bodyAsString());
-                        return Future.failedFuture(new DxValidationException("Failed to fetch Aadhaar details"));
-                    }
+  private Future<JsonObject> fetchAadhaarDetails(String accessToken, String userId, String codeVerifier) {
+    return webClient.getAbs(config.getString(CONFIG_AADHAAR_URL))
+      .bearerTokenAuthentication(accessToken)
+      .send()
+      .compose(response -> {
+        if (response.statusCode() != 200) {
+          LOGGER.error("Failed to fetch Aadhaar details: statusCode={}, body={}",
+            response.statusCode(), response.bodyAsString());
+          return Future.failedFuture(new DxValidationException("Failed to fetch Aadhaar details"));
+        }
 
-                    try {
-                        JsonObject aadhaarJson = parseKYCxml(response.bodyAsString());
-                        aadhaarJson.put("code_verifier", codeVerifier);
-                        JsonObject aadhaarJsonNoPhoto = new JsonObject(aadhaarJson.encode());
-                        aadhaarJsonNoPhoto.remove("Pht");// Remove Pht as per requirement
-                        cacheService.store(userId, aadhaarJsonNoPhoto);
-                        return Future.succeededFuture(new JsonObject().put("aadhaarDetails", aadhaarJson));
-                    } catch (DxValidationException e) {
-                        return Future.failedFuture(e);
-                    }
-                });
+        JsonObject aadhaarJson = parseKYCxml(response.bodyAsString());
+        String txnId = aadhaarJson.getString("txn");
+        aadhaarJson.remove("Pht");
+
+        if (txnId == null || txnId.isBlank()) {
+          LOGGER.error("Transaction ID missing in Aadhaar response: {}", aadhaarJson.encodePrettily());
+          return Future.failedFuture(new DxValidationException("Missing transaction ID from Aadhaar response"));
+        }
+
+        UUID uuid = UUID.fromString(userId);
+
+        return isValidTransaction(txnId, uuid).compose(isValid -> {
+          if (!isValid) {
+            LOGGER.error("Invalid transaction: {}", txnId);
+            return Future.failedFuture(new DxValidationException("KYC not allowed: Aadhaar already linked to another user."));
+          }
+
+          KYCTransaction newTxn = new KYCTransaction(uuid, txnId, codeVerifier, false, null);
+          return kycTransactionDAO.create(newTxn).map(created -> {
+            LOGGER.info("KYC transaction created for userId: {}", userId);
+            return aadhaarJson;
+          });
+        });
+      });
+  }
+
+  private Future<Boolean> isValidTransaction(String txnId, UUID userId) {
+    if (txnId == null || txnId.isBlank()) {
+      LOGGER.error("Invalid transaction ID: {}", txnId);
+      return Future.failedFuture("Invalid transaction ID");
     }
-    //TODO remove code_verifier from cachedData
+
+    Map<String, Object> txnMap = Map.of(Constants.TRANSACTION_ID, txnId);
+
+    return kycTransactionDAO.getAllWithFilters(txnMap).compose(existingByTxn -> {
+      if (existingByTxn != null && !existingByTxn.isEmpty()) {
+        KYCTransaction txn = existingByTxn.get(0);
+        if (!txn.userId().equals(userId) && txn.isConfirmed().equals(Boolean.TRUE)) {
+          LOGGER.error("KYC Aadhaar already used by userId: {}", txn.userId());
+          return Future.failedFuture(new DxValidationException("KYC failed: This Aadhaar is already linked to another user."));
+        }
+      }
+      return Future.succeededFuture(true);
+    });
+  }
+
+
+
     @Override
     public Future<JsonObject> confirmKYCData(UUID userId, String codeVerifier, String userName) {
-        Promise<JsonObject> promise = Promise.promise();
+      Promise<JsonObject> promise = Promise.promise();
 
-        cacheService.retrieve(userId.toString()).onComplete(ar -> {
-            if (ar.failed()) {
-                String msg = "Cache retrieval failed for userId " + userId + ": " + ar.cause().getMessage();
+      return getAllKYCTransactions(userId, codeVerifier)
+        .compose(kycTransaction -> {
+          keycloakUserService.setKycVerifiedTrueWithData(userId, userName, kycTransaction.transactionId())
+            .onComplete(kycResult -> {
+              if (kycResult.succeeded() && kycResult.result()) {
+                LOGGER.info("KYC verification successful for userId: {}", userId);
+                promise.complete(kycTransaction.toJson());
+              } else {
+                String msg = "Failed to update KYC status in Keycloak for userId: " + userId;
                 LOGGER.error(msg);
                 promise.fail(new DxValidationException(msg));
-                return;
-            }
-
-            JsonObject cachedData = ar.result();
-            if (cachedData == null) {
-                String msg = "No cached KYC data for userId: " + userId;
-                LOGGER.warn(msg);
-                promise.fail(new DxValidationException(msg));
-                return;
-            }
-
-            boolean isVerified = codeVerifier.equals(cachedData.getString("code_verifier"));
-            System.out.println("isverified"+isVerified);
-            if (isVerified) {
-                keycloakUserService.setKycVerifiedTrueWithData(userId, cachedData, userName)
-                    .onComplete(kycResult -> {
-                        if (kycResult.succeeded() && kycResult.result()) {
-                            LOGGER.info("KYC verification successful for userId: {}", userId);
-                            promise.complete(cachedData);
-                        } else {
-                            String msg = "Failed to update KYC status in Keycloak for userId: " + userId;
-                            LOGGER.error(msg);
-                            promise.fail(new DxValidationException(msg));
-                        }
-                    });
+              }
+            });
+          Map<String, Object> conditionMap = Map.of(Constants.USER_ID, userId.toString(),
+            Constants.TRANSACTION_ID, kycTransaction.transactionId());
+          Map<String, Object> updateFields = Map.of(Constants.CONFIRMED_FLAG, true,
+            Constants.UPDATED_AT, LocalDateTime.now().toString());
+          kycTransactionDAO.update(conditionMap, updateFields).onComplete(var -> {
+            if (var.succeeded()) {
+              LOGGER.info("KYC transaction updated for userId: {}", userId);
+              promise.complete(kycTransaction.toJson());
             } else {
-                keycloakUserService.setKycVerifiedFalse(userId)
-                    .onComplete(kycResult -> {
-                        String msg = "KYC verification failed due to code mismatch for userId: " + userId;
-                        LOGGER.warn(msg);
-                        promise.fail(new DxValidationException(msg));
-                    });
+              LOGGER.error("Failed to update KYC transaction for userId: {}. Error: {}", userId, var.cause().getMessage());
+              promise.complete(new JsonObject("Failed to update KYC transaction"));
             }
+          });
+          return promise.future();
         });
+    }
+
+
+    private Future<KYCTransaction> getAllKYCTransactions(UUID userId, String codeVerifier) {
+        Promise<KYCTransaction> promise = Promise.promise();
+        Map<String, Object> conditionMap = Map.of(Constants.USER_ID, userId.toString(),
+                Constants.CODE_VERIFIER, codeVerifier);
+
+        kycTransactionDAO.getAllWithFilters(conditionMap)
+            .onComplete(ar -> {
+                if (ar.failed()) {
+                    String msg = "KYC retrieval failed for " + userId + ": " + ar.cause().getMessage();
+                    LOGGER.error(msg);
+                    promise.fail(new DxValidationException(msg));
+                    return;
+                }
+
+                if (ar.result() == null || ar.result().isEmpty()) {
+                    String msg = "No KYC data found for userId: " + userId;
+                    LOGGER.warn(msg);
+                    promise.fail(new DxValidationException(msg));
+                    return;
+                }
+
+              boolean foundUnconfirmed = false;
+              for (KYCTransaction txn : ar.result()) {
+                if (Boolean.FALSE.equals(txn.isConfirmed())) {
+                  promise.complete(txn);
+                  foundUnconfirmed = true;
+                  break;
+                }
+              }
+              if (!foundUnconfirmed) {
+                promise.fail(new DxValidationException("KYC already confirmed for userId: " + userId));
+              }
+
+            });
 
         return promise.future();
     }
-
 
     private JsonObject parseKYCxml(String xmlData) {
         try {

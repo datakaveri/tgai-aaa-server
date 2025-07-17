@@ -152,8 +152,8 @@ public record OrganizationCreateRequest(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.ORG_CREATE_REQUEST_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.ORG_CREATE_REQUEST_TABLE;
+//  }
 }

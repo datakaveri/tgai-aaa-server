@@ -113,8 +113,8 @@ public record Organization(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.ORGANIZATION_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.ORGANIZATION_TABLE;
+//  }
 }

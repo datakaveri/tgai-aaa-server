@@ -102,8 +102,8 @@ public record OrganizationJoinRequest(
     return map;
   }
 
-  @Override
-  public String getTableName() {
-    return Constants.ORG_JOIN_REQUEST_TABLE;
-  }
+//  @Override
+//  public String getTableName() {
+//    return Constants.ORG_JOIN_REQUEST_TABLE;
+//  }
 }
