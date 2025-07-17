@@ -23,11 +23,11 @@ public class OrganizationUserDAOImpl extends AbstractBaseDAO<OrganizationUser> i
     super(postgresService, Constants.ORG_USER_TABLE, ORG_USER_ID, OrganizationUser::fromJson);
   }
 
- // TODO - relook into this
+
   @Override
   public Future<Boolean> deleteUserByOrgId(UUID orgId, UUID userID) {
     if (orgId == null || userID == null) {
-      return Future.failedFuture("User IDs list is empty");
+      return Future.failedFuture("User ID or Org ID is empty");
     }
 
     Condition conditions = new Condition(

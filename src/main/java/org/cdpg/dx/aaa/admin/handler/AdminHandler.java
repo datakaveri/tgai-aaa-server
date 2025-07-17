@@ -13,6 +13,7 @@ import org.cdpg.dx.aaa.credit.service.CreditService;
 import org.cdpg.dx.aaa.organization.service.OrganizationService;
 import org.cdpg.dx.aaa.user.service.UserService;
 import org.cdpg.dx.auditing.model.AuditLog;
+import org.cdpg.dx.common.exception.DxBadRequestException;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.common.request.PaginationRequestBuilder;
 import org.cdpg.dx.common.response.ResponseBuilder;
@@ -176,4 +177,58 @@ public class AdminHandler {
 
     }
 
+  public void deleteDxUser(RoutingContext ctx) {
+    UUID userId = RequestHelper.getPathParamAsUUID(ctx, "id");
+
+    userService.getUserInfoByID(userId).onComplete(ar -> {
+      if (ar.failed() || ar.result() == null) {
+        ctx.fail(new IllegalArgumentException("User not found"));
+        return;
+      }
+
+      var userInfo = ar.result();
+      UUID orgId = UUID.fromString(userInfo.organisationId());
+
+      if (userInfo.roles().contains(KeycloakConstants.ADMIN_ROLE)) {
+        ctx.fail(new DxBadRequestException("Cannot delete admin user"));
+      } else {
+        organizationService.deleteOrganizationUser(orgId, userId)
+          .onFailure(err -> {
+            LOGGER.error("Failed to delete organization user : {}", err.getMessage(), err);
+            ctx.fail(err);
+          })
+          .compose(p->organizationService.deleteOrganizationJoinRequest(orgId, userId))
+          .onFailure(err -> {
+            LOGGER.error("Failed to delete organization join request: {}", err.getMessage(), err);
+            ctx.fail(err);
+          })
+          .compose(q->creditService.deleteCreditRequest(userId))
+          .onFailure(err -> {
+            LOGGER.error("Failed to delete credit request: {}", err.getMessage(), err);
+            ctx.fail(err);
+          })
+          .compose(r->creditService.deleteComputeRoleRequest(userId))
+          .onFailure(err -> {
+            LOGGER.error("Failed to delete compute request: {}", err.getMessage(), err);
+            ctx.fail(err);
+          })
+          .compose(s -> keycloakUserService.deleteUser(userId))
+          .onFailure(err -> {
+            LOGGER.error("Failed to delete user in Keycloak: {}", err.getMessage(), err);
+            ctx.fail(err);
+          })
+          .onSuccess(response -> {
+            LOGGER.info("User {} deleted from organization {}", userId, orgId);
+            AuditLog auditLog = AuditingHelper.createAuditLog(ctx.user(),
+              RoutingContextHelper.getRequestPath(ctx), "DELETE", "Delete User");
+            RoutingContextHelper.setAuditingLog(ctx, auditLog);
+            ResponseBuilder.sendSuccess(ctx, "User deleted successfully from Keycloak and DB");
+          })
+          .onFailure(err -> {
+            LOGGER.error("Failed to delete DxUser: {}", err.getMessage(), err);
+            ctx.fail(err);
+          });
+      }
+    });
+  }
 }

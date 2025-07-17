@@ -93,5 +93,8 @@ public interface OrganizationService {
 
   Future<ProviderRoleRequest> getProviderRequestById(UUID requestId);
 
+  Future<Boolean> deleteOrganizationJoinRequest(UUID orgId, UUID userId);
+
+  Future<Boolean> deleteProviderRoleRequest(UUID orgId, UUID userId);
 }
 

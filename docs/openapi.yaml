@@ -3294,6 +3294,25 @@ paths:
       operationId: post-auth-v1-user-deactivate
       security:
         - authorization: []
+  /auth/v1/user/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: UUID of the user
+        schema:
+          type: string
+          format: uuid
+    delete:
+      summary: (User) Delete User Account
+      tags:
+        - Role APIs
+      responses:
+        '200':
+          description: OK
+      operationId: delete-auth-v1-user-id
+      security:
+        - authorization: [ ]
   /auth/v1/kyc/revoke:
     post:
       summary: Your POST endpoint

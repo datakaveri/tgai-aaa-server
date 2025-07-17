@@ -45,4 +45,8 @@ public interface CreditService {
   Future<ComputeRole> getComputeRequestById(UUID requestId);
 
   Future<CreditRequest> getCreditRequestById(UUID requestId);
+
+  Future<Boolean> deleteComputeRoleRequest(UUID userId);
+
+  Future<Boolean> deleteCreditRequest(UUID userId);
 }

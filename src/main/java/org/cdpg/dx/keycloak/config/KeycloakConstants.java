@@ -6,4 +6,5 @@ public class KeycloakConstants {
     public static final String ORGANISATION_NAME = "organisation_name";
     public static final String KYC_VERIFIED = "kyc_verified";
     public static final String AADHAAR_KYC_DATA = "aadhaar_kyc_data";
+    public static final String ADMIN_ROLE = "org_admin";
 }

@@ -45,5 +45,8 @@ public class AdminController implements ApiController {
                 .operation("post-auth-v1-user-deactivate")
                 .handler(adminHandler::deactivateDxUser);
 
-    }
+        routerBuilder
+                .operation("delete-auth-v1-user-id")
+                .handler(adminHandler::deleteDxUser);
+}
 }

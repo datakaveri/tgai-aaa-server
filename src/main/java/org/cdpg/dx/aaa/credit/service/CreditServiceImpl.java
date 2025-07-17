@@ -1,5 +1,6 @@
 package org.cdpg.dx.aaa.credit.service;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.cdpg.dx.aaa.credit.dao.*;
@@ -7,6 +8,7 @@ import org.cdpg.dx.aaa.credit.models.*;
 import org.cdpg.dx.aaa.organization.config.Constants;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.*;
+import org.cdpg.dx.common.model.DxUser;
 import org.cdpg.dx.common.request.PaginatedRequest;
 import org.cdpg.dx.database.postgres.models.PaginatedResult;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -347,4 +350,69 @@ public class CreditServiceImpl implements CreditService {
     return computeRoleDAO.getAllWithFilters(filter)
             .map(list -> !list.isEmpty());
   }
+
+  public Future<Boolean> deleteCreditRequest(UUID userId)
+  {
+      Map<String,Object> filter = Map.of(
+        Constants.USER_ID,userId.toString()
+      );
+
+      creditRequestDAO.getAllWithFilters(filter).compose(ar->{
+          if (ar.isEmpty()) {
+              return Future.failedFuture(new DxNotFoundException("No credit request found for userId: " + userId));
+          }
+        List<Future> futures = new ArrayList<>();
+        for (CreditRequest cr : ar) {
+          futures.add(creditRequestDAO.delete(cr.id()).map(deleted -> {;
+            if (!deleted) {
+              throw new DxNotFoundException("Failed to delete credit request with ID: " + cr.id());
+            }
+            return true;
+          }));
+        }
+        return CompositeFuture.all(futures);
+      }).recover(err -> {
+          BaseDxException dxEx = BaseDxException.from(err);
+          if (dxEx instanceof NoRowFoundException) {
+              return Future.failedFuture(new DxNotFoundException("No matching requestId found in credit Request table", dxEx));
+          }
+          return Future.failedFuture(dxEx);
+      });
+      return Future.succeededFuture(true);
+  }
+
+  public Future<Boolean> deleteComputeRoleRequest(UUID userId)
+  {
+    Map<String,Object> filter = Map.of(
+      Constants.USER_ID,userId.toString()
+    );
+
+    computeRoleDAO.getAllWithFilters(filter).compose(ar->{
+      if (ar.isEmpty()) {
+        return Future.failedFuture(new DxNotFoundException("No compute request found for userId: " + userId));
+      }
+      List<Future> futures = new ArrayList<>();
+      for (ComputeRole cr : ar) {
+        futures.add(computeRoleDAO.delete(cr.id()).map(deleted -> {;
+          if (!deleted) {
+            throw new DxNotFoundException("Failed to delete compute request with ID: " + cr.id());
+          }
+          return true;
+        }));
+      }
+      return CompositeFuture.all(futures);
+    }).recover(err -> {
+      BaseDxException dxEx = BaseDxException.from(err);
+      if (dxEx instanceof NoRowFoundException) {
+        return Future.failedFuture(new DxNotFoundException("No matching requestId found in compute request table", dxEx));
+      }
+      return Future.failedFuture(dxEx);
+    });
+    return Future.succeededFuture(true);
+  }
+
+
+
+
+
 }

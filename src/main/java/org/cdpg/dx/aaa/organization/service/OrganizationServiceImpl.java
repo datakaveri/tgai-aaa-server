@@ -7,7 +7,9 @@ import org.cdpg.dx.aaa.organization.config.Constants;
 import org.cdpg.dx.auth.authorization.model.DxRole;
 import org.cdpg.dx.common.exception.*;
 import org.cdpg.dx.common.request.PaginatedRequest;
+import org.cdpg.dx.common.response.DxErrorResponse;
 import org.cdpg.dx.database.postgres.models.PaginatedResult;
+import org.cdpg.dx.database.postgres.models.QueryResult;
 import org.cdpg.dx.keycloak.service.KeycloakUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -333,6 +335,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return orgUserDAO.deleteUserByOrgId(orgId, userId)
                 .compose(deleted -> {
                     if (deleted) {
+
                         return keycloakUserService.updateUserAttributes(userId, Map.of(
                                         "organisation_id", "",
                                         "organisation_name", ""
@@ -419,7 +422,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                                     DxRole.PROVIDER
                                             )
                                             .compose(success -> {
-                                                if (!success) {
+                                              if (!success) {
                                                     return Future.failedFuture("Failed to assign PROVIDER role in Keycloak");
                                                 }
                                                 return Future.succeededFuture(true);
@@ -619,4 +622,53 @@ public class OrganizationServiceImpl implements OrganizationService {
     return orgUserDAO.getAllWithFilters(conditonMap);
   }
 
+  public Future<Boolean> deleteOrganizationJoinRequest(UUID orgId, UUID userId) {
+    Map<String, Object> conditionMap = Map.of(
+      Constants.USER_ID, userId.toString(),
+      Constants.ORGANIZATION_ID, orgId.toString()
+    );
+
+    return joinRequestDAO.getAllWithFilters(conditionMap).compose(ar -> {
+      OrganizationJoinRequest res = ar.isEmpty() ? null : ar.get(0);
+      if (res == null) {
+        return Future.failedFuture(new DxNotFoundException("No join request found for user in organization"));
+      }
+
+      UUID id = res.id();
+
+      return joinRequestDAO.delete(id).compose(success -> {
+        if (!success) {
+          return Future.failedFuture(new DxPgException("Failed to delete join request"));
+        }
+        return Future.succeededFuture(true);
+      });
+    });
+  }
+
+  public Future<Boolean> deleteProviderRoleRequest(UUID orgId, UUID userId) {
+    Map<String, Object> conditionMap = Map.of(
+      Constants.USER_ID, userId.toString(),
+      Constants.ORGANIZATION_ID, orgId.toString()
+    );
+
+    return providerRequestDAO.getAllWithFilters(conditionMap).compose(ar -> {
+      ProviderRoleRequest res = ar.isEmpty() ? null : ar.get(0);
+      if (res == null) {
+        return Future.failedFuture(new DxNotFoundException("No provider request found for user in organization"));
+      }
+
+      UUID id = res.id();
+
+      return providerRequestDAO.delete(id).compose(success -> {
+        if (!success) {
+          return Future.failedFuture(new DxPgException("Failed to delete provider request"));
+        }
+        return Future.succeededFuture(true);
+      });
+    });
+  }
+
+
 }
+
+
